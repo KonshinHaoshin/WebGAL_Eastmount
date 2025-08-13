@@ -32,6 +32,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './bottomControlPanel.module.scss';
+import { useEffect, useState } from 'react';
 
 export const BottomControlPanel = () => {
   const t = useTrans('gaming.');
@@ -46,6 +47,17 @@ export const BottomControlPanel = () => {
     fontSize = '125%';
     size = 40;
   }
+  const [showControlPanel, setShowControlPanel] = useState(false); // 默认隐藏下面栏
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'F1') {
+        e.preventDefault(); // 防止浏览器默认帮助行为
+        setShowControlPanel((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
   const { isSupported: isFullscreenSupport, isFullScreen, toggle: toggleFullscreen } = useFullScreen();
   const GUIStore = useSelector((state: RootState) => state.GUI);
   const stageState = useSelector((state: RootState) => state.stage);
@@ -81,8 +93,9 @@ export const BottomControlPanel = () => {
   return (
     // <div className={styles.ToCenter}>
     <>
-      {GUIStore.showTextBox && stageState.enableFilm === '' && (
+      {GUIStore.showTextBox && stageState.enableFilm === '' && showControlPanel && (
         <div className={styles.main} style={{ visibility: GUIStore.controlsVisibility ? 'visible' : 'hidden' }}>
+
           {GUIStore.showTextBox && (
             <span
               className={styles.singleButton}
@@ -91,7 +104,7 @@ export const BottomControlPanel = () => {
                 setComponentVisibility('showTextBox', false);
                 playSeClick();
               }}
-              onMouseEnter={playSeEnter}
+              // onMouseEnter={playSeEnter}
             >
               <PreviewCloseOne
                 className={styles.button}
@@ -111,7 +124,7 @@ export const BottomControlPanel = () => {
                 setComponentVisibility('showTextBox', true);
                 playSeClick();
               }}
-              onMouseEnter={playSeEnter}
+              // onMouseEnter={playSeEnter}
             >
               <PreviewOpen
                 className={styles.button}
@@ -131,7 +144,7 @@ export const BottomControlPanel = () => {
               setComponentVisibility('showTextBox', false);
               playSeClick();
             }}
-            onMouseEnter={playSeEnter}
+            // onMouseEnter={playSeEnter}
           >
             <AlignTextLeftOne
               className={styles.button}
@@ -154,7 +167,7 @@ export const BottomControlPanel = () => {
               }
               playSeClick();
             }}
-            onMouseEnter={playSeEnter}
+            // onMouseEnter={playSeEnter}
           >
             <ReplayMusic
               className={styles.button}
@@ -173,7 +186,7 @@ export const BottomControlPanel = () => {
               switchAuto();
               playSeClick();
             }}
-            onMouseEnter={playSeEnter}
+            // onMouseEnter={playSeEnter}
           >
             <PlayOne className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />
             <span className={styles.button_text}>{t('buttons.auto')}</span>
@@ -186,7 +199,7 @@ export const BottomControlPanel = () => {
               switchFast();
               playSeClick();
             }}
-            onMouseEnter={playSeEnter}
+            // onMouseEnter={playSeEnter}
           >
             <DoubleRight
               className={styles.button}
@@ -204,7 +217,7 @@ export const BottomControlPanel = () => {
               saveGame(0);
               playSeClick();
             }}
-            onMouseEnter={playSeEnter}
+            // onMouseEnter={playSeEnter}
           >
             <DoubleDown
               className={styles.button}
@@ -223,7 +236,7 @@ export const BottomControlPanel = () => {
               loadGame(0);
               playSeClick();
             }}
-            onMouseEnter={playSeEnter}
+            // onMouseEnter={playSeEnter}
           >
             <DoubleUp className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />
             <span className={styles.button_text}>{t('buttons.quicklyLoad')}</span>
@@ -237,7 +250,7 @@ export const BottomControlPanel = () => {
               setComponentVisibility('showMenuPanel', true);
               playSeClick();
             }}
-            onMouseEnter={playSeEnter}
+            // onMouseEnter={playSeEnter}
           >
             <Save className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />
             <span className={styles.button_text}>{t('buttons.save')}</span>
@@ -250,7 +263,7 @@ export const BottomControlPanel = () => {
               setComponentVisibility('showMenuPanel', true);
               playSeClick();
             }}
-            onMouseEnter={playSeEnter}
+            // onMouseEnter={playSeEnter}
           >
             <FolderOpen
               className={styles.button}
@@ -269,7 +282,7 @@ export const BottomControlPanel = () => {
               setComponentVisibility('showMenuPanel', true);
               playSeClick();
             }}
-            onMouseEnter={playSeEnter}
+            // onMouseEnter={playSeEnter}
           >
             <SettingTwo
               className={styles.button}
@@ -295,7 +308,7 @@ export const BottomControlPanel = () => {
                 rightFunc: () => {},
               });
             }}
-            onMouseEnter={playSeEnter}
+            // onMouseEnter={playSeEnter}
           >
             <Home className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />
             <span className={styles.button_text}>{t('buttons.title')}</span>
@@ -305,7 +318,7 @@ export const BottomControlPanel = () => {
               className={`${styles.singleButton}`}
               style={{ fontSize }}
               onClick={toggleFullscreen}
-              onMouseEnter={playSeEnter}
+              // onMouseEnter={playSeEnter}
             >
               {!isFullScreen && (
                 <FullScreen
@@ -335,7 +348,7 @@ export const BottomControlPanel = () => {
               switchControls();
               playSeClick();
             }}
-            onMouseEnter={playSeEnter}
+            // onMouseEnter={playSeEnter}
           >
             {GUIStore.showControls ? (
               <Lock className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />

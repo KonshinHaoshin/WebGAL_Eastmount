@@ -205,13 +205,20 @@ function removeFig(figObj: IStageObject, enterTikerKey: string, effects: IEffect
   }, duration);
 }
 
-function addFigure(type?: 'image' | 'live2D' | 'spine', ...args: any[]) {
+function addFigure(type?: 'image' | 'live2D' | 'spine' | 'video', ...args: any[]) {
   const url = args[1];
   const baseUrl = window.location.origin;
   const urlObject = new URL(url, baseUrl);
-  const _type = urlObject.searchParams.get('type') as 'image' | 'live2D' | 'spine' | null;
-  if (url.endsWith('.json')) {
+  const _type = urlObject.searchParams.get('type') as 'image' | 'live2D' | 'spine' | 'video' | null;
+
+  if (url.endsWith('.jsonl')) {
+    return addJsonlFigure(...args);
+  } else if (url.endsWith('.json')) {
     return addLive2dFigure(...args);
+  } else if (url.endsWith('.gif')) {
+    return addGifFigure(...args); // ✅ GIF 动态图
+  } else if (url.endsWith('.webm') || url.endsWith('.mov') || _type === 'video') {
+    return addVideoFigure(...args); // ✅ webm/mov 动态视频
   } else if (url.endsWith('.skel') || _type === 'spine') {
     // @ts-ignore
     return WebGAL.gameplay.pixiStage?.addSpineFigure(...args);
@@ -228,4 +235,19 @@ function addFigure(type?: 'image' | 'live2D' | 'spine', ...args: any[]) {
 function addLive2dFigure(...args: any[]) {
   // @ts-ignore
   return WebGAL.gameplay.pixiStage?.addLive2dFigure(...args);
+}
+// 拼好模
+function addJsonlFigure(...args: any[]) {
+  // @ts-ignore
+  return WebGAL.gameplay.pixiStage?.addJsonlFigure(...args);
+}
+// gif模型
+function addGifFigure(...args: any[]) {
+  // @ts-ignore
+  return WebGAL.gameplay.pixiStage?.addGifFigure(...args);
+}
+// 视频模型
+function addVideoFigure(...args: any[]) {
+  // @ts-ignore
+  return WebGAL.gameplay.pixiStage?.addVideoFigure(...args);
 }

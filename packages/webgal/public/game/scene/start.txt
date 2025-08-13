@@ -1,3 +1,7 @@
-setVar:heroine=WebGAL;
-setVar:egine=WebGAL;
-choose:简体中文:demo_zh_cn.txt|日本語:demo_ja.txt|English:demo_en.txt|Test:function_test.txt;
+changeBg:M19.png;
+祥子:你好
+changeFigure:该溜子祥子/该溜子祥子.jsonl -id=tomori -motion=idle01 -expression=idle01 -next;
+changeFigure:gif/output.webm -id=sakiko -right;
+setTransform:{"scale":{"x":1,"y":1},"brightness":0.9,"contrast":1.1,"saturation":0.9,"gamma":0.8,"colorRed":161,"colorGreen":213,"colorBlue":243,"bloom":0.5,"bloomBrightness":0.9,"bevel":15,"bevelThickness":10,"bevelRed":186,"bevelGreen":179,"bevelBlue":179} -target=sakiko -duration=0 -next;
+changeFigure:gif/output.gif -id=sakiko01 -left;
+祥子:哈哈，那就厉害了
