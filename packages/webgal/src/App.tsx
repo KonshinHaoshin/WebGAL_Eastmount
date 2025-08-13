@@ -11,11 +11,23 @@ import { PanicOverlay } from '@/UI/PanicOverlay/PanicOverlay';
 import Title from '@/UI/Title/Title';
 import Translation from '@/UI/Translation/Translation';
 import { useEffect } from 'react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 import { initializeScript } from './Core/initializeScript';
 
 function App() {
   useEffect(() => {
     initializeScript();
+    AOS.init({
+      duration: 800,
+      once: true,
+      easing: 'ease-out-quart',
+      startEvent: 'DOMContentLoaded',
+    });
+
+    setTimeout(() => {
+      AOS.refreshHard();
+    }, 50);
   }, []);
 
   // Provider用于对各组件提供状态

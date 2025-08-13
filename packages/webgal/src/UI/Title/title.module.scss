@@ -1,59 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
 .Title_main {
   width: 100%;
   height: 100%;
   position: absolute;
   z-index: 13;
-}
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  overflow: hidden;
 
-.Title_buttonList {
   display: flex;
-  position: absolute;
-  left: 0;
-  min-width: 25%;
-  height: 100%;
-  justify-content: center;
-  align-items: flex-start;
-  flex-flow: column;
-  transition: background 0.75s;
-  padding-left: 120px;
-}
-
-.Title_button {
-  font-weight: bold;
-  text-align: center;
-  flex: 0 1 auto;
-  cursor: pointer;
-  padding: 1em 2em 1em 2em;
-  margin: 20px 0;
-  transition: all 0.33s;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(5px);
-  border-radius: 4px;
-  transform: skewX(-10deg);
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
-}
-
-.Title_button:hover {
-  text-shadow: 0 0 10px rgba(255, 255, 255, 1);
-  padding: 1em 6em 1em 3em;
-}
-
-.Title_button_text {
-  font-size: 165%;
-  color: #fbfbfb;
-  padding: 0 0.5em 0 0.5em;
-  letter-spacing: 0.2em;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .Title_backup_background {
   width: 100%;
   height: 100%;
   position: absolute;
-  z-index: 13;
-  background: linear-gradient(135deg, #fdfbfb 0%, #dcddde 100%);
+  z-index: 12;
+  background: linear-gradient(135deg, #0f0f1f 0%, #04070a 100%);
+  opacity: 0.9;
+}
+
+.Title_buttonContainer {
+  width: 100%;
+  padding-bottom: 160px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 15;
+}
+
+.Title_buttonList {
+  all: unset !important;
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 20px !important;
+  width: 100% !important;
+  position: static !important;
+}
+
+.Title_button {
+  font-weight: 600;
+  font-family: 'Orbitron', sans-serif;
+  color: #00f7ff;
+  font-size: 1.2rem;
+  letter-spacing: 0.15em;
+  text-align: center;
+  cursor: pointer;
+  padding: 1em 2.5em;
+  border-radius: 20px!important;
+  border: 1px solid rgba(0, 255, 255, 0.6);
+  background: rgba(0, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
+  transition: all 0.3s ease;
+  transform: perspective(300px) rotateX(0deg);
+}
+
+.Title_button:hover {
+  background: rgba(0, 255, 255, 0.2);
+  box-shadow: 0 0 24px rgba(0, 255, 255, 0.8), inset 0 0 8px rgba(0, 255, 255, 0.4);
+  transform: perspective(300px) rotateX(2deg) scale(1.03);
+}
+
+.Title_button_text {
+  padding: 0;
+  font-size: 1.2rem;
+  color: #ffffff;
+  text-shadow: 0 0 10px #00f7ff;
 }
 
 .Title_button_disabled {
-  cursor: not-allowed !important;
-  opacity: 0.5;
+  cursor: not-allowed;
+  opacity: 0.4;
+  pointer-events: none;
+  filter: grayscale(80%);
 }

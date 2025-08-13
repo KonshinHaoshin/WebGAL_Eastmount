@@ -17,13 +17,14 @@ export const Save: FC = () => {
   const userDataState = useSelector((state: RootState) => state.userData);
   const savesDataState = useSelector((state: RootState) => state.saveData);
   const dispatch = useDispatch();
+
   const page = [];
   for (let i = 1; i <= 20; i++) {
     let classNameOfElement = styles.Save_Load_top_button;
     if (i === userDataState.optionData.slPage) {
-      classNameOfElement = classNameOfElement + ' ' + styles.Save_Load_top_button_on;
+      classNameOfElement += ` ${styles.Save_Load_top_button_on}`;
     }
-    const element = (
+    page.push(
       <div
         onClick={() => {
           dispatch(setSlPage(i));
@@ -37,15 +38,15 @@ export const Save: FC = () => {
         <div className={styles.Save_Load_top_button_text}>{i}</div>
       </div>
     );
-    page.push(element);
   }
 
   const tCommon = useTrans('common.');
-
+  const t = useTrans('menu.');
   const showSaves = [];
-  // 现在尝试设置10个存档每页
-  const start = (userDataState.optionData.slPage - 1) * 10 + 1;
-  const end = start + 9;
+
+  // 改为五条
+  const start = (userDataState.optionData.slPage - 1) * 5 + 1;
+  const end = start + 4;
 
   useEffect(() => {
     getSavesFromStorage(start, end);
@@ -56,29 +57,27 @@ export const Save: FC = () => {
     animationIndex++;
     const saveData = savesDataState.saveData[i];
     let saveElementContent = <div />;
+
     if (saveData) {
-      const speaker = saveData.nowStageState.showName === '' ? '\u00A0' : `${saveData.nowStageState.showName}`;
+      const speaker = saveData.nowStageState.showName || '\u00A0';
       const speakerView = easyCompile(speaker);
+
       saveElementContent = (
         <>
-          <div className={styles.Save_Load_content_element_top}>
-            <div className={styles.Save_Load_content_element_top_index}>{saveData.index}</div>
-            <div className={styles.Save_Load_content_element_top_date}>{saveData.saveTime}</div>
-          </div>
-          <div className={styles.Save_Load_content_miniRen}>
-            <img className={styles.Save_Load_content_miniRen_bg} alt="Save_img_preview" src={saveData.previewImage} />
-          </div>
-          <div className={styles.Save_Load_content_text}>
-            <div className={styles.Save_Load_content_speaker}>{speakerView}</div>
-            <div className={styles.Save_Load_content_text_padding}>{easyCompile(saveData.nowStageState.showText)}</div>
+          <img className={styles.previewImg} src={saveData.previewImage} alt="preview" />
+          <div className={styles.textBlock}>
+            <div className={styles.titleLine}>
+              <span className={styles.index}>No.{saveData.index}</span>
+              <span className={styles.time}>{saveData.saveTime}</span>
+            </div>
+            <div className={styles.speaker}>{speakerView}</div>
+            <div className={styles.text}>{easyCompile(saveData.nowStageState.showText)}</div>
           </div>
         </>
       );
     }
-    // else {
 
-    // }
-    const saveElement = (
+    showSaves.push(
       <div
         onClick={() => {
           if (savesDataState.saveData[i]) {
@@ -106,10 +105,7 @@ export const Save: FC = () => {
         {saveElementContent}
       </div>
     );
-    showSaves.push(saveElement);
   }
-
-  const t = useTrans('menu.');
 
   return (
     <div className={styles.Save_Load_main}>
@@ -119,7 +115,7 @@ export const Save: FC = () => {
         </div>
         <div className={styles.Save_Load_top_buttonList}>{page}</div>
       </div>
-      <div className={styles.Save_Load_content} id={'Save_content_page_' + userDataState.optionData.slPage}>
+      <div className={styles.Save_Load_content} id={`Save_content_page_${userDataState.optionData.slPage}`}>
         {showSaves}
       </div>
     </div>
@@ -128,23 +124,11 @@ export const Save: FC = () => {
 
 export function easyCompile(sentence: string) {
   const compiledNodes = compileSentence(sentence, 3, true);
-  const rnodes = compiledNodes.map((line) => {
-    return line.map((c) => {
-      return c.reactNode;
-    });
-  });
+  const rnodes = compiledNodes.map((line) => line.map((c) => c.reactNode));
   const showNameArrayReduced = mergeStringsAndKeepObjects(rnodes);
-  return showNameArrayReduced.map((line, index) => {
-    return (
-      <div key={`backlog-line-${index}`}>
-        {line.map((e, index) => {
-          if (e === '<br />') {
-            return <br key={`br${index}`} />;
-          } else {
-            return e;
-          }
-        })}
-      </div>
-    );
-  });
+  return showNameArrayReduced.map((line, index) => (
+    <div key={`backlog-line-${index}`}>
+      {line.map((e, i) => (e === '<br />' ? <br key={`br${i}`} /> : e))}
+    </div>
+  ));
 }

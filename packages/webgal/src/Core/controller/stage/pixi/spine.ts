@@ -28,19 +28,19 @@ export async function loadPixiSpine(): Promise<typeof import('pixi-spine') | nul
   }
 
   // @ts-ignore
-  // pixiSpineLoading = import('pixi-spine')
-  //   .then((module) => {
-  //     spineLoader = new PIXI.Loader();
-  //     pixiSpineModule = module;
-  //     return module;
-  //   })
-  //   .catch((error) => {
-  //     console.error('Failed to load pixi-spine. Spine features will be disabled.', error);
-  //     return null;
-  //   })
-  //   .finally(() => {
-  //     pixiSpineLoading = null;
-  //   });
+  pixiSpineLoading = import('pixi-spine')
+    .then((module) => {
+      spineLoader = new PIXI.Loader();
+      pixiSpineModule = module;
+      return module;
+    })
+    .catch((error) => {
+      console.error('Failed to load pixi-spine. Spine features will be disabled.', error);
+      return null;
+    })
+    .finally(() => {
+      pixiSpineLoading = null;
+    });
 
   return pixiSpineLoading;
 }

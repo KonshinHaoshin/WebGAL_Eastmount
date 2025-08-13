@@ -5,11 +5,16 @@
   width: 100%;
   height: 100%;
   z-index: 10;
-  background: rgba(0, 0, 0, 0.7);
-  padding: 2em 0 2em 0;
-  animation: backlog_soft_in 0.7s ease-out forwards;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px) brightness(0.8) saturate(1.2);
+  padding: 2em 4em;
   box-sizing: border-box;
+  animation: backlog_soft_in 0.7s ease-out forwards;
+  border-top: 2px solid rgba(0, 255, 255, 0.2);
+  border-bottom: 2px solid rgba(0, 255, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.1) inset;
 }
+
 
 .Backlog_main_out {
   font-family: "思源宋体", serif;
@@ -94,6 +99,12 @@
   animation: backlog_item_in 0.5s ease-out forwards;
   margin: 1.25em 0 0 0;
   width: 100%;
+  background: rgba(0, 92, 175, 0.05);
+  border-left: 3px solid #00ffff;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 1em;
+  transition: all 0.3s ease;
 }
 
 .backlog_item_out {
@@ -117,22 +128,16 @@
 
 .backlog_item_content_name {
   font-weight: bold;
-  color: transparent;
-  //background: linear-gradient(150deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 55%, rgb(210, 243, 255) 100%);
-  background: linear-gradient(150deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 35%, rgba(165, 212, 228, 1) 100%);
+  background: linear-gradient(150deg, #ffffff 0%, #00ffff 35%, #51A8DD 100%);
   -webkit-background-clip: text;
-  //width: 20%;
-  margin: 0 0 0 auto;
-  overflow-wrap: break-word;
-  box-sizing: border-box;
-  //background: rgba(255, 255, 255, 0.175);
-  border-radius: 7px;
-  padding: 0.2em 0.5em 0.2em 0.5em;
+  color: transparent;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.4);
+  padding: 0.3em 0.7em;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 6px;
+  width: fit-content;
   font-size: 115%;
-  width: 50%;
-  text-align: left;
-  //font-family: WebgalUI, serif;
-  letter-spacing: 0.1em;
+  box-shadow: 0 0 6px rgba(0, 255, 255, 0.2);
 }
 
 .backlog_item_content {
@@ -155,21 +160,22 @@
 
 .backlog_item_button_element {
   cursor: pointer;
-  padding: 0.01em 0.75em 0 0.75em;
+  padding: 0.2em 1em;
   margin: 0 0 0 0.5em;
-  background: rgba(255, 255, 255, 0.075);
-  border-radius: 7px;
-  display: flex;
-  //border: 1px solid rgba(255, 255, 255, 0.15);
-  //box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #00ffff;
+  font-size: 90%;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.1);
+  transition: all 0.25s ease;
 }
 
 .backlog_item_button_element:hover {
-  background: rgba(255, 255, 255, 0.25);
-  //border: 1px solid rgba(255, 255, 255, 0);
-  //box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  background: rgba(0, 255, 255, 0.1);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+  transform: scale(1.05);
 }
-
 
 .backlog_item_content_text {
   //width: 80%;
@@ -218,3 +224,27 @@
     background-color: rgba(255, 255, 255, 0.2);
   }
 }
+
+
+@keyframes backlog_item_in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(1.05) rotateX(-8deg) rotateY(-5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes backlog_item_out {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(20px) scale(1.05) rotateX(-8deg) rotateY(-5deg);
+  }
+}
+
