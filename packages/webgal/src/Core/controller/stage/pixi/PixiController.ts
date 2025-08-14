@@ -3,16 +3,24 @@ import { v4 as uuid } from 'uuid';
 import { webgalStore } from '@/store/store';
 import { setStage, stageActions } from '@/store/stageReducer';
 import cloneDeep from 'lodash/cloneDeep';
-import { IEffect, IFigureAssociatedAnimation, IFigureMetadata, IFreeFigure, ITransform } from '@/store/stageInterface';
+import {
+  IEffect,
+  IFigureAssociatedAnimation,
+  IFigureMetadata,
+  IFreeFigure,
+  ITransform,
+  baseTransform,
+} from '@/store/stageInterface';
 import { logger } from '@/Core/util/logger';
 import { isIOS } from '@/Core/initializeScript';
 import { WebGALPixiContainer } from '@/Core/controller/stage/pixi/WebGALPixiContainer';
-import { WebGAL } from '@/Core/WebGAL';
+import { Live2D, WebGAL } from '@/Core/WebGAL';
 import { SCREEN_CONSTANTS } from '@/Core/util/constants';
 import { addSpineBgImpl, addSpineFigureImpl } from '@/Core/controller/stage/pixi/spine';
 import { AnimatedGIF } from '@pixi/gif';
 import { setFreeFigure } from '@/store/stageReducer';
-
+import { baseBlinkParam, baseFocusParam, BlinkParam, FocusParam } from '@/Core/live2DCore';
+import { isEqual } from 'lodash';
 // import { figureCash } from '@/Core/gameScripts/vocal/conentsCash'; // 如果要使用 Live2D，取消这里的注释
 // import { Live2DModel, SoundManager } from 'pixi-live2d-display-webgal'; // 如果要使用 Live2D，取消这里的注释
 
@@ -20,7 +28,7 @@ export interface IAnimationObject {
   setStartState: Function;
   setEndState: Function;
   tickerFunc: PIXI.TickerCallback<number>;
-  getEndFilterEffect?: Function;
+  getEndStateEffect?: Function;
 }
 
 interface IStageAnimationObject {
@@ -42,14 +50,17 @@ export interface IStageObject {
   // 相关的源 url
   sourceUrl: string;
   sourceExt: string;
-  sourceType: 'img' | 'live2d' | 'spine' | 'gif' | 'video';
+  sourceType: 'img' | 'live2d' | 'spine' | 'gif' | 'video' | 'stage';
   spineAnimation?: string;
+  isExiting?: boolean;
 }
 
 export interface ILive2DRecord {
   target: string;
   motion: string;
   expression: string;
+  blink: BlinkParam;
+  focus: FocusParam;
 }
 
 // export interface IRegisterTickerOpr {
@@ -78,6 +89,7 @@ export default class PixiStage {
    * 当前的 PIXI App
    */
   public currentApp: PIXI.Application | null = null;
+  public readonly mainStageContainer: WebGALPixiContainer;
   public readonly foregroundEffectsContainer: PIXI.Container;
   public readonly backgroundEffectsContainer: PIXI.Container;
   public frameDuration = 16.67;
@@ -89,6 +101,7 @@ export default class PixiStage {
   public assetLoader = new PIXI.Loader();
   public readonly backgroundContainer: PIXI.Container;
   public backgroundObjects: Array<IStageObject> = [];
+  public mainStageObject: IStageObject;
   /**
    * 添加 Spine 立绘
    * @param key 立绘的标识，一般和立绘位置有关
@@ -110,7 +123,6 @@ export default class PixiStage {
    */
   private MAX_TEX_COUNT = 10;
 
-  private isLive2dAvailable: undefined | boolean = undefined;
   private figureCash: any;
   private live2DModel: any;
   private soundManager: any;
@@ -147,8 +159,23 @@ export default class PixiStage {
       app.renderer.view.style.zIndex = '-5';
     }
 
+    // 添加主舞台容器
+    this.mainStageContainer = new WebGALPixiContainer();
     // 设置可排序
-    app.stage.sortableChildren = true;
+    this.mainStageContainer.sortableChildren = true;
+    this.mainStageContainer.setBaseX(this.stageWidth / 2);
+    this.mainStageContainer.setBaseY(this.stageHeight / 2);
+    this.mainStageContainer.pivot.set(this.stageWidth / 2, this.stageHeight / 2);
+    app.stage.addChild(this.mainStageContainer);
+
+    this.mainStageObject = {
+      uuid: uuid(),
+      key: 'stage-main',
+      pixiContainer: this.mainStageContainer,
+      sourceUrl: '',
+      sourceType: 'stage',
+      sourceExt: '',
+    };
 
     // 添加 4 个 Container 用于做渲染
     this.foregroundEffectsContainer = new PIXI.Container(); // 前景特效
@@ -160,8 +187,7 @@ export default class PixiStage {
     this.backgroundEffectsContainer.zIndex = 1;
     this.backgroundContainer = new PIXI.Container();
     this.backgroundContainer.zIndex = 0;
-
-    app.stage.addChild(
+    this.mainStageContainer.addChild(
       this.foregroundEffectsContainer,
       this.figureContainer,
       this.backgroundEffectsContainer,
@@ -248,8 +274,7 @@ export default class PixiStage {
    * 移除动画
    * @param key
    */
-  public removeAnimation(key: string) {
-    const index = this.stageAnimations.findIndex((e) => e.key === key);
+  public removeAnimationByIndex(index: number) {
     if (index >= 0) {
       const thisTickerFunc = this.stageAnimations[index];
       this.currentApp?.ticker.remove(thisTickerFunc.animationObject.tickerFunc);
@@ -259,39 +284,31 @@ export default class PixiStage {
     }
   }
 
+  public removeAllAnimations() {
+    while (this.stageAnimations.length > 0) {
+      this.removeAnimationByIndex(0);
+    }
+  }
+
+  public removeAnimation(key: string) {
+    const index = this.stageAnimations.findIndex((e) => e.key === key);
+    this.removeAnimationByIndex(index);
+  }
+
   public removeAnimationWithSetEffects(key: string) {
     const index = this.stageAnimations.findIndex((e) => e.key === key);
     if (index >= 0) {
       const thisTickerFunc = this.stageAnimations[index];
       this.currentApp?.ticker.remove(thisTickerFunc.animationObject.tickerFunc);
       thisTickerFunc.animationObject.setEndState();
-      const webgalFilters = thisTickerFunc.animationObject.getEndFilterEffect?.() ?? {};
+      const endStateEffect = thisTickerFunc.animationObject.getEndStateEffect?.() ?? {};
       this.unlockStageObject(thisTickerFunc.targetKey ?? 'default');
       if (thisTickerFunc.targetKey) {
         const target = this.getStageObjByKey(thisTickerFunc.targetKey);
         if (target) {
-          const targetTransform = {
-            alpha: target.pixiContainer.alphaFilterVal,
-            scale: {
-              x: target.pixiContainer.scale.x,
-              y: target.pixiContainer.scale.y,
-            },
-            // pivot: {
-            //   x: target.pixiContainer.pivot.x,
-            //   y: target.pixiContainer.pivot.y,
-            // },
-            position: {
-              x: target.pixiContainer.x,
-              y: target.pixiContainer.y,
-            },
-            rotation: target.pixiContainer.rotation,
-            // @ts-ignore
-            blur: target.pixiContainer.blur,
-            ...webgalFilters,
-          };
           let effect: IEffect = {
             target: thisTickerFunc.targetKey,
-            transform: targetTransform,
+            transform: endStateEffect,
           };
           webgalStore.dispatch(stageActions.updateEffect(effect));
           // if (!this.notUpdateBacklogEffects) updateCurrentBacklogEffects(webgalStore.getState().stage.effects);
@@ -687,22 +704,33 @@ export default class PixiStage {
   }
   // 实现添加拼好模
   /* eslint-disable complexity */
-  public async addJsonlFigure(key: string, jsonlPath: string, presetPosition: 'left' | 'center' | 'right' = 'center') {
-    console.log('正在使用聚合模型');
-    if (this.isLive2dAvailable !== true) return;
+  public async addJsonlFigure(
+    key: string,
+    jsonlPath: string,
+    presetPosition: 'left' | 'center' | 'right' = 'center',
+  ) {
+    console.log('正在使用聚合模型(JSONL)');
 
-    const container = new WebGALPixiContainer();
-    const figureUuid = uuid();
+    // ✅ 与 addLive2dFigure 保持一致的可用性守卫
+    if (!Live2D.isAvailable) {
+      console.warn('Live2D 不可用，addJsonlFigure 终止。');
+      return;
+    }
 
-    const index = this.figureObjects.findIndex((e) => e.key === key);
-    if (index >= 0) {
+    // 先移除同 key 立绘
+    const existIdx = this.figureObjects.findIndex((e) => e.key === key);
+    if (existIdx >= 0) {
       this.removeStageObjectByKey(key);
     }
 
+    // 新建容器并设置 zIndex
+    const container = new WebGALPixiContainer();
     const metadata = this.getFigureMetadataByKey(key);
-    if (metadata?.zIndex) container.zIndex = metadata.zIndex;
+    if (metadata?.zIndex !== undefined) container.zIndex = metadata.zIndex;
 
+    // 挂载并登记
     this.figureContainer.addChild(container);
+    const figureUuid = uuid();
     this.figureObjects.push({
       uuid: figureUuid,
       key,
@@ -712,137 +740,178 @@ export default class PixiStage {
       sourceType: 'live2d',
     });
 
+    // 读取 JSONL
+    let jsonlText = '';
     try {
-      const response = await fetch(jsonlPath);
-      const jsonlText = await response.text();
-      const lines = jsonlText.split('\n').filter(Boolean);
+      const resp = await fetch(jsonlPath);
+      jsonlText = await resp.text();
+    } catch (e) {
+      console.error('读取 JSONL 失败：', jsonlPath, e);
+      return;
+    }
 
-      // const paths: string[] = [];
-      const modelConfigs: {
-        path: string;
-        id?: string;
-        x?: number;
-        y?: number;
-        xscale?: number;
-        yscale?: number;
-      }[] = [];
-      let paramImport: number | null = null; // 用于存储 import 参数
-      const jsonlBaseDir = jsonlPath.substring(0, jsonlPath.lastIndexOf('/') + 1);
+    const lines = jsonlText.split('\n').filter(Boolean);
 
-      for (const line of lines) {
-        try {
-          const obj = JSON.parse(line);
-          // 解析 import 参数
-          // ✅ 判断是否是最后一行的汇总参数（有 motions 或 expressions）
-          if (obj?.motions || obj?.expressions) {
-            if (obj?.import !== undefined) {
-              paramImport = Number(obj.import);
-              console.info('检测到汇总 import 参数:', paramImport);
-            }
-            continue; // ✨不要当作模型行处理！
+    // 收集每行模型配置
+    type ModelConfig = {
+      path: string;
+      id?: string;
+      x?: number;
+      y?: number;
+      xscale?: number;
+      yscale?: number;
+      bounds?: [number, number, number, number]; // 可选：覆盖 bounds
+    };
+    const modelConfigs: ModelConfig[] = [];
+
+    // 末行汇总 import（PARAM_IMPORT）
+    let paramImport: number | null = null;
+
+    // 解析路径前缀
+    const jsonlBaseDir = jsonlPath.substring(0, jsonlPath.lastIndexOf('/') + 1);
+    const resolvePath = (p: string) => {
+      const normalized = String(p).replace(/^\.\//, '');
+      // http(s) 或以 game/ 开头认为是工程根相对路径，不拼接
+      if (/^(https?:)?\/\//i.test(normalized) || normalized.startsWith('game/')) {
+        return normalized;
+      }
+      return jsonlBaseDir + normalized;
+    };
+
+    // 解析每行
+    for (const line of lines) {
+      try {
+        const obj = JSON.parse(line);
+
+        // ✅ 末行汇总（motions/expressions/import）不要当模型行处理
+        if (obj?.motions || obj?.expressions) {
+          if (obj?.import !== undefined) {
+            paramImport = Number(obj.import);
+            console.info('检测到汇总 import =', paramImport);
           }
-          if (obj?.path) {
-            let fullPath = obj.path;
-            if (!obj.path.startsWith('game/')) {
-              fullPath = jsonlBaseDir + obj.path.replace(/^\.\//, '');
-            }
-
-            modelConfigs.push({
-              path: fullPath,
-              id: obj.id,
-              x: obj.x,
-              y: obj.y,
-              xscale: obj.xscale,
-              yscale: obj.yscale,
-            });
-          }
-        } catch (e) {
-          console.warn('JSONL parse error in line:', line);
+          continue;
         }
-      }
 
-      if (modelConfigs.length === 0) {
-        console.warn('No valid paths in jsonl:', jsonlPath);
-        return;
-      }
+        if (obj?.path) {
+          const fullPath = resolvePath(obj.path);
+          const cfg: ModelConfig = {
+            path: fullPath,
+            id: obj.id,
+            x: obj.x,
+            y: obj.y,
+            xscale: obj.xscale,
+            yscale: obj.yscale,
+          };
 
-      const motionFromState = webgalStore.getState().stage.live2dMotion.find((e) => e.target === key);
-      const expressionFromState = webgalStore.getState().stage.live2dExpression.find((e) => e.target === key);
-      const motionToSet = motionFromState?.motion ?? '';
-      const expressionToSet = expressionFromState?.expression ?? '';
-
-      const models: any[] = [];
-
-      for (const modelConfig of modelConfigs) {
-        const { path: modelPath, x, y, xscale, yscale } = modelConfig;
-        try {
-          const model = await this.live2DModel.from(modelPath, { autoInteract: false });
-          if (!model) continue;
-          // 暂时隐藏模型，等全部模型加载后再统一显示
-          model.visible = false;
-
-          const stageWidth = this.stageWidth;
-          const stageHeight = this.stageHeight;
-
-          const scaleX = stageWidth / model.width;
-          const scaleY = stageHeight / model.height;
-          const targetScale = Math.min(scaleX, scaleY);
-
-          const targetWidth = model.width * targetScale;
-          const targetHeight = model.height * targetScale;
-
-          const finalScaleX = targetScale * (xscale ?? 1);
-          const finalScaleY = targetScale * (yscale ?? 1);
-          model.scale.set(finalScaleX, finalScaleY);
-
-          model.anchor.set(0.5);
-          model.position.set(x ?? 0, stageHeight / 2 + (y ?? 0));
-
-          container.setBaseY(stageHeight / 2);
-          if (targetHeight < stageHeight) {
-            container.setBaseY(stageHeight / 2 + (stageHeight - targetHeight) / 2);
+          // 可选 bounds（如果 JSONL 行里有）
+          if (Array.isArray(obj.bounds) && obj.bounds.length === 4) {
+            cfg.bounds = [Number(obj.bounds[0]), Number(obj.bounds[1]), Number(obj.bounds[2]), Number(obj.bounds[3])];
           }
 
-          if (presetPosition === 'center') {
-            container.setBaseX(stageWidth / 2);
-          } else if (presetPosition === 'left') {
-            container.setBaseX(targetWidth / 2);
-          } else if (presetPosition === 'right') {
-            container.setBaseX(stageWidth - targetWidth / 2);
-          }
-
-          container.pivot.set(0, stageHeight / 2);
-          container.addChild(model);
-          models.push(model);
-
-          // ✅ 禁用自动旋转（防止抖动或头部异常移动）
-          // 感谢Hardy-Lee桑
-          if (model.internalModel.angleXParamIndex !== undefined) model.internalModel.angleXParamIndex = 999;
-          if (model.internalModel.angleYParamIndex !== undefined) model.internalModel.angleYParamIndex = 999;
-          if (model.internalModel.angleZParamIndex !== undefined) model.internalModel.angleZParamIndex = 999;
-
-          // @ts-ignore 禁用自动眨眼
-          if (model.internalModel?.eyeBlink) {
-            model.internalModel.eyeBlink.blinkInterval = 1000 * 60 * 60 * 24;
-            model.internalModel.eyeBlink.nextBlinkTimeLeft = 1000 * 60 * 60 * 24;
-          }
-
-          // 每个模型加载完立刻设置 PARAM_IMPORT
-          if (paramImport !== null) {
-            try {
-              model.internalModel?.coreModel?.setParamFloat?.('PARAM_IMPORT', paramImport);
-              console.info(`✅ 设置 PARAM_IMPORT = ${paramImport} 给模型: ${modelPath}`);
-            } catch (e) {
-              console.warn(`❌ 设置 PARAM_IMPORT 失败 (${modelPath})`, e);
-            }
-          }
-        } catch (err) {
-          console.warn(`加载模型 ${modelPath} 失败:`, err);
+          modelConfigs.push(cfg);
         }
+      } catch (e) {
+        console.warn('JSONL 某行解析失败，已跳过：', line);
       }
+    }
 
-      // 应用从状态中读取的 motion 和 expression
-      for (const model of models) {
+    if (modelConfigs.length === 0) {
+      console.warn('JSONL 无有效模型行：', jsonlPath);
+      return;
+    }
+
+    // 读取当前 state 里的 motion / expression（与 addLive2dFigure 一致）
+    const motionFromState = webgalStore.getState().stage.live2dMotion.find((e) => e.target === key);
+    const expressionFromState = webgalStore.getState().stage.live2dExpression.find((e) => e.target === key);
+    const motionToSet = motionFromState?.motion ?? '';
+    const expressionToSet = expressionFromState?.expression ?? '';
+
+    const models: any[] = [];
+    const stageWidth = this.stageWidth;
+    const stageHeight = this.stageHeight;
+
+    // 逐个加载并放入容器
+    for (const cfg of modelConfigs) {
+      const { path: modelPath, x, y, xscale, yscale, bounds } = cfg;
+
+      try {
+        const model = await Live2D.Live2DModel.from(modelPath, {
+          autoInteract: false,
+          // 如果提供了 bounds，就覆盖（与 addLive2dFigure 的用法一致）
+          overWriteBounds: bounds
+            ? { x0: bounds[0], y0: bounds[1], x1: bounds[2], y1: bounds[3] }
+            : undefined,
+        });
+
+        if (!model) continue;
+
+        // 先隐藏，等统一设置完再显示
+        model.visible = false;
+
+        // 计算缩放（与图片/视频一致，尽量填满高度同时不超宽）
+        const scaleX = stageWidth / model.width;
+        const scaleY = stageHeight / model.height;
+        const targetScale = Math.min(scaleX, scaleY);
+
+        const targetWidth = model.width * targetScale;
+        const targetHeight = model.height * targetScale;
+
+        const finalScaleX = targetScale * (xscale ?? 1);
+        const finalScaleY = targetScale * (yscale ?? 1);
+
+        model.scale.set(finalScaleX, finalScaleY);
+        model.anchor.set(0.5);
+        model.position.set(x ?? 0, stageHeight / 2 + (y ?? 0));
+
+        // 容器基准位（上下居中，必要时向下补齐）
+        container.setBaseY(stageHeight / 2);
+        if (targetHeight < stageHeight) {
+          container.setBaseY(stageHeight / 2 + (stageHeight - targetHeight) / 2);
+        }
+
+        // 左中右预设位
+        if (presetPosition === 'center') {
+          container.setBaseX(stageWidth / 2);
+        } else if (presetPosition === 'left') {
+          container.setBaseX(targetWidth / 2);
+        } else if (presetPosition === 'right') {
+          container.setBaseX(stageWidth - targetWidth / 2);
+        }
+
+        container.pivot.set(0, stageHeight / 2);
+        container.addChild(model);
+        models.push(model);
+
+        // ✨ 细节：禁用角度自动控制，避免抖头
+        if (model.internalModel?.angleXParamIndex !== undefined) model.internalModel.angleXParamIndex = 999;
+        if (model.internalModel?.angleYParamIndex !== undefined) model.internalModel.angleYParamIndex = 999;
+        if (model.internalModel?.angleZParamIndex !== undefined) model.internalModel.angleZParamIndex = 999;
+
+        // ✨ 细节：关闭自动眨眼（保留你项目里的统一眨眼控制权）
+        if (model.internalModel?.eyeBlink) {
+          // @ts-ignore
+          model.internalModel.eyeBlink.blinkInterval = 1000 * 60 * 60 * 24;
+          // @ts-ignore
+          model.internalModel.eyeBlink.nextBlinkTimeLeft = 1000 * 60 * 60 * 24;
+        }
+
+        // ✨ 设置 PARAM_IMPORT（若 JSONL 末行提供）
+        if (paramImport !== null) {
+          try {
+            model.internalModel?.coreModel?.setParamFloat?.('PARAM_IMPORT', paramImport);
+            console.info(`设置 PARAM_IMPORT=${paramImport} ->`, modelPath);
+          } catch (e) {
+            console.warn(`设置 PARAM_IMPORT 失败(${modelPath})`, e);
+          }
+        }
+      } catch (err) {
+        console.warn(`加载模型失败：${modelPath}`, err);
+      }
+    }
+
+    // 统一应用 motion/expression，并显示
+    for (const model of models) {
+      try {
         if (motionToSet) {
           // @ts-ignore
           model.motion(motionToSet, 0, 3);
@@ -851,29 +920,28 @@ export default class PixiStage {
           // @ts-ignore
           model.expression(expressionToSet);
         }
-        // 统一显示模型
         model.visible = true;
+      } catch (e) {
+        console.warn('设置 motion/expression 失败', e);
       }
-
-      if (motionToSet) this.updateL2dMotionByKey(key, motionToSet);
-      if (expressionToSet) this.updateL2dExpressionByKey(key, expressionToSet);
-    } catch (e) {
-      console.error('addJsonlFigure 加载失败:', e);
     }
+
+    // 记录到状态（与 addLive2dFigure 行为一致）
+    if (motionToSet) this.updateL2dMotionByKey(key, motionToSet);
+    if (expressionToSet) this.updateL2dExpressionByKey(key, expressionToSet);
   }
-  /* eslint-disable complexity */
+  /* eslint-enable complexity */  /* eslint-disable complexity */
 
   /**
    * Live2d立绘，如果要使用 Live2D，取消这里的注释
    * @param jsonPath
    */
   // eslint-disable-next-line max-params
-  public addLive2dFigure(key: string, jsonPath: string, pos: string, motion: string, expression: string) {
-    if (this.isLive2dAvailable !== true) return;
+  public addLive2dFigure(key: string, jsonPath: string, pos: string) {
+    if (!Live2D.isAvailable) return;
     try {
       let stageWidth = this.stageWidth;
       let stageHeight = this.stageHeight;
-      logger.debug('Using motion:', motion);
 
       this.figureCash.push(jsonPath);
 
@@ -910,7 +978,7 @@ export default class PixiStage {
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const instance = this;
 
-      const setup = (stage: PixiStage) => {
+      const setup = () => {
         if (thisFigureContainer && this.getStageObjByUuid(figureUuid)) {
           (async function () {
             let overrideBounds: [number, number, number, number] = [0, 0, 0, 0];
@@ -920,7 +988,7 @@ export default class PixiStage {
             }
             console.log(overrideBounds);
             const models = await Promise.all([
-              stage.live2DModel.from(jsonPath, {
+              Live2D.Live2DModel.from(jsonPath, {
                 autoInteract: false,
                 overWriteBounds: {
                   x0: overrideBounds[0],
@@ -959,40 +1027,49 @@ export default class PixiStage {
               }
 
               thisFigureContainer.pivot.set(0, stageHeight / 2);
-              let motionToSet = motion;
+
               let animation_index = 0;
               let priority_number = 3;
-              // var audio_link = voiceCash.pop();
 
-              // model.motion(category_name, animation_index, priority_number,location.href + audio_link);
-              /**
-               * 检查 Motion 和 Expression
-               */
+              // motion
+              let motionToSet = '';
               const motionFromState = webgalStore.getState().stage.live2dMotion.find((e) => e.target === key);
-              const expressionFromState = webgalStore.getState().stage.live2dExpression.find((e) => e.target === key);
               if (motionFromState) {
                 motionToSet = motionFromState.motion;
               }
               instance.updateL2dMotionByKey(key, motionToSet);
               model.motion(motionToSet, animation_index, priority_number);
-              let expressionToSet = expression;
+
+              // expression
+              let expressionToSet = '';
+              const expressionFromState = webgalStore.getState().stage.live2dExpression.find((e) => e.target === key);
               if (expressionFromState) {
                 expressionToSet = expressionFromState.expression;
               }
               instance.updateL2dExpressionByKey(key, expressionToSet);
               model.expression(expressionToSet);
-              // @ts-ignore
-              if (model.internalModel.eyeBlink) {
-                // @ts-ignore
-                model.internalModel.eyeBlink.blinkInterval = 1000 * 60 * 60 * 24; // @ts-ignore
-                model.internalModel.eyeBlink.nextBlinkTimeLeft = 1000 * 60 * 60 * 24;
+
+              // blink
+              let blinkToSet: BlinkParam = baseBlinkParam;
+              const blinkFromState = webgalStore.getState().stage.live2dBlink.find((e) => e.target === key);
+              if (blinkFromState) {
+                blinkToSet = { ...blinkToSet, ...blinkFromState.blink };
               }
+              instance.updateL2dBlinkByKey(key, blinkToSet);
+              model.internalModel?.setBlinkParam(blinkToSet);
+
+              // focus
+              let focusToSet: FocusParam = baseFocusParam;
+              const focusFromState = webgalStore.getState().stage.live2dFocus.find((e) => e.target === key);
+              if (focusFromState) {
+                focusToSet = { ...focusToSet, ...focusFromState.focus };
+              }
+              instance.updateL2dFocusByKey(key, focusToSet);
+              model.internalModel?.focusController?.focus(focusToSet.x, focusToSet.y, focusToSet.instant);
 
               // lip-sync is still a problem and you can not.
-              stage.soundManager.volume = 0; // @ts-ignore
-              if (model.internalModel.angleXParamIndex !== undefined) model.internalModel.angleXParamIndex = 999; // @ts-ignore
-              if (model.internalModel.angleYParamIndex !== undefined) model.internalModel.angleYParamIndex = 999; // @ts-ignore
-              if (model.internalModel.angleZParamIndex !== undefined) model.internalModel.angleZParamIndex = 999;
+              Live2D.SoundManager.volume = 0; // @ts-ignore
+
               thisFigureContainer.addChild(model);
             });
           })();
@@ -1005,14 +1082,14 @@ export default class PixiStage {
       const resourses = Object.keys(loader.resources);
       this.cacheGC();
       if (!resourses.includes(jsonPath)) {
-        this.loadAsset(jsonPath, () => setup(this));
+        this.loadAsset(jsonPath, () => setup());
       } else {
         // 复用
-        setup(this);
+        setup();
       }
     } catch (error) {
       console.error('Live2d Module err: ' + error);
-      this.isLive2dAvailable = false;
+      Live2D.isAvailable = false;
     }
   }
 
@@ -1101,7 +1178,7 @@ export default class PixiStage {
 
   public changeModelMotionByKey(key: string, motion: string) {
     // logger.debug(`Applying motion ${motion} to ${key}`);
-    const target = this.figureObjects.find((e) => e.key === key);
+    const target = this.figureObjects.find((e) => e.key === key && !e.isExiting);
     if (target?.sourceType === 'live2d') {
       const figureRecordTarget = this.live2dFigureRecorder.find((e) => e.target === key);
       if (target && figureRecordTarget?.motion !== motion) {
@@ -1125,7 +1202,7 @@ export default class PixiStage {
   }
 
   public changeSpineAnimationByKey(key: string, animation: string) {
-    const target = this.figureObjects.find((e) => e.key === key);
+    const target = this.figureObjects.find((e) => e.key === key && !e.isExiting);
     if (target?.sourceType !== 'spine') return;
 
     const container = target.pixiContainer;
@@ -1150,7 +1227,7 @@ export default class PixiStage {
 
   public changeModelExpressionByKey(key: string, expression: string) {
     // logger.debug(`Applying expression ${expression} to ${key}`);
-    const target = this.figureObjects.find((e) => e.key === key);
+    const target = this.figureObjects.find((e) => e.key === key && !e.isExiting);
     if (target?.sourceType !== 'live2d') return;
     const figureRecordTarget = this.live2dFigureRecorder.find((e) => e.target === key);
     if (target && figureRecordTarget?.expression !== expression) {
@@ -1161,6 +1238,46 @@ export default class PixiStage {
         model.expression(expression);
       }
       this.updateL2dExpressionByKey(key, expression);
+    }
+  }
+
+  public changeModelBlinkByKey(key: string, blinkParam: BlinkParam) {
+    const target = this.figureObjects.find((e) => e.key === key && !e.isExiting);
+    if (target?.sourceType !== 'live2d') return;
+    const figureRecordTarget = this.live2dFigureRecorder.find((e) => e.target === key);
+    if (target && !isEqual(figureRecordTarget?.blink, blinkParam)) {
+      const container = target.pixiContainer;
+      const children = container.children;
+      let newBlinkParam: BlinkParam = { ...baseBlinkParam, ...blinkParam };
+      // 继承现有 BlinkParam
+      if (figureRecordTarget?.blink) {
+        newBlinkParam = { ...cloneDeep(figureRecordTarget.blink), ...blinkParam };
+      }
+      for (const model of children) {
+        // @ts-ignore
+        model?.internalModel?.setBlinkParam?.(newBlinkParam);
+      }
+      this.updateL2dBlinkByKey(key, newBlinkParam);
+    }
+  }
+
+  public changeModelFocusByKey(key: string, focusParam: FocusParam) {
+    const target = this.figureObjects.find((e) => e.key === key && !e.isExiting);
+    if (target?.sourceType !== 'live2d') return;
+    const figureRecordTarget = this.live2dFigureRecorder.find((e) => e.target === key);
+    if (target && !isEqual(figureRecordTarget?.focus, focusParam)) {
+      const container = target.pixiContainer;
+      const children = container.children;
+      let newFocusParam: FocusParam = { ...baseFocusParam, ...focusParam };
+      // 继承现有 FocusParam
+      if (figureRecordTarget?.focus) {
+        newFocusParam = { ...cloneDeep(figureRecordTarget.focus), ...focusParam };
+      }
+      for (const model of children) {
+        // @ts-ignore
+        model?.internalModel?.focusController.focus(newFocusParam.x, newFocusParam.y, newFocusParam.instant);
+      }
+      this.updateL2dFocusByKey(key, newFocusParam);
     }
   }
 
@@ -1195,15 +1312,15 @@ export default class PixiStage {
    * @param key
    */
   public getStageObjByKey(key: string) {
-    return [...this.figureObjects, ...this.backgroundObjects].find((e) => e.key === key);
+    return [...this.figureObjects, ...this.backgroundObjects, this.mainStageObject].find((e) => e.key === key);
   }
 
   public getStageObjByUuid(objUuid: string) {
-    return [...this.figureObjects, ...this.backgroundObjects].find((e) => e.uuid === objUuid);
+    return [...this.figureObjects, ...this.backgroundObjects, this.mainStageObject].find((e) => e.uuid === objUuid);
   }
 
   public getAllStageObj() {
-    return [...this.figureObjects, ...this.backgroundObjects];
+    return [...this.figureObjects, ...this.backgroundObjects, this.mainStageObject];
   }
 
   /**
@@ -1272,7 +1389,7 @@ export default class PixiStage {
     if (figureTargetIndex >= 0) {
       this.live2dFigureRecorder[figureTargetIndex].motion = motion;
     } else {
-      this.live2dFigureRecorder.push({ target, motion, expression: '' });
+      this.live2dFigureRecorder.push({ target, motion, expression: '', blink: baseBlinkParam, focus: baseFocusParam });
     }
   }
 
@@ -1281,7 +1398,25 @@ export default class PixiStage {
     if (figureTargetIndex >= 0) {
       this.live2dFigureRecorder[figureTargetIndex].expression = expression;
     } else {
-      this.live2dFigureRecorder.push({ target, motion: '', expression });
+      this.live2dFigureRecorder.push({ target, motion: '', expression, blink: baseBlinkParam, focus: baseFocusParam });
+    }
+  }
+
+  private updateL2dBlinkByKey(target: string, blink: BlinkParam) {
+    const figureTargetIndex = this.live2dFigureRecorder.findIndex((e) => e.target === target);
+    if (figureTargetIndex >= 0) {
+      this.live2dFigureRecorder[figureTargetIndex].blink = blink;
+    } else {
+      this.live2dFigureRecorder.push({ target, motion: '', expression: '', blink, focus: baseFocusParam });
+    }
+  }
+
+  private updateL2dFocusByKey(target: string, focus: FocusParam) {
+    const figureTargetIndex = this.live2dFigureRecorder.findIndex((e) => e.target === target);
+    if (figureTargetIndex >= 0) {
+      this.live2dFigureRecorder[figureTargetIndex].focus = focus;
+    } else {
+      this.live2dFigureRecorder.push({ target, motion: '', expression: '', blink: baseBlinkParam, focus });
     }
   }
 
@@ -1337,16 +1472,8 @@ export default class PixiStage {
     try {
       const { figureCash } = await import('@/Core/gameScripts/vocal/conentsCash');
       this.figureCash = figureCash;
-      const { Live2DModel, SoundManager } = await import('pixi-live2d-display-webgal');
-      this.live2DModel = Live2DModel;
-      this.soundManager = SoundManager;
     } catch (error) {
-      this.isLive2dAvailable = false;
-      console.info('live2d lib load failed', error);
-    }
-    if (this.isLive2dAvailable === undefined) {
-      this.isLive2dAvailable = true;
-      console.info('live2d lib load success');
+      console.error('Failed to load figureCash:', error);
     }
   }
 }
