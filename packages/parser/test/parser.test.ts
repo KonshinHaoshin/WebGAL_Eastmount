@@ -134,7 +134,7 @@ test("config", async () => {
   const configFesult = parser.parseConfig(`
 Game_name:欢迎使用WebGAL！;
 Game_key:0f86dstRf;
-Title_img:WebGAL_New_Enter_Image.png;
+Title_img:WebGAL_New_Enter_Image.webp;
 Title_bgm:s_Title.mp3;
 Title_logos: 1.png | 2.png | Image Logo.png| -show -active=false -add=op! -count=3;This is a fake config, do not reference anything.
   `);
@@ -159,7 +159,7 @@ test("config-stringify", async () => {
   const configFesult = parser.parseConfig(`
 Game_name:欢迎使用WebGAL！;
 Game_key:0f86dstRf;
-Title_img:WebGAL_New_Enter_Image.png;
+Title_img:WebGAL_New_Enter_Image.webp;
 Title_bgm:s_Title.mp3;
 Title_logos: 1.png | 2.png | Image Logo.png| -show -active=false -add=op! -count=3;This is a fake config, do not reference anything.
   `);
@@ -191,6 +191,65 @@ test("say statement", async () => {
     content: "123",
     args: [{ key: 'speaker', value: 'xx' }],
     sentenceAssets: [],
+    subScene: []
+  });
+});
+
+test("wait command", async () => {
+  const parser = new SceneParser((assetList) => {
+  }, (fileName, assetType) => {
+    return fileName;
+  }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
+
+  const result = parser.parse(`wait:1000;`, 'test', 'test');
+  expect(result.sentenceList).toContainEqual({
+    command: commandType.wait,
+    commandRaw: "wait",
+    content: "1000",
+    args: [],
+    sentenceAssets: [],
+    subScene: []
+  });
+});
+
+test("changeFigure with duration and animation args", async () => {
+  const parser = new SceneParser((assetList) => {
+  }, (fileName, assetType) => {
+    return fileName;
+  }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
+
+  const result = parser.parse(`changeFigure:stand.webp -duration=1000 -enter=fadeIn -exit=fadeOut;`, 'test', 'test');
+  expect(result.sentenceList).toContainEqual({
+    command: commandType.changeFigure,
+    commandRaw: "changeFigure",
+    content: "stand.webp",
+    args: [
+      { key: 'duration', value: 1000 },
+      { key: 'enter', value: 'fadeIn' },
+      { key: 'exit', value: 'fadeOut' }
+    ],
+    sentenceAssets: [{ name: "stand.webp", url: 'stand.webp', type: fileType.figure, lineNumber: 0 }],
+    subScene: []
+  });
+});
+
+test("changeBg with animation parameters", async () => {
+  const parser = new SceneParser((assetList) => {
+  }, (fileName, assetType) => {
+    return fileName;
+  }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
+
+  const result = parser.parse(`changeBg:background.jpg -duration=2000 -enter=slideIn -transform={"alpha":0.8};`, 'test', 'test');
+  expect(result.sentenceList).toContainEqual({
+    command: commandType.changeBg,
+    commandRaw: "changeBg",
+    content: "background.jpg",
+    args: [
+      { key: 'duration', value: 2000 },
+      { key: 'enter', value: 'slideIn' },
+      { key: 'transform', value: '{"alpha":0.8}' }
+    ],
+    sentenceAssets: [{ name: "background.jpg", url: 'background.jpg', type: fileType.background, lineNumber: 0 }],
     subScene: []
   });
 });
