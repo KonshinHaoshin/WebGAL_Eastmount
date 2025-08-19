@@ -92,6 +92,9 @@ export function changeFigure(sentence: ISentence): IPerform {
   const exitAnimation = getStringArgByKey(sentence, 'exit');
   let zIndex = getNumberArgByKey(sentence, 'zIndex') ?? -1;
 
+  // 视频形式立绘，允许 'true' | 'false' | 'disappear'
+  const loopArg = getStringArgByKey(sentence, 'loop') ?? 'true';
+
   const dispatch = webgalStore.dispatch;
 
   const currentFigureAssociatedAnimation = webgalStore.getState().stage.figureAssociatedAnimation;
@@ -209,6 +212,7 @@ export function changeFigure(sentence: ISentence): IPerform {
       dispatch(stageActions.setLive2dBlink({ target: key, blink }));
       dispatch(stageActions.setLive2dFocus({ target: key, focus }));
       dispatch(stageActions.setFigureMetaData([key, 'zIndex', zIndex, false]));
+      dispatch(stageActions.setFigureMetaData([key, 'loop', loopArg, false]));
     } else {
       // 当 url 没有发生变化时，即没有新立绘替换
       // 应当保留旧立绘的状态，仅在需要时更新

@@ -1,8 +1,10 @@
 changeBg:M19.png -ease=circOut;
+changeFigure:gif/output.webm -id=sakiko -right -loop=disappear;
+changeFigure:gif/output.gif -id=sakiko01 -left -loop=true;
+
 祥子:你好
 changeFigure:该溜子祥子/该溜子祥子.jsonl -id=tomori -motion=idle01 -expression=idle01 -ease=circOut;
-setTransform:{"position":{"x":500,"y":0},"rotation":0,"scale":{"x":1,"y":1},"brightness":0.9,"contrast":1.1,"saturation":0.9,"gamma":0.8,"colorRed":161,"colorGreen":213,"colorBlue":243,"bevel":15,"bevelThickness":10,"bevelRed":227,"bevelGreen":250,"bevelBlue":252} -target=tomori -duration=500 -ease=easeInOut;
-
-changeFigure:gif/output.webm -id=sakiko -right;
 setTransform:{"scale":{"x":1,"y":1},"brightness":0.9,"contrast":1.1,"saturation":0.9,"gamma":0.8,"colorRed":161,"colorGreen":213,"colorBlue":243,"bloom":0.5,"bloomBrightness":0.9,"bevel":15,"bevelThickness":10,"bevelRed":186,"bevelGreen":179,"bevelBlue":179} -target=stage-main -duration=0 -next;
 祥子:哈哈，那就厉害了
+
+changeFigure:该溜子祥子/该溜子祥子.jsonl -id=tomori -motion=thinking01 -expression=thinking01 -ease=circOut;

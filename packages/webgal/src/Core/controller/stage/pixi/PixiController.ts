@@ -627,8 +627,6 @@ export default class PixiStage {
 
   // 播放gif
   public async addGifFigure(key: string, url: string, presetPosition: 'left' | 'center' | 'right' = 'center') {
-    const ext = this.getExtName(url).toLowerCase();
-
     const thisFigureContainer = new WebGALPixiContainer();
 
     // 移除已有相同 key 的立绘
@@ -642,6 +640,9 @@ export default class PixiStage {
     if (metadata?.zIndex !== undefined) {
       thisFigureContainer.zIndex = metadata.zIndex;
     }
+
+    // 获取 loopMode（默认 true）
+    const loopMode: 'true' | 'false' | 'disappear' = metadata?.loop ?? 'true';
 
     // 添加容器到舞台
     this.figureContainer.addChild(thisFigureContainer);
@@ -658,10 +659,10 @@ export default class PixiStage {
     });
 
     try {
-      // ✅ 使用 fetch 异步加载 buffer
+      // 异步加载 buffer
       const buffer = await fetch(url).then((res) => res.arrayBuffer());
 
-      // ✅ 使用 AnimatedGIF.fromBuffer 异步解码
+      // 解码 GIF
       const gif = await AnimatedGIF.fromBuffer(buffer);
 
       const originalWidth = gif.width;
@@ -670,7 +671,7 @@ export default class PixiStage {
       const scaleY = this.stageHeight / originalHeight;
       const targetScale = Math.min(scaleX, scaleY);
 
-      // 设置缩放、锚点、初始位置
+      // 设置缩放、锚点、位置
       gif.scale.set(targetScale);
       gif.anchor.set(0.5);
       gif.position.y = this.stageHeight / 2;
@@ -678,13 +679,11 @@ export default class PixiStage {
       const targetWidth = originalWidth * targetScale;
       const targetHeight = originalHeight * targetScale;
 
-      // Y 位置微调（让立绘整体居中）
       thisFigureContainer.setBaseY(this.stageHeight / 2);
       if (targetHeight < this.stageHeight) {
         thisFigureContainer.setBaseY(this.stageHeight / 2 + (this.stageHeight - targetHeight) / 2);
       }
 
-      // 设置 X 方向位置
       if (presetPosition === 'center') {
         thisFigureContainer.setBaseX(this.stageWidth / 2);
       } else if (presetPosition === 'left') {
@@ -695,20 +694,32 @@ export default class PixiStage {
 
       thisFigureContainer.pivot.set(0, this.stageHeight / 2);
 
-      // ✅ 播放动画 + 添加到容器
+      // === 🔑 loop 控制 ===
+      if (loopMode === 'true') {
+        gif.loop = true;
+      } else {
+        gif.loop = false;
+        gif.onComplete = () => {
+          if (loopMode === 'false') {
+            // 停在最后一帧
+            gif.stop();
+          } else if (loopMode === 'disappear') {
+            // 播完消失
+            this.removeStageObjectByKey(key);
+          }
+        };
+      }
+
       gif.play();
       thisFigureContainer.addChild(gif);
     } catch (e) {
       console.error('GIF 加载失败', e);
     }
   }
+
   // 实现添加拼好模
   /* eslint-disable complexity */
-  public async addJsonlFigure(
-    key: string,
-    jsonlPath: string,
-    presetPosition: 'left' | 'center' | 'right' = 'center',
-  ) {
+  public async addJsonlFigure(key: string, jsonlPath: string, presetPosition: 'left' | 'center' | 'right' = 'center') {
     console.log('正在使用聚合模型(JSONL)');
 
     // ✅ 与 addLive2dFigure 保持一致的可用性守卫
@@ -753,7 +764,7 @@ export default class PixiStage {
     const lines = jsonlText.split('\n').filter(Boolean);
 
     // 收集每行模型配置
-    type ModelConfig = {
+    interface ModelConfig {
       path: string;
       id?: string;
       x?: number;
@@ -761,7 +772,7 @@ export default class PixiStage {
       xscale?: number;
       yscale?: number;
       bounds?: [number, number, number, number]; // 可选：覆盖 bounds
-    };
+    }
     const modelConfigs: ModelConfig[] = [];
 
     // 末行汇总 import（PARAM_IMPORT）
@@ -838,9 +849,7 @@ export default class PixiStage {
         const model = await Live2D.Live2DModel.from(modelPath, {
           autoInteract: false,
           // 如果提供了 bounds，就覆盖（与 addLive2dFigure 的用法一致）
-          overWriteBounds: bounds
-            ? { x0: bounds[0], y0: bounds[1], x1: bounds[2], y1: bounds[3] }
-            : undefined,
+          overWriteBounds: bounds ? { x0: bounds[0], y0: bounds[1], x1: bounds[2], y1: bounds[3] } : undefined,
         });
 
         if (!model) continue;
@@ -930,7 +939,7 @@ export default class PixiStage {
     if (motionToSet) this.updateL2dMotionByKey(key, motionToSet);
     if (expressionToSet) this.updateL2dExpressionByKey(key, expressionToSet);
   }
-  /* eslint-enable complexity */  /* eslint-disable complexity */
+  /* eslint-enable complexity */ /* eslint-disable complexity */
 
   /**
    * Live2d立绘，如果要使用 Live2D，取消这里的注释
@@ -1108,6 +1117,9 @@ export default class PixiStage {
       thisFigureContainer.zIndex = metadata.zIndex;
     }
 
+    // 获取 loop 模式（默认 true）
+    const loopMode: 'true' | 'false' | 'disappear' = metadata?.loop ?? 'true';
+
     // 添加容器到舞台
     this.figureContainer.addChild(thisFigureContainer);
 
@@ -1128,10 +1140,38 @@ export default class PixiStage {
       video.src = url;
       video.crossOrigin = 'anonymous';
       video.muted = true;
-      video.loop = true;
       video.autoplay = true;
       video.playsInline = true;
       video.preload = 'auto';
+
+      // 根据 loopMode 设置循环逻辑
+      if (loopMode === 'true') {
+        video.loop = true;
+      } else {
+        video.loop = false;
+        video.addEventListener('ended', () => {
+          if (loopMode === 'false') {
+            // 播完停在最后一帧
+            video.pause();
+            video.currentTime = video.duration;
+          } else if (loopMode === 'disappear') {
+            this.removeStageObjectByKey(key);
+
+            // 清 Redux
+            const dispatch = webgalStore.dispatch;
+            if (key === 'fig-center') {
+              dispatch(setStage({ key: 'figName', value: '' }));
+            } else if (key === 'fig-left') {
+              dispatch(setStage({ key: 'figNameLeft', value: '' }));
+            } else if (key === 'fig-right') {
+              dispatch(setStage({ key: 'figNameRight', value: '' }));
+            } else {
+              // 自由立绘
+              dispatch(stageActions.setFreeFigureByKey({ key, name: '', basePosition: 'center' }));
+            }
+          }
+        });
+      }
 
       // 创建 PIXI texture
       const texture = PIXI.Texture.from(video);
