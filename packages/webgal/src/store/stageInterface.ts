@@ -169,6 +169,7 @@ export interface ILive2DFocus {
 
 export interface IFigureMetadata {
   zIndex?: number;
+  loop?: 'true' | 'false' | 'disappear'; // 视频立绘播放模式
 }
 
 type figureMetaData = Record<string, IFigureMetadata>;
