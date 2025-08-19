@@ -44,12 +44,14 @@ export default function IMSSTextbox(props: ITextboxProps) {
   }, []);
   let allTextIndex = 0;
   const nameElementList = showName.map((line, index) => {
-    const textLine = line.flatMap((en, enIndex) => {
+    const textline = line.map((en, index) => {
       const e = en.reactNode;
       let style = '';
       let tips = '';
       let style_alltext = '';
+      let isEnhanced = false;
       if (en.enhancedValue) {
+        isEnhanced = true;
         const data = en.enhancedValue;
         for (const dataElem of data) {
           const { key, value } = dataElem;
@@ -66,56 +68,28 @@ export default function IMSSTextbox(props: ITextboxProps) {
           }
         }
       }
-      const styleClassName = ' ' + css(style);
-      const styleAllText = ' ' + css(style_alltext);
-
-      // 🔠 拆分字符（仅限字符串内容）
-      if (typeof e === 'string') {
-        return [...e].map((char, charIndex) => {
-          let delay = allTextIndex * textDelay;
-          let prevLength = currentConcatDialogPrev.length;
-          if (currentConcatDialogPrev !== '' && allTextIndex >= prevLength) {
-            delay = delay - prevLength * textDelay;
-          }
-          allTextIndex++;
-
-          const commonProps = {
-            id: `${delay}`,
-            key: currentDialogKey + '-' + enIndex + '-' + charIndex,
-            style: {
-              animationDelay: `${delay}ms`,
-              animationDuration: `${textDuration}ms`,
-              position: 'relative' as const,
-            },
-          };
-
-          const className =
-            allTextIndex < prevLength
-              ? applyStyle('TextBox_textElement_Settled', styles.TextBox_textElement_Settled)
-              : applyStyle('TextBox_textElement_start', styles.TextBox_textElement_start) + ' Textelement_start';
-
-          return (
-            // eslint-disable-next-line react/jsx-key
-            <span {...commonProps} className={className}>
-              <span className={styles.zhanwei + styleAllText}>
-                {char}
-                <span className={applyStyle('outer', styles.outer) + styleClassName + styleAllText}>{char}</span>
-                {isUseStroke && <span className={applyStyle('inner', styles.inner) + styleAllText}>{char}</span>}
-              </span>
-            </span>
-          );
-        });
-      } else {
-        // 如果不是字符串（比如是 emoji、React 元素），不处理拆分
+      const styleClassName = ' ' + css(style, { label: 'showname' });
+      const styleAllText = ' ' + css(style_alltext, { label: 'showname' });
+      if (isEnhanced) {
         return (
-          <span
-            key={currentDialogKey + '-' + enIndex}
-            className={applyStyle('TextBox_textElement_Settled', styles.TextBox_textElement_Settled)}
-          >
-            {e}
+          <span key={index} style={{ position: 'relative' }}>
+            <span className={styles.zhanwei + styleAllText}>
+              {e}
+              <span className={applyStyle('outerName', styles.outerName) + styleClassName + styleAllText}>{e}</span>
+              {isUseStroke && <span className={applyStyle('innerName', styles.innerName) + styleAllText}>{e}</span>}
+            </span>
           </span>
         );
       }
+      return (
+        <span key={index} style={{ position: 'relative' }}>
+          <span className={styles.zhanwei + styleAllText}>
+            {e}
+            <span className={applyStyle('outerName', styles.outerName) + styleClassName + styleAllText}>{e}</span>
+            {isUseStroke && <span className={applyStyle('innerName', styles.innerName) + styleAllText}>{e}</span>}
+          </span>
+        </span>
+      );
     });
     return (
       <div
@@ -126,7 +100,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
         }}
         key={`text-line-${index}`}
       >
-        {textLine}
+        {textline}
       </div>
     );
   });
