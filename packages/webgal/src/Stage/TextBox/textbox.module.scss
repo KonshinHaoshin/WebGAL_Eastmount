@@ -67,22 +67,13 @@ $height: 330px;
 
 
 .TextBox_textElement_start {
+  @include text_shadow_textElement;
+  position: relative;
+  animation: TextDelayShow 1000ms ease-out forwards;
   opacity: 0;
-  animation-name: typeFadeIn;
-  animation-fill-mode: forwards;
-
-  @keyframes typeFadeIn {
-    0% {
-      opacity: 0;
-      transform: translateY(0.2em);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+  display: inline-flex;
+  align-content: space-between
 }
-
 
 
 .outer {
