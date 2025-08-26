@@ -81,9 +81,24 @@ export function useSetFigure(stageState: IStageState) {
 				return;
 			}
 			try {
-				const texture = await create2DLutTextureFromCube(WebGAL.gameplay.pixiStage!.currentApp!, lut);
-				figureObject.pixiContainer.setColorMapTexture(texture);
-				figureObject.pixiContainer.colorMapIntensity = 1;
+				// 直接使用自定义 ColorMapFilter 的 loadLutFile 方法
+				const colorMapFilter = figureObject.pixiContainer.containerFilters.get('colorMap') as any;
+				if (colorMapFilter && colorMapFilter.loadLutFile) {
+					await colorMapFilter.loadLutFile(lut);
+					figureObject.pixiContainer.colorMapIntensity = 1;
+				} else {
+					// 确保滤镜存在，然后使用 loadLutFile 方法
+					const filter = figureObject.pixiContainer.ensureFilterByName('colorMap') as any;
+					if (filter.loadLutFile) {
+						await filter.loadLutFile(lut);
+						figureObject.pixiContainer.colorMapIntensity = 1;
+					} else {
+						// 降级方案：使用原有的转换方法
+						const texture = await create2DLutTextureFromCube(WebGAL.gameplay.pixiStage!.currentApp!, lut);
+						figureObject.pixiContainer.setColorMapTexture(texture);
+						figureObject.pixiContainer.colorMapIntensity = 1;
+					}
+				}
 			} catch (e) {
 				console.error('Failed to apply figure LUT', key, e);
 			}

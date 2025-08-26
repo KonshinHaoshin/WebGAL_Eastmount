@@ -9,7 +9,7 @@ import { BevelFilter } from '@/Core/controller/stage/pixi/shaders/BevelFilter';
 import * as PIXI from 'pixi.js';
 import { BlurFilter } from '@pixi/filter-blur';
 import { INIT_RAD, RadiusAlphaFilter } from '@/Core/controller/stage/pixi/shaders/RadiusAlphaFilter';
-import { ColorMapFilter } from '@pixi/filter-color-map';
+import { CustomColorMapFilter as ColorMapFilter } from '@/Core/controller/stage/pixi/shaders/CustomColorMapFilter';
 
 /**
  * Filter configuration for creation and default state detection.
@@ -168,8 +168,8 @@ const FILTER_CONFIGS: Record<string, FilterConfig> = {
 	},
 	colorMap: {
 		priority: FilterPriority.ColorMap,
-		create: () => new ColorMapFilter(undefined as any, { nearest: false }),
-		isDefault: (f) => !(f as ColorMapFilter).mapTexture,
+		create: () => new ColorMapFilter(null, false),
+		isDefault: (f) => !(f as ColorMapFilter).colorMap,
 	},
 };
 
@@ -577,7 +577,7 @@ export class WebGALPixiContainer extends PIXI.Container {
 			return;
 		}
 		const filter = this.ensureFilterByName<ColorMapFilter>('colorMap');
-		filter.mapTexture = texture;
+		filter.colorMap = texture;
 	}
 	public get colorMapIntensity(): number {
 		return this._getPropertyValue('colorMapIntensity');
@@ -674,7 +674,7 @@ export class WebGALPixiContainer extends PIXI.Container {
 		this.filterToName.set(filter, name);
 	}
 
-	private ensureFilterByName<T extends PIXI.Filter>(filterName: string): T {
+	public ensureFilterByName<T extends PIXI.Filter>(filterName: string): T {
 		let inst = this.containerFilters.get(filterName) as T | undefined;
 		if (inst) return inst;
 		const cfg = FILTER_CONFIGS[filterName];
