@@ -95,17 +95,23 @@ export function changeFigure(sentence: ISentence): IPerform {
 	// 视频形式立绘，允许 'true' | 'false' | 'disappear'
 	const loopArg = getStringArgByKey(sentence, 'loop') ?? 'true';
 
-	// LUT 参数（.cube）
-	const lutArg = getStringArgByKey(sentence, 'lut') ?? '';
-	if (lutArg) {
-		webgalStore.dispatch(stageActions.setFigureMetaData([id, 'lut', assetSetter(lutArg, fileType.lut), false]));
-	} else {
-		// 如果明确传入空字符串，移除现有 lut
-		const raw = getStringArgByKey(sentence, 'lut');
-		if (raw === '') {
-			webgalStore.dispatch(stageActions.setFigureMetaData([id, 'lut', undefined, false]));
+				// LUT 参数
+	const lutArg = getStringArgByKey(sentence, 'lut');
+	console.log('[LUT Debug] changeFigure LUT arg:', { lutArg, lutArgType: typeof lutArg, lutArgLength: lutArg?.length });
+	if (lutArg !== null) {
+		if (lutArg === '') {
+			// 明确传入空字符串，清除 LUT
+			console.log('[LUT Debug] Setting lut to empty string to clear LUT');
+			webgalStore.dispatch(stageActions.setFigureMetaData([id, 'lut', '', false]));
+		} else {
+			// 传入具体的 LUT 文件路径
+			console.log('[LUT Debug] Setting lut to file path:', lutArg);
+			webgalStore.dispatch(stageActions.setFigureMetaData([id, 'lut', assetSetter(lutArg, fileType.lut), false]));
 		}
+	} else {
+		console.log('[LUT Debug] No lut parameter, keeping existing LUT');
 	}
+	// 如果没有 -lut 参数，保持现有 LUT 不变
 
 	const dispatch = webgalStore.dispatch;
 

@@ -170,7 +170,7 @@ export interface ILive2DFocus {
 export interface IFigureMetadata {
 	zIndex?: number;
 	loop?: 'true' | 'false' | 'disappear'; // 视频立绘播放模式
-	lut?: string; // 立绘的 LUT 文件路径（.cube）
+	lut?: string; // 立绘的 LUT 文件路径
 }
 
 type figureMetaData = Record<string, IFigureMetadata>;
@@ -207,7 +207,7 @@ export interface IStageState {
 	effects: Array<IEffect>; // 应用的变换
 	bgTransform: string;
 	bgFilter: string;
-	bgLut?: string; // 背景的 LUT 文件路径（.cube）
+	bgLut?: string; // 背景的 LUT 文件路径
 	PerformList: Array<IRunPerform>; // 要启动的演出列表
 	currentDialogKey: string; // 当前对话的key
 	live2dMotion: ILive2DMotion[];
