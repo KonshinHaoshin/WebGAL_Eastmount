@@ -1,0 +1,29 @@
+; LUT功能测试场景
+; 这个场景演示了如何在changeFigure和changeBg命令中使用-lut=参数
+
+; 显示背景图片
+changeBg bg.webp -lut=LD - Cashmere 1.cube
+
+; 显示立绘，应用LUT效果
+changeFigure 1/stand.webp -lut=LD - Cashmere 2.cube
+
+; 对话
+say "测试LUT功能" "测试角色"
+
+; 切换LUT效果
+changeFigure 1/stand.webp -lut=LD - Cashmere 3.cube
+
+; 对话
+say "LUT效果已切换" "测试角色"
+
+; 移除LUT效果（通过设置空的LUT文件）
+changeFigure 1/stand.webp -lut=
+
+; 对话
+say "LUT效果已移除" "测试角色"
+
+; 背景也应用LUT效果
+changeBg bg.webp -lut=LD - Cashmere 1.cube
+
+; 结束
+end
