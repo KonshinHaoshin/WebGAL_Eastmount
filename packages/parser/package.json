@@ -8,8 +8,7 @@
     "build": "rimraf -rf ./build && rollup --config",
     "build-ci": "rollup --config",
     "debug": "tsx test/debug.ts",
-    "debug-scss-parser": "tsx test/debugCssParser.ts",
-    "debug-linebreak-parser": "tsx test/debug-linebreak.ts"
+    "debug-scss-parser": "tsx test/debugCssParser.ts"
   },
   "types": "./build/types/index.d.ts",
   "module": "./build/es/index.js",
