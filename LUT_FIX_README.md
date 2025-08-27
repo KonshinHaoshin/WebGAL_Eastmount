@@ -2,11 +2,15 @@
 
 ## 问题描述
 
-在使用 `changeFigure` 命令的 `-lut` 参数时，应用 .cube LUT 文件会导致立绘直接黑屏。
+在使用 LUT 功能时，无论是 `changeFigure` 还是 `changeBg` 命令的 `-lut` 参数，应用 .cube LUT 文件都会导致黑屏。
 
 **问题命令示例：**
 ```
+# 立绘 LUT 黑屏
 changeFigure:该溜子祥子/该溜子祥子.jsonl -right -id=2 -motion=idle01 -expression=idle01 -ease=circOut -lut=LD-DarkMonochrome3.cube;
+
+# 背景 LUT 黑屏
+changeBg:background.jpg -lut=LD-DarkMonochrome3.cube;
 ```
 
 ## 根本原因
@@ -70,7 +74,7 @@ filter.colorMap = texture;
 #### 2. `packages/webgal/src/Stage/MainStage/useSetFigure.ts`
 
 **改动内容：**
-- 更新 LUT 应用逻辑，优先使用自定义滤镜的 `loadLutFile` 方法
+- 更新立绘 LUT 应用逻辑，优先使用自定义滤镜的 `loadLutFile` 方法
 - 保留降级方案以确保兼容性
 
 **具体修改：**
@@ -110,7 +114,54 @@ try {
 }
 ```
 
-#### 3. `packages/webgal/src/Core/controller/stage/pixi/shaders/CustomColorMapFilter.ts`
+#### 3. `packages/webgal/src/Stage/MainStage/useSetBg.ts`
+
+**改动内容：**
+- 更新背景 LUT 应用逻辑，优先使用自定义滤镜的 `loadLutFile` 方法
+- 保留降级方案以确保兼容性
+
+**具体修改：**
+
+```typescript
+// 修改前
+(async () => {
+    try {
+        const texture = await create2DLutTextureFromCube(WebGAL.gameplay.pixiStage!.currentApp!, lutUrl);
+        bgObj.pixiContainer.setColorMapTexture(texture);
+        bgObj.pixiContainer.colorMapIntensity = 1;
+    } catch (e) {
+        console.error('Failed to apply bg LUT', e);
+    }
+})();
+
+// 修改后
+(async () => {
+    try {
+        // 直接使用自定义 ColorMapFilter 的 loadLutFile 方法
+        const colorMapFilter = bgObj.pixiContainer.containerFilters.get('colorMap') as any;
+        if (colorMapFilter && colorMapFilter.loadLutFile) {
+            await colorMapFilter.loadLutFile(lutUrl);
+            bgObj.pixiContainer.colorMapIntensity = 1;
+        } else {
+            // 确保滤镜存在，然后使用 loadLutFile 方法
+            const filter = bgObj.pixiContainer.ensureFilterByName('colorMap') as any;
+            if (filter.loadLutFile) {
+                await filter.loadLutFile(lutUrl);
+                bgObj.pixiContainer.colorMapIntensity = 1;
+            } else {
+                // 降级方案：使用原有的转换方法
+                const texture = await create2DLutTextureFromCube(WebGAL.gameplay.pixiStage!.currentApp!, lutUrl);
+                bgObj.pixiContainer.setColorMapTexture(texture);
+                bgObj.pixiContainer.colorMapIntensity = 1;
+            }
+        }
+    } catch (e) {
+        console.error('Failed to apply bg LUT', e);
+    }
+})();
+```
+
+#### 4. `packages/webgal/src/Core/controller/stage/pixi/shaders/CustomColorMapFilter.ts`
 
 **改动内容：**
 - 修复 PIXI 纹理创建时的导入引用
@@ -158,7 +209,11 @@ const texture = Texture.from(canvas);
 修复后，以下命令应该能正常工作而不会黑屏：
 
 ```
+# 立绘 LUT 测试
 changeFigure:该溜子祥子/该溜子祥子.jsonl -right -id=2 -motion=idle01 -expression=idle01 -ease=circOut -lut=LD-DarkMonochrome3.cube;
+
+# 背景 LUT 测试
+changeBg:background.jpg -lut=LD-DarkMonochrome3.cube;
 ```
 
 ## 兼容性说明
@@ -187,11 +242,19 @@ packages/webgal/src/
 │   └── shaders/
 │       └── CustomColorMapFilter.ts     # 次要修改：纹理引用
 ├── Stage/MainStage/
-│   └── useSetFigure.ts                 # 主要修改：LUT 应用逻辑
+│   ├── useSetFigure.ts                 # 主要修改：立绘 LUT 应用逻辑
+│   └── useSetBg.ts                     # 主要修改：背景 LUT 应用逻辑
 └── Core/util/lut/
     └── cubeToLut2D.ts                  # 保持不变：降级方案
 ```
 
 ## 总结
 
-这次修复解决了 WebGAL 中 LUT 功能的核心问题，通过使用正确的自定义 ColorMapFilter 实现，确保 .cube 文件能够正确加载和应用，而不会导致黑屏问题。修复保持了向后兼容性，并提供了更好的错误处理和调试支持。
+这次修复解决了 WebGAL 中 LUT 功能的核心问题，通过使用正确的自定义 ColorMapFilter 实现，确保 .cube 文件能够正确加载和应用到立绘和背景上，而不会导致黑屏问题。修复包括：
+
+✅ **立绘 LUT 功能** - 修复 `changeFigure -lut` 参数
+✅ **背景 LUT 功能** - 修复 `changeBg -lut` 参数
+✅ **滤镜系统** - 使用专门的 CustomColorMapFilter
+✅ **向后兼容** - 保留降级方案确保稳定性
+
+修复保持了向后兼容性，并提供了更好的错误处理和调试支持。

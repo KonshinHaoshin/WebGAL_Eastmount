@@ -1,5 +1,3 @@
-changeBg:M19.png;
+changeBg:M19.png -lut=tonalblue3.png;
 祥子:你好
-changeFigure:该溜子祥子/该溜子祥子.jsonl -id=1  -motion=idle01 -expression=idle01 -ease=circOut -left;
-changeFigure:该溜子祥子/该溜子祥子.jsonl -id=2 -transform={"position":{"x":0,"y":0},"scale":{"x":1,"y":1},"rotation":0,"brightness":0.8,"contrast":1.1,"saturation":0.9,"gamma":0.8,"colorRed":242,"colorGreen":216,"colorBlue":194,"bloom":0.5,"bloomBrightness":0.8,"bloomBlur":10,"bevel":1,"bevelThickness":15,"bevelRotation":30,"bevelRed":255,"bevelGreen":212,"bevelBlue":176} -motion=idle01 -expression=idle01 -ease=circOut -lut=LD-TonalSand1.cube-s33.png -right;
-祥子:哈哈，那就厉害了
+changeFigure:该溜子祥子/该溜子祥子.jsonl -id=2  -motion=idle01 -expression=idle01 -ease=circOut -right -lut=tonalblue3.png;

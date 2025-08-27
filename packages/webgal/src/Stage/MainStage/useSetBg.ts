@@ -6,7 +6,8 @@ import { setEbg } from '@/Core/gameScripts/changeBg/setEbg';
 
 import { getEnterExitAnimation } from '@/Core/Modules/animationFunctions';
 import { WebGAL } from '@/Core/WebGAL';
-import { create2DLutTextureFromCube } from '@/Core/util/lut/cubeToLut2D';
+import * as PIXI from 'pixi.js';
+import { loadLutTextureWithValidation } from '@/Core/util/lut/loadLutTextureWithValidation';
 
 export function useSetBg(stageState: IStageState) {
 	const bgName = stageState.bgName;
@@ -48,11 +49,12 @@ export function useSetBg(stageState: IStageState) {
 		}
 		(async () => {
 			try {
-				const texture = await create2DLutTextureFromCube(WebGAL.gameplay.pixiStage!.currentApp!, lutUrl);
+				const app = WebGAL.gameplay.pixiStage!.currentApp! as PIXI.Application;
+				const texture = await loadLutTextureWithValidation(app, lutUrl);
 				bgObj.pixiContainer.setColorMapTexture(texture);
 				bgObj.pixiContainer.colorMapIntensity = 1;
 			} catch (e) {
-				console.error('Failed to apply bg LUT', e);
+				console.error('Failed to apply bg LUT', lutUrl, e);
 			}
 		})();
 	}, [stageState.bgLut, stageState.bgName]);
