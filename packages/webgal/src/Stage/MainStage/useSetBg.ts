@@ -6,8 +6,7 @@ import { setEbg } from '@/Core/gameScripts/changeBg/setEbg';
 
 import { getEnterExitAnimation } from '@/Core/Modules/animationFunctions';
 import { WebGAL } from '@/Core/WebGAL';
-import * as PIXI from 'pixi.js';
-import { loadLutTextureWithValidation } from '@/Core/util/lut/loadLutTextureWithValidation';
+import { lutLoadManager } from '@/Core/util/lut/lutLoadManager';
 
 export function useSetBg(stageState: IStageState) {
 	const bgName = stageState.bgName;
@@ -43,21 +42,36 @@ export function useSetBg(stageState: IStageState) {
 		const lutUrl = stageState.bgLut;
 		const bgObj = WebGAL.gameplay.pixiStage?.getStageObjByKey('bg-main');
 		if (!bgObj) return;
+
 		if (!lutUrl) {
+			// 清除 LUT
+			lutLoadManager.cancelRequest('bg-main');
 			bgObj.pixiContainer.setColorMapTexture(null);
 			return;
 		}
+
+		// 使用 LUT 加载管理器，防止竞态条件
 		(async () => {
 			try {
-				const app = WebGAL.gameplay.pixiStage!.currentApp! as PIXI.Application;
-				const texture = await loadLutTextureWithValidation(app, lutUrl);
+				const app = WebGAL.gameplay.pixiStage!.currentApp!;
+				const texture = await lutLoadManager.loadLUT('bg-main', lutUrl, app);
 				bgObj.pixiContainer.setColorMapTexture(texture);
 				bgObj.pixiContainer.colorMapIntensity = 1;
-			} catch (e) {
-				console.error('Failed to apply bg LUT', lutUrl, e);
+			} catch (e: unknown) {
+				// 忽略已取消的请求错误
+				if (e instanceof Error && !e.message.includes('请求已被取消')) {
+					console.error('Failed to apply bg LUT', lutUrl, e);
+				}
 			}
 		})();
 	}, [stageState.bgLut, stageState.bgName]);
+
+	// 组件卸载时清理
+	useEffect(() => {
+		return () => {
+			lutLoadManager.cancelRequest('bg-main');
+		};
+	}, []);
 }
 
 function removeBg(bgObject: IStageObject) {

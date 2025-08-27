@@ -7,8 +7,7 @@ import { generateUniversalSoftOffAnimationObj } from '@/Core/controller/stage/pi
 
 import { getEnterExitAnimation } from '@/Core/Modules/animationFunctions';
 import { WebGAL } from '@/Core/WebGAL';
-import * as PIXI from 'pixi.js';
-import { loadLutTextureWithValidation } from '@/Core/util/lut/loadLutTextureWithValidation';
+import { lutLoadManager } from '@/Core/util/lut/lutLoadManager';
 
 export function useSetFigure(stageState: IStageState) {
 	const {
@@ -76,21 +75,45 @@ export function useSetFigure(stageState: IStageState) {
 		Object.entries(figureMetaData).forEach(async ([key, value]) => {
 			const figureObject = WebGAL.gameplay.pixiStage?.getStageObjByKey(key);
 			if (!figureObject || figureObject.isExiting) return;
+
 			const lut = value?.lut;
-			if (!lut) {
+
+			// 如果 lut 是 undefined，保持现有 LUT 不变
+			if (lut === undefined) {
+				return;
+			}
+
+			// 如果 lut 是空字符串，明确清除 LUT
+			if (lut === '') {
+				lutLoadManager.cancelRequest(key);
 				figureObject.pixiContainer.setColorMapTexture(null);
 				return;
 			}
+
+			// 使用 LUT 加载管理器，防止竞态条件
 			try {
-				const app = WebGAL.gameplay.pixiStage!.currentApp! as PIXI.Application;
-				const texture = await loadLutTextureWithValidation(app, lut);
+				const app = WebGAL.gameplay.pixiStage!.currentApp!;
+				const texture = await lutLoadManager.loadLUT(key, lut, app);
 				figureObject.pixiContainer.setColorMapTexture(texture);
 				figureObject.pixiContainer.colorMapIntensity = 1;
-			} catch (e) {
-				console.error('Failed to apply figure LUT', key, e);
+			} catch (e: unknown) {
+				// 忽略已取消的请求错误
+				if (e instanceof Error && !e.message.includes('请求已被取消')) {
+					console.error('Failed to apply figure LUT', key, e);
+				}
 			}
 		});
 	}, [figureMetaData, figName, figNameLeft, figNameRight]);
+
+	// 组件卸载时清理所有立绘的 LUT 请求
+	useEffect(() => {
+		return () => {
+			// 清理所有立绘的 LUT 请求
+			Object.keys(figureMetaData).forEach(key => {
+				lutLoadManager.cancelRequest(key);
+			});
+		};
+	}, [figureMetaData]);
 
 	/**
 	 * 设置立绘
