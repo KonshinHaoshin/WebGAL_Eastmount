@@ -1,83 +1,96 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+.Title_backup_background {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1;
+}
 
 .Title_main {
-  width: 100%;
-  height: 100%;
   position: absolute;
-  z-index: 13;
-  background-color: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(4px);
-  overflow: hidden;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
+  inset: 0;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  z-index: 2;
 }
 
-.Title_backup_background {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  z-index: 12;
-  background: linear-gradient(135deg, #0f0f1f 0%, #04070a 100%);
-  opacity: 0.9;
-}
-
+/* ✅ 底部居中容器 */
 .Title_buttonContainer {
-  width: 100%;
-  padding-bottom: 160px;
+  position: absolute;
+  left: 6vw;            /* 左边距：可按视觉微调 */
+  right: auto;          /* 取消居中 */
+  bottom: 6vh;          /* 距底部：可按视觉微调 */
   display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 15;
-}
-
-.Title_buttonList {
-  all: unset !important;
-  display: flex !important;
-  flex-direction: row !important;
-  justify-content: center !important;
-  align-items: center !important;
-  gap: 20px !important;
-  width: 100% !important;
-  position: static !important;
-}
-
-.Title_button {
-  font-weight: 600;
-  font-family: 'Orbitron', sans-serif;
-  color: #00f7ff;
-  font-size: 1.2rem;
-  letter-spacing: 0.15em;
-  text-align: center;
-  cursor: pointer;
-  padding: 1em 2.5em;
-  border-radius: 20px!important;
-  border: 1px solid rgba(0, 255, 255, 0.6);
-  background: rgba(0, 255, 255, 0.1);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 0 12px rgba(0, 255, 255, 0.4);
-  transition: all 0.3s ease;
-  transform: perspective(300px) rotateX(0deg);
-}
-
-.Title_button:hover {
-  background: rgba(0, 255, 255, 0.2);
-  box-shadow: 0 0 24px rgba(0, 255, 255, 0.8), inset 0 0 8px rgba(0, 255, 255, 0.4);
-  transform: perspective(300px) rotateX(2deg) scale(1.03);
-}
-
-.Title_button_text {
-  padding: 0;
-  font-size: 1.2rem;
-  color: #ffffff;
-  text-shadow: 0 0 10px #00f7ff;
-}
-
-.Title_button_disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
+  justify-content: flex-start; /* 从左往右排 */
+  align-items: flex-end;
   pointer-events: none;
-  filter: grayscale(80%);
 }
+
+
+/* ✅ 改成横向排列 */
+.Title_buttonList {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;         /* 底边对齐 */
+  gap: clamp(1.2rem, 2vw, 2.4rem);
+  pointer-events: auto;
+  flex-wrap: nowrap;             /* 不换行（需要换行就改 wrap） */
+}
+
+/* 图片按钮：无默认按钮样式，居中响应 */
+.Title_imgButton {
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  line-height: 0;
+  outline: none;
+
+  img {
+    display: block;
+    width: min(20vw, 260px); /* 横排时可以缩小些 */
+    height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
+    image-rendering: auto;
+    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35));
+    transition: transform 0.1s ease;
+  }
+
+  &:hover:not(:disabled) img,
+  &:focus-visible:not(:disabled) img {
+    transform: translateY(-4px) scale(1.02); /* 悬停时微微上浮 */
+  }
+
+  &:active:not(:disabled) img {
+    transform: translateY(0) scale(0.98);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    filter: grayscale(30%);
+  }
+}
+
+/* 屏幕阅读器可见、视觉上隐藏 */
+.srOnly {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 1px, 1px);
+  white-space: nowrap; border: 0;
+}
+
+
+.Title_buttonWrapper {
+  display: flex;
+  align-items: flex-end;
+}
+
+.pos1 { transform: translateY(10px) scale(1.3); }
+.pos2 { transform: translateY(-20px) scale(1.5); }
+.pos3 { transform: translateY(30px) scale(1.25); }
+.pos4 { transform: translateX(-40px) translateY(-6px)  scale(1); }
+.pos5 { transform: translateX(-110px) translateY(20px) scale(1); }

@@ -14,6 +14,8 @@ import { whenChecker } from '@/Core/controller/gamePlay/scriptExecutor';
 import useEscape from '@/hooks/useEscape';
 import useApplyStyle from '@/hooks/useApplyStyle';
 import { Provider } from 'react-redux';
+import choose01 from '@/assets/dragonspring/choose01.png';
+import choose02 from '@/assets/dragonspring/choose02.png';
 
 class ChooseOption {
   /**
@@ -85,6 +87,7 @@ function Choose(props: { chooseOptions: ChooseOption[] }) {
   const font = fontFamily === textFont.song ? '"思源宋体", serif' : '"WebgalUI", serif';
   const { playSeEnter, playSeClick } = useSEByWebgalStore();
   const applyStyle = useApplyStyle('Stage/Choose/choose.scss');
+
   // 运行时计算JSX.Element[]
   const runtimeBuildList = (chooseListFull: ChooseOption[]) => {
     return chooseListFull
@@ -105,9 +108,31 @@ function Choose(props: { chooseOptions: ChooseOption[] }) {
               WebGAL.gameplay.performController.unmountPerform('choose');
             }
           : () => {};
+
         return (
           <div className={applyStyle('Choose_item_outer', styles.Choose_item_outer)} key={e.jump + i}>
-            <div className={className} style={{ fontFamily: font }} onClick={onClick} onMouseEnter={playSeEnter}>
+            <div
+              className={className}
+              style={{
+                fontFamily: font,
+                backgroundImage: `url(${choose01})`, // 默认使用 choose01
+                color: '#8E354A',
+                margin: '6px 0',
+                padding: '100px 140px',
+              }}
+              onClick={onClick}
+              onMouseEnter={playSeEnter}
+              onMouseOver={(e) => {
+                // 鼠标悬浮时切换到 choose02 并改变文字颜色
+                e.currentTarget.style.backgroundImage = `url(${choose02})`;
+                e.currentTarget.style.color = '#FFFFFF'; // 变为白色
+              }}
+              onMouseOut={(e) => {
+                // 鼠标离开时切换回 choose01 并恢复文字颜色
+                e.currentTarget.style.backgroundImage = `url(${choose01})`;
+                e.currentTarget.style.color = '#8E354A'; // 恢复默认颜色
+              }}
+            >
               {e.text}
             </div>
           </div>

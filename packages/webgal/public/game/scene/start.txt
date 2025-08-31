@@ -1,5 +1,8 @@
-changeBg:Background_001_001.png -lut=LD-TonalSand3.png;
-changeFigure:sakiko/togawasakiko.png -right -id=sakiko;
+changeBg:Background_001_001.png;
+changeFigure:sakiko/DS_sakiko.png -right -id=sakiko;
+changeFigure:anon/DS_anon.png -left -id=anon;
 旁白:丰川祥子看着千早爱音
+丰川祥子:爱音同学，你似乎看着不太舒服的样子
 丰川祥子:千早爱音，你的眼中看见了什么？
+choose:我看见了我的大雷:选择场景文件|祥祥亲亲:选择场景文件|抱抱;
 丰川祥子:看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？

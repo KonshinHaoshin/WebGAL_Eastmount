@@ -159,6 +159,25 @@ $height: 330px;
   z-index: 3;
   border: 4px solid rgba(255, 255, 255, 0);
 }
+.TextBox_showName {
+  font-size: 85%;
+  padding: 0 2em;
+  position: absolute;
+  top: -68px;
+  left: 0;
+  transform:none;
+  height: 80px;
+  line-height: 68px;
+  z-index: 3;
+  text-align: center;
+
+  border-radius: 0px 0px 0px 0px;
+  border-bottom: 3px solid #0a3a75; /* 深蓝色下划线 */
+  background: none;
+  font-weight: bold;
+  color: white;
+  letter-spacing: 0.1em;
+}
 
 .TextBox_ShowName_Background {
   z-index: 2;
