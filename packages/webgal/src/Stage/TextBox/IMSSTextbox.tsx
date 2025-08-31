@@ -6,6 +6,7 @@ import useApplyStyle from '@/hooks/useApplyStyle';
 import { css } from '@emotion/css';
 import { textSize } from '@/store/userDataInterface';
 import textboxBg from '@/assets/dragonspring/textbox.png';
+import nameBoxBg from '@/assets/dragonspring/namebox.png';
 
 export default function IMSSTextbox(props: ITextboxProps) {
   const {
@@ -230,37 +231,37 @@ export default function IMSSTextbox(props: ITextboxProps) {
 
             {isHasName && (
               <>
-                {/* 这层仅用于“占位测量”，背景已禁用 */}
+                {/* namebox 背景图，直接铺满全屏 */}
                 <div
-                  className={
-                    applyStyle('TextBox_showName', styles.TextBox_showName) +
-                    ' ' +
-                    applyStyle('TextBox_ShowName_Background', styles.TextBox_ShowName_Background)
-                  }
+                  aria-hidden
                   style={{
-                    opacity: `${textboxOpacity / 100}`,
-                    fontSize: '200%',
-                    background: 'transparent',
-                    border: '0',
-                    boxShadow: 'none',
+                    position: 'fixed',
+                    inset: 0,
+                    zIndex: 3, // 要在 textbox 背景之上、文字之下，根据需要调
+                    pointerEvents: 'none',
+                    backgroundImage: `url(${nameBoxBg})`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                    backgroundSize: 'cover',
+                    opacity: textboxOpacity / 100,
                   }}
-                >
-                  <span style={{ opacity: 0 }}>{nameElementList}</span>
-                </div>
+                />
 
-                {/* 实际显示名字 */}
+                {/* 显示名字的文字层 */}
                 <div
                   className={applyStyle('TextBox_showName', styles.TextBox_showName)}
                   style={{
                     fontSize: '200%',
                     background: 'transparent',
                     border: 0,
+                    zIndex: 4, // 在背景图上
                   }}
                 >
                   {nameElementList}
                 </div>
               </>
             )}
+
 
             <div
               className={`${lhCss} ${applyStyle('text', styles.text)}`}

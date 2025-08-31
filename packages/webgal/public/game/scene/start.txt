@@ -1,7 +1,4 @@
-changeBg:M19.png -lut=LD-TonalSand3.png;
-祥子:你好
-changeFigure:该溜子祥子/该溜子祥子.jsonl -id=2  -motion=idle01 -expression=idle01 -ease=circOut -right -lut=LD-TonalBlue3.png;
-
-changeFigure:该溜子祥子/该溜子祥子.jsonl -id=1  -motion=idle01 -expression=idle01 -ease=circOut -lut=tonalblue3.png;
-changeFigure:该溜子祥子/该溜子祥子.jsonl -id=2  -motion=thinking01 -expression=thinking01 -ease=circOut -lut=golden.png -right ;
-爱音:我喜欢你
+changeBg:Background_001_001.png -lut=LD-TonalSand3.png;
+changeFigure:sakiko/togawasakiko.png -right -id=sakiko;
+丰川祥子:千早爱音，你的眼中看见了什么？
+丰川祥子:看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？看见了什么？

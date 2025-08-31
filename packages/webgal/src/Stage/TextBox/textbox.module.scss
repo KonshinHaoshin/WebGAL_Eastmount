@@ -233,4 +233,9 @@ $height: 330px;
 .text {
   //line-height: 2em;
   overflow: hidden;
+  position: absolute;
+  text-align: left;
+  left: 0;
+  top: 0;
+  bottom: 50px;
 }
