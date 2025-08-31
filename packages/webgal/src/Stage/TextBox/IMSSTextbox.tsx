@@ -1,5 +1,5 @@
 import styles from './textbox.module.scss';
-import { ReactNode, useEffect } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { WebGAL } from '@/Core/WebGAL';
 import { ITextboxProps } from './types';
 import useApplyStyle from '@/hooks/useApplyStyle';
@@ -43,47 +43,63 @@ export default function IMSSTextbox(props: ITextboxProps) {
     return () => {
       WebGAL.events.textSettle.off(settleText);
     };
-  }, []);
+  }, [applyStyle]);
 
   let allTextIndex = 0;
 
-  const nameElementList = showName.map((line, index) => {
-    const textline = line.map((en, idx) => {
-      const e = en.reactNode;
-      let style = '';
-      let tips = '';
-      let style_alltext = '';
-      let isEnhanced = false;
+  // 两个工具
+  function toPlainText(node: React.ReactNode): string {
+    if (typeof node === 'string') return node;
+    if (typeof node === 'number') return String(node);
+    if (Array.isArray(node)) return node.map(toPlainText).join('');
+    // eslint-disable-next-line no-eq-null,eqeqeq
+    if (node == null) return '';
+    // @ts-ignore
+    if (typeof node.props?.children !== 'undefined') {
+      // @ts-ignore
+      return toPlainText(node.props.children);
+    }
+    return String(node as any);
+  }
 
-      if (en.enhancedValue) {
-        isEnhanced = true;
-        const data = en.enhancedValue;
-        for (const dataElem of data) {
-          const { key, value } = dataElem;
-          switch (key) {
-            case 'style':
-              style = value;
-              break;
-            case 'tips':
-              tips = value;
-              break;
-            case 'style-alltext':
-              style_alltext = value;
-              break;
-          }
-        }
+  function styleForIndex(i: number): { fontSize: string; color?: string; useLayer?: boolean } {
+    if (i === 0) return { fontSize: '250%', color: '#FF1493', useLayer: false }; // 第1字：最大黑
+    if (i === 1) return { fontSize: '150%', color: '#fff', useLayer: false }; // 第2字：常规白
+    if (i === 2) return { fontSize: '220%', useLayer: true }; // 第3字：介于两者，用渐变+描边层
+    return { fontSize: '150%', color: '#fff', useLayer: false }; // 其余：常规白
+  }
+
+  // 名字逐字渲染
+  const nameElementList = showName.map((line, index) => {
+    // 合并该行的 reactNode -> 纯文本（通常名字就一个节点）
+    const text = line.map((en) => toPlainText(en.reactNode)).join('');
+    const chars = Array.from(text); // 兼容中文/emoji
+
+    const charSpans = chars.map((ch, i) => {
+      const s = styleForIndex(i);
+      const base: React.CSSProperties = {
+        position: 'relative',
+        display: 'inline-block',
+        lineHeight: 1,
+        marginRight: '0.1em',
+      };
+
+      if (s.useLayer) {
+        return (
+          <span key={`${ch}-${i}`} style={{ ...base, fontSize: s.fontSize }}>
+            <span className={styles.zhanwei}>
+              {ch}
+              <span className={applyStyle('outerName', styles.outerName)}>{ch}</span>
+              {isUseStroke && <span className={applyStyle('innerName', styles.innerName)}>{ch}</span>}
+            </span>
+          </span>
+        );
       }
 
-      const styleClassName = ' ' + css(style, { label: 'showname' });
-      const styleAllText = ' ' + css(style_alltext, { label: 'showname' });
-
+      // 其他字符：直接用颜色/大小
       return (
-        <span key={idx} style={{ position: 'relative' }}>
-          <span className={styles.zhanwei + styleAllText}>
-            {e}
-            <span className={applyStyle('outerName', styles.outerName) + styleClassName + styleAllText}>{e}</span>
-            {isUseStroke && <span className={applyStyle('innerName', styles.innerName) + styleAllText}>{e}</span>}
-          </span>
+        <span key={`${ch}-${i}`} style={{ ...base, fontSize: s.fontSize, color: s.color }}>
+          {ch}
         </span>
       );
     });
@@ -91,17 +107,19 @@ export default function IMSSTextbox(props: ITextboxProps) {
     return (
       <div
         style={{
+          display: 'flex',
+          alignItems: 'baseline',
           wordBreak: isSafari || props.isFirefox ? 'break-all' : undefined,
-          display: isSafari ? 'flex' : undefined,
           flexWrap: isSafari ? 'wrap' : undefined,
         }}
-        key={`text-line-${index}`}
+        key={`name-line-${index}`}
       >
-        {textline}
+        {charSpans}
       </div>
     );
   });
 
+  // ==== 对话正文渲染（保持你原逻辑）====
   const textElementList = textArray.map((line, index) => {
     const textLine = line.map((en, idx) => {
       const e = en.reactNode as ReactNode;
@@ -192,13 +210,13 @@ export default function IMSSTextbox(props: ITextboxProps) {
     <>
       {isText && (
         <div className={styles.TextBox_Container}>
-          {/* 全屏 PNG 背景：彻底替代旧的文本框外观 */}
+          {/* 全屏 PNG 背景 */}
           <div
             aria-hidden
             style={{
               position: 'fixed',
               inset: 0,
-              zIndex: 2, // 背景在下
+              zIndex: 2,
               pointerEvents: 'none',
               backgroundImage: `url(${textboxBg})`,
               backgroundRepeat: 'no-repeat',
@@ -237,7 +255,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
                   style={{
                     position: 'fixed',
                     inset: 0,
-                    zIndex: 3, // 要在 textbox 背景之上、文字之下，根据需要调
+                    zIndex: 3,
                     pointerEvents: 'none',
                     backgroundImage: `url(${nameBoxBg})`,
                     backgroundRepeat: 'no-repeat',
@@ -247,14 +265,17 @@ export default function IMSSTextbox(props: ITextboxProps) {
                   }}
                 />
 
-                {/* 显示名字的文字层 */}
+                {/* 名字：按屏幕坐标固定位置 */}
                 <div
                   className={applyStyle('TextBox_showName', styles.TextBox_showName)}
                   style={{
-                    fontSize: '200%',
+                    position: 'absolute',
+                    left: -150,
+                    top: -200,
+                    fontSize: '200%', // 作为整体基准，不影响逐字 fontSize 的相对大小
                     background: 'transparent',
                     border: 0,
-                    zIndex: 4, // 在背景图上
+                    zIndex: 4,
                   }}
                 >
                   {nameElementList}
@@ -262,7 +283,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
               </>
             )}
 
-
+            {/* 对话正文 */}
             <div
               className={`${lhCss} ${applyStyle('text', styles.text)}`}
               style={{

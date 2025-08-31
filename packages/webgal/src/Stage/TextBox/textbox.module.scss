@@ -142,13 +142,12 @@ $height: 330px;
 .TextBox_showName {
   @include text_shadow_textElement;
   font-size: 85%;
+  position: absolute !important;
   //border-bottom: 3px solid rgb(176, 176, 176);
   //min-width: 25%;
   padding: 0 2em 0 2em;
   //margin: 0 0 0 0;
-  position: absolute;
-  left: 150px;
-  top: -68px;
+  text-align: left;
   height: 80px;
   line-height: 68px;
   //display: flex;
