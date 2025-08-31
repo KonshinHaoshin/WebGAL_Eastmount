@@ -5,6 +5,7 @@ import { ITextboxProps } from './types';
 import useApplyStyle from '@/hooks/useApplyStyle';
 import { css } from '@emotion/css';
 import { textSize } from '@/store/userDataInterface';
+import textboxBg from '@/assets/dragonspring/textbox.png';
 
 export default function IMSSTextbox(props: ITextboxProps) {
   const {
@@ -31,7 +32,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
   useEffect(() => {
     function settleText() {
       const textElements = document.querySelectorAll('.Textelement_start');
-      const textArray = [...textElements];
+      const textArray = [...(textElements as unknown as HTMLElement[])];
       textArray.forEach((e) => {
         e.className = applyStyle('TextBox_textElement_Settled', styles.TextBox_textElement_Settled);
       });
@@ -42,14 +43,17 @@ export default function IMSSTextbox(props: ITextboxProps) {
       WebGAL.events.textSettle.off(settleText);
     };
   }, []);
+
   let allTextIndex = 0;
+
   const nameElementList = showName.map((line, index) => {
-    const textline = line.map((en, index) => {
+    const textline = line.map((en, idx) => {
       const e = en.reactNode;
       let style = '';
       let tips = '';
       let style_alltext = '';
       let isEnhanced = false;
+
       if (en.enhancedValue) {
         isEnhanced = true;
         const data = en.enhancedValue;
@@ -68,21 +72,12 @@ export default function IMSSTextbox(props: ITextboxProps) {
           }
         }
       }
+
       const styleClassName = ' ' + css(style, { label: 'showname' });
       const styleAllText = ' ' + css(style_alltext, { label: 'showname' });
-      if (isEnhanced) {
-        return (
-          <span key={index} style={{ position: 'relative' }}>
-            <span className={styles.zhanwei + styleAllText}>
-              {e}
-              <span className={applyStyle('outerName', styles.outerName) + styleClassName + styleAllText}>{e}</span>
-              {isUseStroke && <span className={applyStyle('innerName', styles.innerName) + styleAllText}>{e}</span>}
-            </span>
-          </span>
-        );
-      }
+
       return (
-        <span key={index} style={{ position: 'relative' }}>
+        <span key={idx} style={{ position: 'relative' }}>
           <span className={styles.zhanwei + styleAllText}>
             {e}
             <span className={applyStyle('outerName', styles.outerName) + styleClassName + styleAllText}>{e}</span>
@@ -91,6 +86,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
         </span>
       );
     });
+
     return (
       <div
         style={{
@@ -104,12 +100,14 @@ export default function IMSSTextbox(props: ITextboxProps) {
       </div>
     );
   });
+
   const textElementList = textArray.map((line, index) => {
-    const textLine = line.map((en, index) => {
-      const e = en.reactNode;
+    const textLine = line.map((en, idx) => {
+      const e = en.reactNode as ReactNode;
       let style = '';
       let tips = '';
       let style_alltext = '';
+
       if (en.enhancedValue) {
         const data = en.enhancedValue;
         for (const dataElem of data) {
@@ -127,24 +125,24 @@ export default function IMSSTextbox(props: ITextboxProps) {
           }
         }
       }
-      // if (e === '<br />') {
-      //   return <br key={`br${index}`} />;
-      // }
+
       let delay = allTextIndex * textDelay;
       allTextIndex++;
-      let prevLength = currentConcatDialogPrev.length;
+      const prevLength = currentConcatDialogPrev.length;
+
       if (currentConcatDialogPrev !== '' && allTextIndex >= prevLength) {
         delay = delay - prevLength * textDelay;
       }
+
       const styleClassName = ' ' + css(style);
       const styleAllText = ' ' + css(style_alltext);
+
       if (allTextIndex < prevLength) {
         return (
           <span
-            // data-text={e}
             id={`${delay}`}
             className={applyStyle('TextBox_textElement_Settled', styles.TextBox_textElement_Settled)}
-            key={currentDialogKey + index}
+            key={currentDialogKey + idx}
             style={{ animationDelay: `${delay}ms`, animationDuration: `${textDuration}ms` }}
           >
             <span className={styles.zhanwei + styleAllText}>
@@ -155,12 +153,12 @@ export default function IMSSTextbox(props: ITextboxProps) {
           </span>
         );
       }
+
       return (
         <span
-          // data-text={e}
           id={`${delay}`}
           className={`${applyStyle('TextBox_textElement_start', styles.TextBox_textElement_start)} Textelement_start`}
-          key={currentDialogKey + index}
+          key={currentDialogKey + idx}
           style={{ animationDelay: `${delay}ms`, position: 'relative' }}
         >
           <span className={styles.zhanwei + styleAllText}>
@@ -171,6 +169,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
         </span>
       );
     });
+
     return (
       <div
         style={{
@@ -192,20 +191,23 @@ export default function IMSSTextbox(props: ITextboxProps) {
     <>
       {isText && (
         <div className={styles.TextBox_Container}>
+          {/* 全屏 PNG 背景：彻底替代旧的文本框外观 */}
           <div
-            className={
-              applyStyle('TextBox_main', styles.TextBox_main) +
-              ' ' +
-              applyStyle('TextBox_Background', styles.TextBox_Background) +
-              ' ' +
-              (miniAvatar === ''
-                ? applyStyle('TextBox_main_miniavatarOff', styles.TextBox_main_miniavatarOff)
-                : undefined)
-            }
+            aria-hidden
             style={{
-              opacity: `${textboxOpacity / 100}`,
+              position: 'fixed',
+              inset: 0,
+              zIndex: 2, // 背景在下
+              pointerEvents: 'none',
+              backgroundImage: `url(${textboxBg})`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+              backgroundSize: 'cover',
+              opacity: textboxOpacity / 100,
             }}
           />
+
+          {/* 文字层：透明，仅用于定位/排版 */}
           <div
             id="textBoxMain"
             className={
@@ -217,6 +219,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
             }
             style={{
               fontFamily: font,
+              background: 'transparent',
             }}
           >
             <div id="miniAvatar" className={applyStyle('miniAvatarContainer', styles.miniAvatarContainer)}>
@@ -224,8 +227,10 @@ export default function IMSSTextbox(props: ITextboxProps) {
                 <img className={applyStyle('miniAvatarImg', styles.miniAvatarImg)} alt="miniAvatar" src={miniAvatar} />
               )}
             </div>
+
             {isHasName && (
               <>
+                {/* 这层仅用于“占位测量”，背景已禁用 */}
                 <div
                   className={
                     applyStyle('TextBox_showName', styles.TextBox_showName) +
@@ -235,20 +240,28 @@ export default function IMSSTextbox(props: ITextboxProps) {
                   style={{
                     opacity: `${textboxOpacity / 100}`,
                     fontSize: '200%',
+                    background: 'transparent',
+                    border: '0',
+                    boxShadow: 'none',
                   }}
                 >
                   <span style={{ opacity: 0 }}>{nameElementList}</span>
                 </div>
+
+                {/* 实际显示名字 */}
                 <div
                   className={applyStyle('TextBox_showName', styles.TextBox_showName)}
                   style={{
                     fontSize: '200%',
+                    background: 'transparent',
+                    border: 0,
                   }}
                 >
                   {nameElementList}
                 </div>
               </>
             )}
+
             <div
               className={`${lhCss} ${applyStyle('text', styles.text)}`}
               style={{
@@ -256,7 +269,6 @@ export default function IMSSTextbox(props: ITextboxProps) {
                 flexFlow: 'column',
                 overflow: 'hidden',
                 paddingLeft: '0.1em',
-                // lineHeight: textSizeState === textSize.medium ? '2.2em' : '2em', // 不加的话上半拼音可能会被截断，同时保持排版整齐
               }}
             >
               {textElementList}
