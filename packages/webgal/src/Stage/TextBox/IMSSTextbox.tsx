@@ -7,6 +7,7 @@ import { css } from '@emotion/css';
 import { textSize } from '@/store/userDataInterface';
 import textboxBg from '@/assets/dragonspring/textbox.png';
 import nameBoxBg from '@/assets/dragonspring/namebox.png';
+import characters from '@/assets/dragonspring/characters.json';
 
 export default function IMSSTextbox(props: ITextboxProps) {
   const {
@@ -62,21 +63,48 @@ export default function IMSSTextbox(props: ITextboxProps) {
     return String(node as any);
   }
 
-  function styleForIndex(i: number): { fontSize: string; color?: string; useLayer?: boolean } {
-    if (i === 0) return { fontSize: '250%', color: '#FF1493', useLayer: false }; // 第1字：最大黑
-    if (i === 1) return { fontSize: '150%', color: '#fff', useLayer: false }; // 第2字：常规白
-    if (i === 2) return { fontSize: '220%', useLayer: true }; // 第3字：介于两者，用渐变+描边层
-    return { fontSize: '150%', color: '#fff', useLayer: false }; // 其余：常规白
+  function getFirstCharColorByName(fullName: string): string | undefined {
+    try {
+      // characters.json 形如：{ "千早爱音":"#FF8899", ... }
+      // 完整匹配：优先用全名
+      // 需要支持“去空格/全角空白”可以在此处清洗
+      const key = fullName.trim();
+      // @ts-ignore
+      const color = (characters as Record<string, string>)[key];
+      if (color.length > 0) return color;
+    } catch {}
+    return undefined;
+  }
+
+  interface CharStyle {
+    fontSize: string;
+    color?: string;
+    useLayer?: boolean; // 使用 outerName/innerName 叠层（渐变+描边）
+    outlineOnly?: boolean; // 只描边（透明填充）
+    strokeWidthEm?: number; // 描边宽度（em）
+  }
+
+  function styleForIndex(i: number, firstCharColor?: string): CharStyle {
+    if (i === 0) {
+      // 首字母：有颜色 → 实心；无映射 → 只描边（白色）
+      if (firstCharColor) {
+        return { fontSize: '250%', color: firstCharColor, useLayer: false };
+      }
+      return { fontSize: '250%', color: '#fff', useLayer: true }; // 透明填充 + 白描边
+    }
+    if (i === 1) return { fontSize: '150%', color: '#fff', useLayer: true };
+    if (i === 2) return { fontSize: '220%', useLayer: true };
+    return { fontSize: '150%', color: '#fff', useLayer: true };
   }
 
   // 名字逐字渲染
   const nameElementList = showName.map((line, index) => {
-    // 合并该行的 reactNode -> 纯文本（通常名字就一个节点）
-    const text = line.map((en) => toPlainText(en.reactNode)).join('');
-    const chars = Array.from(text); // 兼容中文/emoji
+    const fullText = line.map((en) => toPlainText(en.reactNode)).join('');
+    const chars = Array.from(fullText);
+    const firstColor = getFirstCharColorByName(fullText); // ★ 从映射里取首字母主题色
 
     const charSpans = chars.map((ch, i) => {
-      const s = styleForIndex(i);
+      const s = styleForIndex(i, firstColor);
       const base: React.CSSProperties = {
         position: 'relative',
         display: 'inline-block',
@@ -84,6 +112,22 @@ export default function IMSSTextbox(props: ITextboxProps) {
         marginRight: '0.1em',
       };
 
+      if (s.outlineOnly) {
+        return (
+          <span
+            key={`${ch}-${i}`}
+            style={{
+              ...base,
+              fontSize: s.fontSize,
+              color: 'transparent',
+            }}
+          >
+            {ch}
+          </span>
+        );
+      }
+
+      // 叠层：outerName/innerName（渐变 + 可选描边）
       if (s.useLayer) {
         return (
           <span key={`${ch}-${i}`} style={{ ...base, fontSize: s.fontSize }}>
@@ -96,7 +140,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
         );
       }
 
-      // 其他字符：直接用颜色/大小
+      // 普通实心（用于有颜色的首字母）
       return (
         <span key={`${ch}-${i}`} style={{ ...base, fontSize: s.fontSize, color: s.color }}>
           {ch}
@@ -270,8 +314,8 @@ export default function IMSSTextbox(props: ITextboxProps) {
                   className={applyStyle('TextBox_showName', styles.TextBox_showName)}
                   style={{
                     position: 'absolute',
-                    left: -150,
-                    top: -200,
+                    left: -165,
+                    top: -190,
                     fontSize: '200%', // 作为整体基准，不影响逐字 fontSize 的相对大小
                     background: 'transparent',
                     border: 0,
