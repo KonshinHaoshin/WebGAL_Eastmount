@@ -1,3 +1,4 @@
+/* === Backlog 容器 === */
 .Backlog_main {
   font-family: "思源宋体", serif;
   position: absolute;
@@ -5,8 +6,9 @@
   width: 100%;
   height: 100%;
   z-index: 10;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(6px) brightness(0.8) saturate(1.2);
+
+  background: var(--backlog-bg) center center / cover no-repeat;
+
   padding: 2em 4em;
   box-sizing: border-box;
   animation: backlog_soft_in 0.7s ease-out forwards;
@@ -15,7 +17,6 @@
   box-shadow: 0 0 20px rgba(0, 255, 255, 0.1) inset;
 }
 
-
 .Backlog_main_out {
   font-family: "思源宋体", serif;
   position: absolute;
@@ -23,31 +24,35 @@
   width: 100%;
   height: 100%;
   z-index: 10;
-  background: rgba(0, 0, 0, 0.7);
+
+  background: var(--backlog-bg) center center / cover no-repeat;
+
   padding: 2em 0 2em 0;
   animation: backlog_soft_out 0.7s ease-out forwards;
   box-sizing: border-box;
 }
 
-// 把z-index置为负数 不然会挡住点击层
+/* 把 z-index 置为负数，不然会挡住点击层 */
 .Backlog_main_out_IndexHide {
   z-index: -10;
 }
 
-// 暂时禁用滚动
+/* 暂时禁用滚动 */
 .Backlog_main_DisableScroll {
   overflow: hidden !important;
 }
 
-
+/* 顶部条 */
 .backlog_top {
   padding: 0 0 0 1em;
   display: flex;
+  align-items: center;
   height: 10%;
+  gap: 12px;
 }
 
 .backlog_top_icon {
-  padding: 0.6em 0.6em 0 0.6em;
+  padding: 0.6em;
   border-radius: 1000px;
   transform: translate(0, -13px);
   cursor: pointer;
@@ -67,7 +72,6 @@
   }
 }
 
-
 .backlog_title {
   height: 100%;
   line-height: 100%;
@@ -78,10 +82,11 @@
   -webkit-background-clip: text;
 }
 
+/* 内容滚动区 */
 .backlog_content {
   position: absolute;
   height: 80%;
-  padding: 1em 10em 1em 10em;
+  padding: 1em 10em;
   overflow: auto;
   display: flex;
   flex-flow: column-reverse;
@@ -90,21 +95,21 @@
   box-sizing: border-box;
 }
 
-
+/* 单条记录 */
 .backlog_item {
   display: flex;
+  align-items: flex-start; /* 让左栏与正文自然对齐 */
   color: white;
   font-size: 165%;
   opacity: 0;
   animation: backlog_item_in 0.5s ease-out forwards;
-  margin: 1.25em 0 0 0;
+  margin: 2.5em 0 0 0;
   width: 100%;
-  background: rgba(0, 92, 175, 0.05);
-  border-left: 3px solid #00ffff;
-  box-shadow: 0 0 8px rgba(0, 255, 255, 0.15);
   border-radius: 6px;
   padding: 1em;
   transition: all 0.3s ease;
+  gap: 16px;
+  height: auto;
 }
 
 .backlog_item_out {
@@ -117,114 +122,117 @@
   width: 100%;
 }
 
+/* 左侧功能区：按钮 | 名字 两列栅格 */
 .backlog_func_area {
-  display: flex;
-  flex-flow: row;
-  align-items: flex-start;
-  width: 30%;
-  max-width: 30%;
-  min-width: 30%;
+  display: grid;
+  grid-template-columns: auto 1fr; /* 左：按钮，右：名字 */
+  align-items: center;
+  gap: 12px;
+  width: auto;
+  min-width: 0;
+  max-width: none;
 }
 
-.backlog_item_content_name {
-  font-weight: bold;
-  background: linear-gradient(150deg, #ffffff 0%, #00ffff 35%, #51A8DD 100%);
-  -webkit-background-clip: text;
-  color: transparent;
-  text-shadow: 0 0 5px rgba(0, 255, 255, 0.4);
-  padding: 0.3em 0.7em;
-  border: 1px solid rgba(0, 255, 255, 0.2);
-  border-radius: 6px;
-  width: fit-content;
-  font-size: 115%;
-  box-shadow: 0 0 6px rgba(0, 255, 255, 0.2);
-}
-
-.backlog_item_content {
-  //display: flex;
-  font-size: 115%;
-  width: 82.5%;
-  box-sizing: border-box;
-  padding: 0.2em 0 0 1em;
-  //font-family: WebgalUI, serif;
-  letter-spacing: 0.05em;
-}
-
+/* 按钮组 */
 .backlog_item_button_list {
   display: flex;
-  //padding: 0 2em 0 0.3em;
-  flex-flow: row;
-  align-items: flex-start;
-  margin: 0.35em 0 0 0;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
 }
 
 .backlog_item_button_element {
+  position: relative;
   cursor: pointer;
-  padding: 0.2em 1em;
-  margin: 0 0 0 0.5em;
-  background: rgba(0, 255, 255, 0.05);
-  border: 1px solid rgba(0, 255, 255, 0.15);
-  border-radius: 6px;
-  color: #00ffff;
-  font-size: 90%;
-  box-shadow: 0 0 8px rgba(0, 255, 255, 0.1);
-  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
 }
 
-.backlog_item_button_element:hover {
-  background: rgba(0, 255, 255, 0.1);
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-  transform: scale(1.05);
+.backlog_item_button_img {
+  position: absolute;
+  left: 250px;
+  top: -300px;
+  width: 480px;
+  height: 480px;
+  object-fit: contain;
+  scale: 10;
+}
+
+/* 名字容器（右列）：相对定位，底图绝对铺满，文字在上 */
+.backlog_item_content_name {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 48px;        /* 可按美术需求调整 */
+  padding: 0 20px;     /* 左右留白（底板会铺满容器） */
+  line-height: 1;
+  max-width: 420px;    /* 防止超长名字把布局挤坏 */
+  min-width: 120px;
+}
+
+/* 名字底板：铺满容器、在下层、不吃事件 */
+.name_container_bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: none;
+
+  left: 550px;
+  top: -200px;
+  scale: 15;
+}
+
+/* 名字文本：在上层 */
+.name_container_text {
+  position: absolute;   /* ✔ 从 fixed 改为 absolute */
+  left: 150px;           /* 具体数值按你的底板视觉微调 */
+  top: -215%;
+  z-index: 1;
+  font-weight: bold;
+  font-size: 70%;
+  text-align: left;
+  color: #fff;
+  white-space: nowrap;
+  pointer-events: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* 去掉会改起点的缩放 */
+  scale: 1;             /* ✔ */
+}
+
+/* 正文区（右侧大块） */
+.backlog_item_content {
+  position: static;
+  top:60%;
+  left: 20%;
+  font-size: 115%;
+  flex: 1 1 auto;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0.2em 0 0 1em;
+  letter-spacing: 0.05em;
 }
 
 .backlog_item_content_text {
-  //width: 80%;
   box-sizing: border-box;
+  word-break: break-word;
 }
 
-
+/* 动画们 */
 @keyframes backlog_soft_in {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 @keyframes backlog_soft_out {
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
+  0% { opacity: 1; }
+  100% { opacity: 0; }
 }
-
-@keyframes backlog_item_in {
-  0% {
-    opacity: 0;
-    transform: scale(1.05, 1.05) translate(-15px, 10px) rotateX(-5deg) rotateY(-5deg);
-    //background-color: rgba(255, 255, 255, 0.2);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1, 1) translate(0, 0);
-  }
-}
-
-@keyframes backlog_item_out {
-  0% {
-    opacity: 1;
-    transform: scale(1, 1) translate(0, 0);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.05, 1.05) translate(-15px, 10px) rotateX(-5deg) rotateY(-5deg);
-    background-color: rgba(255, 255, 255, 0.2);
-  }
-}
-
 
 @keyframes backlog_item_in {
   0% {
@@ -248,3 +256,44 @@
   }
 }
 
+.name_zhanwei {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+}
+.name_outer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: normal;
+  /* 文字发光/外描边感（可按需微调）*/
+  filter: drop-shadow(0 0 2px rgba(255,255,255,0.6)) drop-shadow(0 0 6px rgba(150,200,255,0.35));
+}
+.name_inner {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: transparent;
+  -webkit-text-stroke: 1.5px #fff; /* Safari/Chromium */
+  text-stroke: 1.5px #fff;         /* 部分浏览器不支持，兜底不报错 */
+}
+
+/* 单个字符容器，允许不同 font-size */
+.name_char {
+  position: relative;
+  display: inline-block;
+  width: 1em;           /* 占位宽度固定为 1 个字宽 */
+  height: 1em;          /* 占位高度固定为 1em（按基准字号） */
+  line-height: 1;
+  margin-right: 0.05em; /* 字间距可微调 */
+  vertical-align: bottom;
+  font-kerning: none;   /* 减少字体自动字距带来的波动 */
+}
+
+/* 名字整体容器（可控制对齐） */
+.name_line {
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  white-space: nowrap;
+}
