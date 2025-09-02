@@ -142,23 +142,21 @@
 }
 
 .backlog_item_button_element {
-  position: relative;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  overflow: hidden;
 }
 
 .backlog_item_button_img {
   position: absolute;
-  left: 250px;
-  top: -300px;
-  width: 480px;
-  height: 480px;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  scale: 10;
+  transform: none;
+  left: 50px;
+  top: -90px;
 }
 
 /* 名字容器（右列）：相对定位，底图绝对铺满，文字在上 */
@@ -185,6 +183,8 @@
   left: 550px;
   top: -200px;
   scale: 15;
+
+  pointer-events: none;
 }
 
 /* 名字文本：在上层 */

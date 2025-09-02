@@ -10,18 +10,18 @@
   inset: 0;
   background-position: center center;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: auto;
   z-index: 2;
 }
 
-/* ✅ 底部居中容器 */
+
 .Title_buttonContainer {
   position: absolute;
-  left: 6vw;            /* 左边距：可按视觉微调 */
-  right: auto;          /* 取消居中 */
-  bottom: 6vh;          /* 距底部：可按视觉微调 */
+  left: 6%;
+  right: auto;
+  bottom: 6%;
   display: flex;
-  justify-content: flex-start; /* 从左往右排 */
+  justify-content: flex-start;
   align-items: flex-end;
   pointer-events: none;
 }
@@ -32,7 +32,7 @@
   display: flex;
   flex-direction: row;
   align-items: flex-end;         /* 底边对齐 */
-  gap: clamp(1.2rem, 2vw, 2.4rem);
+  gap: 2.5%;
   pointer-events: auto;
   flex-wrap: nowrap;             /* 不换行（需要换行就改 wrap） */
 }

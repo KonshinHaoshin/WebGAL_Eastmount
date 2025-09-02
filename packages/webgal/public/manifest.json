@@ -1,6 +1,6 @@
 {
-  "name": "EASTMOUNT Engine",
-  "short_name": "EastMount",
+  "name": "DragonSpring Engine",
+  "short_name": "DS EastMount",
   "start_url": ".",
   "display": "fullscreen",
   "description": "基于webGal开发的社区引擎",
