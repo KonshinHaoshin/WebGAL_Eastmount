@@ -63,17 +63,52 @@ export default function IMSSTextbox(props: ITextboxProps) {
     return String(node as any);
   }
 
-  function getFirstCharColorByName(fullName: string): string | undefined {
-    try {
-      // characters.json 形如：{ "千早爱音":"#FF8899", ... }
-      // 完整匹配：优先用全名
-      // 需要支持“去空格/全角空白”可以在此处清洗
-      const key = fullName.trim();
-      // @ts-ignore
-      const color = (characters as Record<string, string>)[key];
-      if (color.length > 0) return color;
-    } catch {}
-    return undefined;
+  function upperFirstLatin(ch: string) {
+    // 仅对英文字母有效；汉字等不改变
+    if (/^[a-z]/.test(ch)) return ch.toUpperCase();
+    return ch;
+  }
+
+  function normalizeSpaces(s: string) {
+    // 统一空白：去首尾、将全角空格转半角、压缩中间多空格为一个
+    return s
+      .replace(/\u3000/g, ' ')
+      .trim()
+      .replace(/\s+/g, ' ');
+  }
+  function compact(s: string) {
+    // 去除所有空白，用于“千早爱音” ≈ “千早 爱音”的匹配
+    return normalizeSpaces(s).replace(/\s+/g, '');
+  }
+
+  /** 返回：{ canonicalKey, color }
+   * canonicalKey 是在 characters.json 中存在的“规范键”（含空格，如“千早 爱音”）
+   * 若找不到，canonicalKey 为 normalize 后的原文，color 为 undefined
+   */
+  function resolveCanonicalNameAndColor(inputName: string): { canonicalKey: string; color?: string } {
+    const raw = normalizeSpaces(inputName);
+    const compactInput = compact(raw);
+
+    // 1) 先尝试字典“紧凑匹配”：去空格后相等则认为是该键
+    const dict = characters as Record<string, string>;
+    for (const k of Object.keys(dict)) {
+      if (compact(k) === compactInput) {
+        const color = dict[k];
+        if (color && color.length > 0) {
+          return { canonicalKey: normalizeSpaces(k), color };
+        }
+        return { canonicalKey: normalizeSpaces(k) };
+      }
+    }
+
+    // 2) 再尝试直接键匹配（用户本就输入了空格）
+    const directKey = normalizeSpaces(raw);
+    if (dict[directKey]) {
+      return { canonicalKey: directKey, color: dict[directKey] };
+    }
+
+    // 3) 找不到就返回 normalize 后文本，颜色为空
+    return { canonicalKey: directKey };
   }
 
   interface CharStyle {
@@ -84,50 +119,100 @@ export default function IMSSTextbox(props: ITextboxProps) {
     strokeWidthEm?: number; // 描边宽度（em）
   }
 
-  function styleForIndex(i: number, firstCharColor?: string): CharStyle {
-    if (i === 0) {
-      // 首字母：有颜色 → 实心；无映射 → 只描边（白色）
-      if (firstCharColor) {
-        return { fontSize: '250%', color: firstCharColor, useLayer: false };
-      }
-      return { fontSize: '250%', color: '#fff', useLayer: true }; // 透明填充 + 白描边
+  interface StyleOpts {
+    isSurnameFirst: boolean; // 姓氏首字
+    isGivenFirst: boolean; // 名字首字
+    hasSurname: boolean; // 是否有“姓 名”结构
+    surnameColor?: string; // 姓首字颜色
+  }
+
+  function styleForIndex(i: number, opt: StyleOpts): CharStyle {
+    const { isSurnameFirst, isGivenFirst, hasSurname, surnameColor } = opt;
+
+    // ✅ 统一规则：
+    // - 姓首字：250%
+    // - 名首字：200%（表现“首字大写”的强调）
+    // - 其他：  150%（全部相同）
+    const size = isSurnameFirst ? '250%' : isGivenFirst ? '200%' : '150%';
+
+    // 1) 姓首字：有颜色→纯色实心；无颜色→叠层白描边
+    if (isSurnameFirst) {
+      if (surnameColor) return { fontSize: size, color: surnameColor, useLayer: false };
+      return { fontSize: size, color: '#fff', useLayer: true };
     }
-    if (i === 1) return { fontSize: '150%', color: '#fff', useLayer: true };
-    if (i === 2) return { fontSize: '220%', useLayer: true };
-    return { fontSize: '150%', color: '#fff', useLayer: true };
+
+    // 2) 名首字：仅强调（加大字号），颜色不变，走叠层
+    if (isGivenFirst) {
+      return { fontSize: size, color: '#fff', useLayer: true };
+    }
+
+    // 3) 无姓氏之分：唯一首字也要强调（200%），其余 150%
+    if (!hasSurname && i === 0) {
+      return { fontSize: '200%', color: '#fff', useLayer: true };
+    }
+
+    // 4) 普通字：统一 150%，叠层
+    return { fontSize: size, color: '#fff', useLayer: true };
   }
 
   // 名字逐字渲染
+  // 名字逐字渲染（带“姓/名”逻辑 + 自动匹配字典键）
   const nameElementList = showName.map((line, index) => {
     const fullText = line.map((en) => toPlainText(en.reactNode)).join('');
-    const chars = Array.from(fullText);
-    const firstColor = getFirstCharColorByName(fullText); // ★ 从映射里取首字母主题色
 
-    const charSpans = chars.map((ch, i) => {
-      const s = styleForIndex(i, firstColor);
+    // 拿到规范键（含空格）与颜色
+    const { canonicalKey, color: surnameColor } = resolveCanonicalNameAndColor(fullText);
+
+    // 拆分姓/名（若没有空格，则认为无姓氏之分）
+    const tokens = canonicalKey.split(' ');
+    const hasSurnameGiven = tokens.length >= 2;
+    const surname = hasSurnameGiven ? tokens[0] : '';
+    const given = hasSurnameGiven ? tokens.slice(1).join('') : '';
+
+    // 组合成最终要显示的字符数组
+    const display = hasSurnameGiven ? surname + given : canonicalKey;
+    const chars = Array.from(display);
+
+    // 计算“名”的起始下标（仅在有姓氏时有效）
+    const givenStartIndex = hasSurnameGiven ? surname.length : -1;
+
+    // 渲染函数：保持你原有的大小/描边叠层策略，但根据首字位置调整颜色/大写
+    const charSpans = chars.map((origCh, i) => {
+      // 按规则处理大写：姓首字 & 名首字（仅 ASCII 有效）
+      const isSurnameFirst = i === 0 && hasSurnameGiven;
+      const isGivenFirst = i === givenStartIndex && hasSurnameGiven;
+      const isOnlyFirst = !hasSurnameGiven && i === 0;
+
+      const ch = isSurnameFirst || isGivenFirst || isOnlyFirst ? upperFirstLatin(origCh) : origCh;
+
+      // 复用你原有的风格分配（会给不同序号不同 fontSize/叠层）
+      const s = styleForIndex(i, {
+        isSurnameFirst,
+        isGivenFirst,
+        hasSurname: hasSurnameGiven,
+        surnameColor, // string | undefined 没问题，因为 StyleOpts 里是可选
+      });
+
       const base: React.CSSProperties = {
         position: 'relative',
         display: 'inline-block',
         lineHeight: 1,
-        marginRight: '0.1em',
+        marginRight: 0,
       };
 
-      if (s.outlineOnly) {
+      // 规则补充：
+      // 1) 姓首字：若有颜色映射 → 纯色实心（不走叠层）+ 大写
+      if (isSurnameFirst && surnameColor) {
         return (
-          <span
-            key={`${ch}-${i}`}
-            style={{
-              ...base,
-              fontSize: s.fontSize,
-              color: 'transparent',
-            }}
-          >
+          <span key={`${ch}-${i}`} style={{ ...base, fontSize: s.fontSize, color: surnameColor }}>
             {ch}
           </span>
         );
       }
 
-      // 叠层：outerName/innerName（渐变 + 可选描边）
+      // 2) 名首字：仅大写，不改颜色；走原有叠层（白 + 描边）
+      // 3) 无姓氏之分时：仅首字大写，不改颜色；走原有叠层
+      //    => 这两种都沿用“useLayer”的路径
       if (s.useLayer) {
         return (
           <span key={`${ch}-${i}`} style={{ ...base, fontSize: s.fontSize }}>
@@ -140,9 +225,16 @@ export default function IMSSTextbox(props: ITextboxProps) {
         );
       }
 
-      // 普通实心（用于有颜色的首字母）
+      // 其它情况（很少触发）：按你原逻辑
+      if (s.outlineOnly) {
+        return (
+          <span key={`${ch}-${i}`} style={{ ...base, fontSize: s.fontSize, color: 'transparent' }}>
+            {ch}
+          </span>
+        );
+      }
       return (
-        <span key={`${ch}-${i}`} style={{ ...base, fontSize: s.fontSize, color: s.color }}>
+        <span key={`${ch}-${i}`} style={{ ...base, fontSize: s.fontSize, color: s.color ?? '#fff' }}>
           {ch}
         </span>
       );

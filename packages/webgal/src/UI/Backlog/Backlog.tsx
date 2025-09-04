@@ -30,15 +30,45 @@ function toPlainText(node: React.ReactNode): string {
   return String(node as any);
 }
 
-/* ====== 根据全名取首字颜色（来自 characters.json）====== */
-function getFirstCharColorByName(fullName: string): string | undefined {
-  try {
-    const key = fullName.trim();
-    // @ts-ignore
-    const color = (characters as Record<string, string>)[key];
-    if (color && color.length > 0) return color;
-  } catch {}
-  return undefined;
+/** 仅英文字母首字母大写（中文不变） */
+function upperFirstLatin(ch: string) {
+  return /^[a-z]/.test(ch) ? ch.toUpperCase() : ch;
+}
+
+/** 强化空白归一 */
+function normalizeSpaces(s: string) {
+  return s
+    .replace(/[\u00A0\u1680\u180E\u2000-\u200B\u202F\u205F\u2060\u3000\uFEFF]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+function compact(s: string) {
+  return normalizeSpaces(s).replace(/\s+/g, '');
+}
+
+/** 把输入名映射到 characters.json 的规范键（含空格），并返回颜色 */
+function resolveCanonicalNameAndColor(inputName: string): { canonicalKey: string; color?: string } {
+  const dict = characters as Record<string, string>;
+
+  const rawNorm = normalizeSpaces(inputName);
+  const rawComp = compact(inputName);
+
+  // a) 紧凑匹配（“千早爱音”≈“千早 爱音”）
+  for (const k of Object.keys(dict)) {
+    if (compact(k) === rawComp) {
+      const ck = normalizeSpaces(k);
+      const color = dict[k];
+      return color ? { canonicalKey: ck, color } : { canonicalKey: ck };
+    }
+  }
+
+  // b) 直接匹配（用户本就输入了空格）
+  if (dict[rawNorm]) {
+    return { canonicalKey: rawNorm, color: dict[rawNorm] };
+  }
+
+  // c) 兜底：返回规范化文本
+  return { canonicalKey: rawNorm };
 }
 
 /* ====== 不同下标的字符使用不同尺寸/样式 ====== */
@@ -49,15 +79,30 @@ interface CharStyle {
   outlineOnly?: boolean;
 }
 
-function styleForIndex(i: number, firstCharColor?: string): CharStyle {
-  // 和 IMSSTextbox 的思路一致：0号字放大且上色；其余字带描边/渐变层
-  if (i === 0) {
-    if (firstCharColor) return { fontSize: '250%', color: firstCharColor, useLayer: false };
-    return { fontSize: '250%', color: '#fff', useLayer: true }; // 没映射就白色并用描边层
+interface StyleOpts {
+  isSurnameFirst: boolean; // 姓首字
+  isGivenFirst: boolean; // 名首字
+  hasSurname: boolean; // 是否有“姓 名”结构
+  surnameColor?: string; // 姓首字颜色
+}
+
+function styleForIndex(i: number, opt: StyleOpts): CharStyle {
+  const { isSurnameFirst, isGivenFirst, hasSurname, surnameColor } = opt;
+
+  // 姓首字 250%，名首字 200%，其余 150%（统一）
+  const size = isSurnameFirst ? '250%' : isGivenFirst ? '200%' : '150%';
+
+  if (isSurnameFirst) {
+    if (surnameColor) return { fontSize: size, color: surnameColor, useLayer: false };
+    return { fontSize: size, color: '#fff', useLayer: true };
   }
-  if (i === 1) return { fontSize: '150%', color: '#fff', useLayer: true };
-  if (i === 2) return { fontSize: '220%', color: '#fff', useLayer: true };
-  return { fontSize: '150%', color: '#fff', useLayer: true };
+  if (isGivenFirst) {
+    return { fontSize: size, color: '#fff', useLayer: true };
+  }
+  if (!hasSurname && i === 0) {
+    return { fontSize: '200%', color: '#fff', useLayer: true };
+  }
+  return { fontSize: size, color: '#fff', useLayer: true };
 }
 
 export const Backlog = () => {
@@ -109,20 +154,55 @@ export const Backlog = () => {
         <div key={`backlog-line-${idx}`}>{line.map((e, i2) => (e === '<br />' ? <br key={`br${i2}`} /> : e))}</div>
       ));
 
-      // ===== 名字（逐字渲染 + 首字上色 + 尺寸变化）=====
-      // 之前逻辑：compileSentence -> nameElementList；这里改为转纯文本再拆字
+      /// ===== 名字（与 IMSSTextbox 同步）=====
       const nameRaw = compileSentence(backlogItem.currentStageState.showName, 3, true);
-      const fullName = nameRaw.map((line) => line.map((c) => toPlainText(c.reactNode)).join('')).join('\n');
-      const firstColor = getFirstCharColorByName(fullName);
+      const fullNameInput = nameRaw.map((line) => line.map((c) => toPlainText(c.reactNode)).join('')).join('\n');
 
-      const nameChars = Array.from(fullName); // 逐字
-      const nameCharSpans = nameChars.map((ch, idx) => {
-        const s = styleForIndex(idx, firstColor);
+      const { canonicalKey, color: surnameColor } = resolveCanonicalNameAndColor(fullNameInput);
+
+      // 拆分“姓 名”
+      const tokens = canonicalKey.split(' ');
+      const hasSurnameGiven = tokens.length >= 2;
+      const surname = hasSurnameGiven ? tokens[0] : '';
+      const given = hasSurnameGiven ? tokens.slice(1).join('') : '';
+
+      // 显示文本（去空格并拼回）
+      const display = hasSurnameGiven ? surname + given : canonicalKey;
+      const chars = Array.from(display);
+      const givenStartIndex = hasSurnameGiven ? surname.length : -1;
+
+      const nameCharSpans = chars.map((origCh, idx) => {
+        const isSurnameFirst = idx === 0 && hasSurnameGiven;
+        const isGivenFirst = idx === givenStartIndex && hasSurnameGiven;
+        const isOnlyFirst = !hasSurnameGiven && idx === 0;
+
+        const ch = isSurnameFirst || isGivenFirst || isOnlyFirst ? upperFirstLatin(origCh) : origCh;
+
+        const s = styleForIndex(idx, {
+          isSurnameFirst,
+          isGivenFirst,
+          hasSurname: hasSurnameGiven,
+          surnameColor,
+        });
+
         const baseStyle: React.CSSProperties = {
           fontSize: s.fontSize,
           color: s.color ?? '#fff',
+          lineHeight: 1,
+          // 让每个字不额外拉开
+          marginRight: 0,
         };
 
+        // 姓首字有颜色：纯色实心
+        if (isSurnameFirst && surnameColor) {
+          return (
+            <span key={`${ch}-${idx}`} className={styles.name_char} style={baseStyle}>
+              {ch}
+            </span>
+          );
+        }
+
+        // 其它：叠层（与 IMSSTextbox outerName/innerName 等价）
         if (s.useLayer) {
           return (
             <span key={`${ch}-${idx}`} className={styles.name_char} style={baseStyle}>
@@ -135,7 +215,7 @@ export const Backlog = () => {
           );
         }
 
-        // 普通实心（首字有颜色时用）
+        // 兜底（基本不会到）
         return (
           <span key={`${ch}-${idx}`} className={styles.name_char} style={baseStyle}>
             {ch}

@@ -49,12 +49,12 @@
 
   img {
     display: block;
-    width: min(20vw, 260px); /* 横排时可以缩小些 */
+    width: 260px; /* 横排时可以缩小些 */
     height: auto;
     user-select: none;
     -webkit-user-drag: none;
     image-rendering: auto;
-    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35));
+    filter: drop-shadow(0 0.42vh 0.63vw rgba(0,0,0,0.35));
     transition: transform 0.1s ease;
   }
 

@@ -132,9 +132,9 @@ test("config", async () => {
   }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
 
   const configFesult = parser.parseConfig(`
-Game_name:欢迎使用WebGAL！;
+Game_name:欢迎使用仿魔法少女的魔女审判引擎DRAGONSPRING！;
 Game_key:0f86dstRf;
-Title_img:WebGAL_New_Enter_Image.webp;
+Title_img:Dragonspring.png;
 Title_bgm:s_Title.mp3;
 Title_logos: 1.png | 2.png | Image Logo.png| -show -active=false -add=op! -count=3;This is a fake config, do not reference anything.
   `);
@@ -157,9 +157,9 @@ test("config-stringify", async () => {
   }, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
 
   const configFesult = parser.parseConfig(`
-Game_name:欢迎使用WebGAL！;
+Game_name:欢迎使用仿魔法少女的魔女审判引擎DRAGONSPRING！;
 Game_key:0f86dstRf;
-Title_img:WebGAL_New_Enter_Image.webp;
+Title_img:Dragonspring.png;
 Title_bgm:s_Title.mp3;
 Title_logos: 1.png | 2.png | Image Logo.png| -show -active=false -add=op! -count=3;This is a fake config, do not reference anything.
   `);
