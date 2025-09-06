@@ -77,6 +77,7 @@ export async function addSpineFigureImpl(
       thisFigureContainer.zIndex = metadata.zIndex;
     }
   }
+  const loopMode: 'true' | 'false' | 'disappear' = (metadata as any)?.loop ?? 'true';
   // 挂载
   this.figureContainer.addChild(thisFigureContainer);
   const figureUuid = uuid();
@@ -125,16 +126,26 @@ export async function addSpineFigureImpl(
           // 播放默认动画（第一个动画）
           animationToPlay = figureSpine.spineData.animations[0].name;
         }
-
+        const shouldLoop = loopMode === 'true';
         if (animationToPlay) {
-          figureSpine.state.setAnimation(0, animationToPlay, false);
+          // 播放
+          const entry = figureSpine.state.setAnimation(0, animationToPlay, shouldLoop);
           figureSpine.autoUpdate = true;
+
           const stageObj = this.getStageObjByUuid(figureUuid);
-          if (stageObj) {
-            if (stageObj.spineAnimation) {
-              stageObj.spineAnimation = animationToPlay;
-            }
-          }
+          if (stageObj) stageObj.spineAnimation = animationToPlay;
+          entry.listener = {
+            complete: () => {
+              const stillHere = this.getStageObjByUuid(figureUuid);
+              if (!stillHere) return;
+              if (loopMode === 'false') {
+                figureSpine.state.setEmptyAnimation(0, 0.15);
+                figureSpine.state.timeScale = 0;
+              } else if (loopMode === 'disappear') {
+                this.removeStageObjectByKey(key);
+              }
+            },
+          };
         }
 
         /**

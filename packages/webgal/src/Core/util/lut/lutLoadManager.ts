@@ -20,7 +20,7 @@ class LUTLoadManager {
    * @param app PIXI 应用实例
    * @returns Promise<PIXI.Texture>
    */
-  async loadLUT(id: string, url: string, app: PIXI.Application): Promise<PIXI.Texture> {
+  public async loadLUT(id: string, url: string, app: PIXI.Application): Promise<PIXI.Texture> {
     // 取消之前的请求
     this.cancelRequest(id);
 

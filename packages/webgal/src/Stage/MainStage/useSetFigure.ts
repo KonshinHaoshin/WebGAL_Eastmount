@@ -70,40 +70,41 @@ export function useSetFigure(stageState: IStageState) {
 		});
 	}, [figureMetaData]);
 
-	// 应用/清除立绘 LUT
-	useEffect(() => {
-		Object.entries(figureMetaData).forEach(async ([key, value]) => {
-			const figureObject = WebGAL.gameplay.pixiStage?.getStageObjByKey(key);
-			if (!figureObject || figureObject.isExiting) return;
+  // 应用/清除立绘 LUT
+  useEffect(() => {
+    Object.entries(figureMetaData).forEach(async ([key, value]) => {
+      const lut = value?.lut;
+      if (lut === undefined) return;
 
-			const lut = value?.lut;
+      const applyLut = async () => {
+        const figureObject = WebGAL.gameplay.pixiStage?.getStageObjByKey(key);
+        if (!figureObject || figureObject.isExiting) return;
 
-			// 如果 lut 是 undefined，保持现有 LUT 不变
-			if (lut === undefined) {
-				return;
-			}
+        if (lut === '') {
+          lutLoadManager.cancelRequest(key);
+          figureObject.pixiContainer.setColorMapTexture(null);
+          return;
+        }
+        try {
+          const app = WebGAL.gameplay.pixiStage!.currentApp!;
+          const texture = await lutLoadManager.loadLUT(key, lut, app);
+          figureObject.pixiContainer.setColorMapTexture(texture);
+          figureObject.pixiContainer.colorMapIntensity = 1;
+        } catch (e: unknown) {
+          if (e instanceof Error && !e.message.includes('请求已被取消')) {
+            console.error('Failed to apply figure LUT', key, e);
+          }
+        }
+      };
 
-			// 如果 lut 是空字符串，明确清除 LUT
-			if (lut === '') {
-				lutLoadManager.cancelRequest(key);
-				figureObject.pixiContainer.setColorMapTexture(null);
-				return;
-			}
-
-			// 使用 LUT 加载管理器，防止竞态条件
-			try {
-				const app = WebGAL.gameplay.pixiStage!.currentApp!;
-				const texture = await lutLoadManager.loadLUT(key, lut, app);
-				figureObject.pixiContainer.setColorMapTexture(texture);
-				figureObject.pixiContainer.colorMapIntensity = 1;
-			} catch (e: unknown) {
-				// 忽略已取消的请求错误
-				if (e instanceof Error && !e.message.includes('请求已被取消')) {
-					console.error('Failed to apply figure LUT', key, e);
-				}
-			}
-		});
-	}, [figureMetaData, figName, figNameLeft, figNameRight]);
+      // 立绘未就绪时，延迟一帧重试一次
+      if (!WebGAL.gameplay.pixiStage?.getStageObjByKey(key)) {
+        setTimeout(applyLut, 0);
+      } else {
+        applyLut();
+      }
+    });
+  }, [figureMetaData]);
 
 	// 组件卸载时清理所有立绘的 LUT 请求
 	useEffect(() => {
