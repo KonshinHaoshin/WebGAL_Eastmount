@@ -121,7 +121,7 @@ function Choose(props: { chooseOptions: ChooseOption[] }) {
                 padding: '100px 140px',
               }}
               onClick={onClick}
-              onMouseEnter={playSeEnter}
+              // onMouseEnter={playSeEnter}
               onMouseOver={(e) => {
                 // 鼠标悬浮时切换到 choose02 并改变文字颜色
                 e.currentTarget.style.backgroundImage = `url(${choose02})`;

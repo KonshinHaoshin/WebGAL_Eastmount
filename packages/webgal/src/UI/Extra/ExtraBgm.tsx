@@ -56,7 +56,7 @@ export function ExtraBgm() {
         style={{
           animationDelay: `${i * 150}ms`,
         }}
-        onMouseEnter={playSeEnter}
+        // onMouseEnter={playSeEnter}
       >
         {e.name}
       </div>
@@ -80,7 +80,7 @@ export function ExtraBgm() {
               setBgmByIndex(foundCurrentBgmIndex - 1);
             }
           }}
-          onMouseEnter={playSeEnter}
+          // onMouseEnter={playSeEnter}
           className={styles.bgmControlButton}
         >
           <GoStart theme="filled" size={iconSize} fill="#fff" strokeWidth={3} strokeLinejoin="miter" />
@@ -91,7 +91,7 @@ export function ExtraBgm() {
             const bgmControl: HTMLAudioElement = document.getElementById('currentBgm') as HTMLAudioElement;
             bgmControl?.play().then();
           }}
-          onMouseEnter={playSeEnter}
+          // onMouseEnter={playSeEnter}
           className={styles.bgmControlButton}
         >
           <PlayOne theme="filled" size={iconSize} fill="#fff" strokeWidth={3} strokeLinejoin="miter" />
@@ -105,7 +105,7 @@ export function ExtraBgm() {
               setBgmByIndex(foundCurrentBgmIndex + 1);
             }
           }}
-          onMouseEnter={playSeEnter}
+          // onMouseEnter={playSeEnter}
           className={styles.bgmControlButton}
         >
           <GoEnd theme="filled" size={iconSize} fill="#fff" strokeWidth={3} strokeLinejoin="miter" />
@@ -116,7 +116,7 @@ export function ExtraBgm() {
             const bgmControl: HTMLAudioElement = document.getElementById('currentBgm') as HTMLAudioElement;
             bgmControl.pause();
           }}
-          onMouseEnter={playSeEnter}
+          // onMouseEnter={playSeEnter}
           className={styles.bgmControlButton}
         >
           <SquareSmall theme="filled" size={iconSize} fill="#fff" strokeWidth={3} strokeLinejoin="miter" />
@@ -127,7 +127,7 @@ export function ExtraBgm() {
             playSeClick();
             isShowBgmList.set(!isShowBgmList.value);
           }}
-          onMouseEnter={playSeEnter}
+          // onMouseEnter={playSeEnter}
           className={styles.bgmControlButton}
           style={{ marginLeft: 'auto' }}
         >

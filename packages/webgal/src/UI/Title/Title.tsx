@@ -210,7 +210,7 @@ const Title: FC = () => {
             if (keyboard) keyboard.lock(['Escape', 'F11']);
           }
         }}
-        onMouseEnter={playSeEnter}
+        // onMouseEnter={playSeEnter}
       />
 
       {GUIState.showTitle && (

@@ -1,5 +1,5 @@
 import styles from './textbox.module.scss';
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { WebGAL } from '@/Core/WebGAL';
 import { ITextboxProps } from './types';
 import useApplyStyle from '@/hooks/useApplyStyle';
@@ -8,6 +8,10 @@ import { textSize } from '@/store/userDataInterface';
 import textboxBg from '@/assets/dragonspring/textbox.png';
 import nameBoxBg from '@/assets/dragonspring/namebox.png';
 import characters from '@/assets/dragonspring/characters.json';
+import button_on from '@/assets/dragonspring/button_on.png';
+import button_off from '@/assets/dragonspring/button_off.png';
+import { switchAuto } from '@/Core/controller/gamePlay/autoPlay';
+import useSoundEffect from '@/hooks/useSoundEffect';
 
 export default function IMSSTextbox(props: ITextboxProps) {
   const {
@@ -27,9 +31,18 @@ export default function IMSSTextbox(props: ITextboxProps) {
     isUseStroke,
     textboxOpacity,
     textSizeState,
+    isAuto,
   } = props;
-
+  const [isClicked, setIsClicked] = useState(false);
   const applyStyle = useApplyStyle('Stage/TextBox/textbox.scss');
+  const { playSeClick } = useSoundEffect();
+
+  // 处理auto按钮点击
+  const handleAutoClick = () => {
+    switchAuto();
+    playSeClick();
+    setIsClicked((prevState) => !prevState);
+  };
 
   useEffect(() => {
     function settleText() {
@@ -418,6 +431,31 @@ export default function IMSSTextbox(props: ITextboxProps) {
                 </div>
               </>
             )}
+
+            {/* Auto按钮 */}
+            <div
+              style={{
+                position: 'fixed',
+                left: 40,
+                top: 1260,
+                zIndex: 99999,
+                cursor: 'pointer',
+                display: 'flex',
+                justifyContent: 'center',
+                pointerEvents: 'auto',
+              }}
+              onClick={handleAutoClick}
+            >
+              <img
+                src={isClicked ? button_on : button_off}
+                alt="auto_button"
+                style={{
+                  width: 'auto',
+                  height: 'auto',
+                }}
+                draggable={false}
+              />
+            </div>
 
             {/* 对话正文 */}
             <div

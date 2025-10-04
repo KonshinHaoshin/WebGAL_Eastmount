@@ -21,7 +21,7 @@ export const MenuPanelButton = (props: IMenuPanel) => {
         props.clickFunc();
         // playSePageChange();
       }}
-      onMouseEnter={playSeEnter}
+      // onMouseEnter={playSeEnter}
       style={{ ...props.style, color: props.tagColor }}
     >
       <div className={styles.MenuPanel_button_icon}>

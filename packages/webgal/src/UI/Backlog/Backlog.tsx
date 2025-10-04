@@ -160,7 +160,10 @@ export const Backlog = () => {
 
       const { canonicalKey, color: surnameColor } = resolveCanonicalNameAndColor(fullNameInput);
 
-      // 拆分“姓 名”
+      // 检查是否有名字内容（去除空白字符后）
+      const hasName = canonicalKey.trim() !== '';
+
+      // 拆分"姓 名"
       const tokens = canonicalKey.split(' ');
       const hasSurnameGiven = tokens.length >= 2;
       const surname = hasSurnameGiven ? tokens[0] : '';
@@ -252,7 +255,8 @@ export const Backlog = () => {
                 <img src={backlog_item_button} alt="return" className={styles.backlog_item_button_img} />
               </div>
 
-              {backlogItem.currentStageState.vocal ? (
+              {/* 语音播放按钮已屏蔽 */}
+              {false && backlogItem.currentStageState.vocal ? (
                 <div
                   onClick={() => {
                     playSeClick();
@@ -279,10 +283,12 @@ export const Backlog = () => {
             </div>
 
             {/* 名字底板 + 名字文字（底图在下，文字在上） */}
-            <div className={styles.backlog_item_content_name}>
-              <img src={backlog_item_nameContainer} alt="namebox" className={styles.name_container_bg} />
-              <div className={styles.name_container_text}>{nameElement}</div>
-            </div>
+            {hasName && (
+              <div className={styles.backlog_item_content_name}>
+                <img src={backlog_item_nameContainer} alt="namebox" className={styles.name_container_bg} />
+                <div className={styles.name_container_text}>{nameElement}</div>
+              </div>
+            )}
           </div>
 
           {/* 右：正文 */}

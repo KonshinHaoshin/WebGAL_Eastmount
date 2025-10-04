@@ -9,6 +9,7 @@ import { textSize } from '@/store/userDataInterface';
 import IMSSTextbox from '@/Stage/TextBox/IMSSTextbox';
 import { SCREEN_CONSTANTS } from '@/Core/util/constants';
 import useEscape from '@/hooks/useEscape';
+import { WebGAL } from '@/Core/WebGAL';
 
 const userAgent = navigator.userAgent;
 const isFirefox = /firefox/i.test(userAgent);
@@ -50,6 +51,22 @@ export const TextBox = () => {
   const fontOptimization = guiState.fontOptimization;
 
   const [isShowStroke, setIsShowStroke] = useState(true);
+  const [isAuto, setIsAuto] = useState(WebGAL.gameplay.isAuto);
+
+  useEffect(() => {
+    // 监听auto模式变化
+    const checkAutoMode = () => {
+      const currentAutoState = WebGAL.gameplay.isAuto;
+      if (currentAutoState !== isAuto) {
+        setIsAuto(currentAutoState);
+      }
+    };
+
+    // 定期检查auto模式状态
+    const interval = setInterval(checkAutoMode, 100);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!fontOptimization) {
@@ -101,6 +118,7 @@ export const TextBox = () => {
       lineLimit={lineLimit}
       isUseStroke={isShowStroke}
       textboxOpacity={textboxOpacity}
+      isAuto={isAuto}
     />
   );
 };

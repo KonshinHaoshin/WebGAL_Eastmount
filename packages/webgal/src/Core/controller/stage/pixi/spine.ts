@@ -28,19 +28,19 @@ export async function loadPixiSpine(): Promise<typeof import('pixi-spine') | nul
   }
 
   // @ts-ignore
-  pixiSpineLoading = import('pixi-spine')
-    .then((module) => {
-      spineLoader = new PIXI.Loader();
-      pixiSpineModule = module;
-      return module;
-    })
-    .catch((error) => {
-      console.error('Failed to load pixi-spine. Spine features will be disabled.', error);
-      return null;
-    })
-    .finally(() => {
-      pixiSpineLoading = null;
-    });
+  // pixiSpineLoading = import('pixi-spine')
+  //   .then((module) => {
+  //     spineLoader = new PIXI.Loader();
+  //     pixiSpineModule = module;
+  //     return module;
+  //   })
+  //   .catch((error) => {
+  //     console.error('Failed to load pixi-spine. Spine features will be disabled.', error);
+  //     return null;
+  //   })
+  //   .finally(() => {
+  //     pixiSpineLoading = null;
+  //   });
 
   return pixiSpineLoading;
 }
@@ -77,7 +77,6 @@ export async function addSpineFigureImpl(
       thisFigureContainer.zIndex = metadata.zIndex;
     }
   }
-  const loopMode: 'true' | 'false' | 'disappear' = (metadata as any)?.loop ?? 'true';
   // 挂载
   this.figureContainer.addChild(thisFigureContainer);
   const figureUuid = uuid();
@@ -126,26 +125,16 @@ export async function addSpineFigureImpl(
           // 播放默认动画（第一个动画）
           animationToPlay = figureSpine.spineData.animations[0].name;
         }
-        const shouldLoop = loopMode === 'true';
-        if (animationToPlay) {
-          // 播放
-          const entry = figureSpine.state.setAnimation(0, animationToPlay, shouldLoop);
-          figureSpine.autoUpdate = true;
 
+        if (animationToPlay) {
+          figureSpine.state.setAnimation(0, animationToPlay, false);
+          figureSpine.autoUpdate = true;
           const stageObj = this.getStageObjByUuid(figureUuid);
-          if (stageObj) stageObj.spineAnimation = animationToPlay;
-          entry.listener = {
-            complete: () => {
-              const stillHere = this.getStageObjByUuid(figureUuid);
-              if (!stillHere) return;
-              if (loopMode === 'false') {
-                figureSpine.state.setEmptyAnimation(0, 0.15);
-                figureSpine.state.timeScale = 0;
-              } else if (loopMode === 'disappear') {
-                this.removeStageObjectByKey(key);
-              }
-            },
-          };
+          if (stageObj) {
+            if (stageObj.spineAnimation) {
+              stageObj.spineAnimation = animationToPlay;
+            }
+          }
         }
 
         /**

@@ -31,7 +31,7 @@ export const Save: FC = () => {
           setStorage();
           playSePageChange();
         }}
-        onMouseEnter={playSeEnter}
+        // onMouseEnter={playSeEnter}
         key={'Save_element_page' + i}
         className={classNameOfElement}
       >
@@ -97,7 +97,7 @@ export const Save: FC = () => {
             saveGame(i);
           }
         }}
-        onMouseEnter={playSeEnter}
+        // onMouseEnter={playSeEnter}
         key={'saveElement_' + i}
         className={styles.Save_Load_content_element}
         style={{ animationDelay: `${animationIndex * 30}ms` }}

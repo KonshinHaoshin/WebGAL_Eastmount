@@ -51,7 +51,7 @@ export function ExtraCg() {
           playSeClick();
         }}
         key={'nav' + i}
-        onMouseEnter={playSeEnter}
+        // onMouseEnter={playSeEnter}
         className={className}
       >
         {i}

@@ -129,7 +129,8 @@ export const Stage: FC = () => {
           WebGAL.events.fullscreenDbClick.emit();
         }}
         id="FullScreenClick"
-        style={{ width: '100%', height: '100%', position: 'absolute', zIndex: '12', top: '0' }}
+        // 我们将点击全屏的判定网上抬了点，这样不会挡着自动按钮
+        style={{ left: '40', width: '100%', height: '85%', position: 'absolute', zIndex: '12', top: '0' }}
         onMouseMove={(e) => !GUIState.showControls && updateControlsVisibility(e, stageState, GUIState, dispatch)}
       />
       <IntroContainer />

@@ -30,7 +30,7 @@ export const Load: FC = () => {
           setStorage();
           playSePageChange();
         }}
-        onMouseEnter={playSeEnter}
+        // onMouseEnter={playSeEnter}
         key={'Load_element_page' + i}
         className={classNameOfElement}
       >
@@ -84,7 +84,7 @@ export const Load: FC = () => {
           loadGame(i);
           playSeClick();
         }}
-        onMouseEnter={playSeEnter}
+        // onMouseEnter={playSeEnter}
         key={'loadElement_' + i}
         className={styles.Save_Load_content_element}
         style={{ animationDelay: `${animationIndex * 30}ms` }}

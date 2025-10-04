@@ -37,7 +37,7 @@ export const getUserInput = (sentence: ISentence): IPerform => {
         <div className={styles.title}>{title}</div>
         <input id="user-input" className={styles.Choose_item} />
         <div
-          onMouseEnter={playSeEnter}
+          // onMouseEnter={playSeEnter}
           onClick={() => {
             const userInput: HTMLInputElement = document.getElementById('user-input') as HTMLInputElement;
             if (userInput) {
