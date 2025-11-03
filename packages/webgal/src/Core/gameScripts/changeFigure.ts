@@ -179,8 +179,6 @@ export function changeFigure(sentence: ISentence): IPerform {
       try {
         const frame = JSON.parse(transformString) as AnimationFrame;
         animationObj = generateTransformAnimationObj(key, frame, duration, ease);
-        // 因为是切换，必须把一开始的 alpha 改为 0
-        animationObj[0].alpha = 0;
         const animationName = (Math.random() * 10).toString(16);
         const newAnimation: IUserAnimation = { name: animationName, effects: animationObj };
         WebGAL.animationManager.addAnimation(newAnimation);
@@ -198,8 +196,6 @@ export function changeFigure(sentence: ISentence): IPerform {
       // 应用默认的
       const frame = {};
       animationObj = generateTransformAnimationObj(key, frame as AnimationFrame, duration, ease);
-      // 因为是切换，必须把一开始的 alpha 改为 0
-      animationObj[0].alpha = 0;
       const animationName = (Math.random() * 10).toString(16);
       const newAnimation: IUserAnimation = { name: animationName, effects: animationObj };
       WebGAL.animationManager.addAnimation(newAnimation);
