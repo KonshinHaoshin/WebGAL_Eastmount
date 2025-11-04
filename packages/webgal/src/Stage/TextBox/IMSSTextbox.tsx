@@ -217,7 +217,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
       // 1) 姓首字：若有颜色映射 → 纯色实心（不走叠层）+ 大写
       if (isSurnameFirst && surnameColor) {
         return (
-          <span key={`${ch}-${i}`} style={{ ...base, fontSize: s.fontSize, color: surnameColor }}>
+          <span key={`${ch}-${i}`} style={{ ...base, fontSize: s.fontSize, color: surnameColor, left: '20px' }}>
             {ch}
           </span>
         );
