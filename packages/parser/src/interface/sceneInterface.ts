@@ -39,6 +39,7 @@ export enum commandType {
   getUserInput,
   applyStyle,
   wait,
+  manopedia,
 }
 
 /**

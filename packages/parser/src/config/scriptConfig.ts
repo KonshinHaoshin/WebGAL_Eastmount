@@ -38,6 +38,7 @@ export const SCRIPT_CONFIG = [
   { scriptString: 'getUserInput', scriptType: commandType.getUserInput },
   { scriptString: 'applyStyle', scriptType: commandType.applyStyle },
   { scriptString: 'wait', scriptType: commandType.wait },
+  { scriptString: 'manopedia', scriptType: commandType.manopedia },
 ];
 export const ADD_NEXT_ARG_LIST = [
   commandType.bgm,

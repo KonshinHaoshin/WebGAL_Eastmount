@@ -70,6 +70,7 @@ export const initState: IStageState = {
   isDisableTextbox: false,
   replacedUIlable: {},
   figureMetaData: {},
+  enableManopedia: false,
 };
 
 /**

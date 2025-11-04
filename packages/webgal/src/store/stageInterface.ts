@@ -222,6 +222,7 @@ export interface IStageState {
 	isDisableTextbox: boolean;
 	replacedUIlable: Record<string, string>;
 	figureMetaData: figureMetaData;
+	enableManopedia: boolean;
 }
 
 /**
