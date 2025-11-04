@@ -256,3 +256,24 @@ $height: 330px;
     top: 0;
     bottom: 50px;
 }
+
+.textBoxCursor {
+    position: fixed;
+    right: 400px;
+    bottom: 120px;
+    width: auto;
+    height: auto;
+    z-index: 10;
+    animation: cursorBlink 1s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes cursorBlink {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}

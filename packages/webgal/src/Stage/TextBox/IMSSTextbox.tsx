@@ -12,6 +12,7 @@ import button_on from '@/assets/dragonspring/button_on.png';
 import button_off from '@/assets/dragonspring/button_off.png';
 import { switchAuto } from '@/Core/controller/gamePlay/autoPlay';
 import useSoundEffect from '@/hooks/useSoundEffect';
+import cursor from '@/assets/dragonspring/cursor.png';
 
 export default function IMSSTextbox(props: ITextboxProps) {
   const {
@@ -34,6 +35,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
     isAuto,
   } = props;
   const [isClicked, setIsClicked] = useState(false);
+  const [showCursor, setShowCursor] = useState(false);
   const applyStyle = useApplyStyle('Stage/TextBox/textbox.scss');
   const { playSeClick } = useSoundEffect();
 
@@ -51,6 +53,8 @@ export default function IMSSTextbox(props: ITextboxProps) {
       textArray.forEach((e) => {
         e.className = applyStyle('TextBox_textElement_Settled', styles.TextBox_textElement_Settled);
       });
+      // 点击后立即显示全部文字时，也立即显示 cursor
+      setShowCursor(true);
     }
 
     WebGAL.events.textSettle.on(settleText);
@@ -58,6 +62,45 @@ export default function IMSSTextbox(props: ITextboxProps) {
       WebGAL.events.textSettle.off(settleText);
     };
   }, [applyStyle]);
+
+  // 当对话键变化时，隐藏 cursor
+  useEffect(() => {
+    setShowCursor(false);
+  }, [currentDialogKey]);
+
+  // 计算文本动画完成时间并自动显示 cursor（与 say.ts 使用相同的逻辑）
+  useEffect(() => {
+    if (!isText || textArray.length === 0) {
+      setShowCursor(false);
+      return;
+    }
+
+    // 计算文本总字符数（与 say.ts 中的逻辑一致）
+    let totalChars = 0;
+    textArray.forEach((line) => {
+      line.forEach(() => {
+        totalChars++;
+      });
+    });
+
+    // 计算文本播放结束时间（与 say.ts 中的计算逻辑完全一致）
+    // say.ts 中的计算：
+    // - sentenceDelay = textDelay * len (所有字符数 * textDelay)
+    // - endDelay = useTextAnimationDuration(textSpeed) / 2 (textDuration / 2)
+    // - duration = sentenceDelay + endDelay
+    const sentenceDelay = totalChars * textDelay; // 所有字符延迟的总和
+    const endDelay = textDuration / 2; // 动画持续时间的一半
+    const totalAnimationTime = sentenceDelay + endDelay;
+
+    // 在动画完成后自动显示 cursor（不依赖点击，与 say.ts 的 stopFunction 时机一致）
+    const timer = setTimeout(() => {
+      setShowCursor(true);
+    }, totalAnimationTime);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [textArray, textDelay, textDuration, isText, currentDialogKey]);
 
   let allTextIndex = 0;
 
@@ -469,6 +512,9 @@ export default function IMSSTextbox(props: ITextboxProps) {
             >
               {textElementList}
             </div>
+
+            {/* Cursor - 文本播放完成后显示并闪烁 */}
+            {showCursor && !isAuto && <img src={cursor} alt="cursor" className={styles.textBoxCursor} />}
           </div>
         </div>
       )}
