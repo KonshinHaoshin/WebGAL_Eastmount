@@ -1,0 +1,19 @@
+.gearButton {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  cursor: pointer;
+  z-index: 10;
+  display: inline-block;
+}
+
+.gearIcon {
+  width: auto;
+  height: auto;
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.5));
+  transition: transform 0.3s ease;
+}
+
+.gearButton:hover .gearIcon {
+  transform: rotate(90deg);
+}

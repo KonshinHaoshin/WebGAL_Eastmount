@@ -4,6 +4,7 @@ import { BottomControlPanel } from '@/UI/BottomControlPanel/BottomControlPanel';
 import { BottomControlPanelFilm } from '@/UI/BottomControlPanel/BottomControlPanelFilm';
 import DevPanel from '@/UI/DevPanel/DevPanel';
 import { Extra } from '@/UI/Extra/Extra';
+import { GearButton } from '@/UI/gearButton';
 import GlobalDialog from '@/UI/GlobalDialog/GlobalDialog';
 import Logo from '@/UI/Logo/Logo';
 import Menu from '@/UI/Menu/Menu';
@@ -37,6 +38,7 @@ function App() {
       <Stage />
       <BottomControlPanel />
       <BottomControlPanelFilm />
+      <GearButton />
       <Backlog />
       <Title />
       <Logo />
