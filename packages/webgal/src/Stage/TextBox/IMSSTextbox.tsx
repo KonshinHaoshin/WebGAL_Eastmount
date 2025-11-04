@@ -514,7 +514,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
             </div>
 
             {/* Cursor - 文本播放完成后显示并闪烁 */}
-            {showCursor && !isAuto && <img src={cursor} alt="cursor" className={styles.textBoxCursor} />}
+            {showCursor && <img src={cursor} alt="cursor" className={styles.textBoxCursor} />}
           </div>
         </div>
       )}
