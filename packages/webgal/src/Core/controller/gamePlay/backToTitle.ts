@@ -14,6 +14,8 @@ export const backToTitle = () => {
   stopFast();
   // 清除语音
   dispatch(setStage({ key: 'playVocal', value: '' }));
+  // 重置魔女图鉴按钮状态
+  dispatch(setStage({ key: 'enableManopedia', value: false }));
   // 重新打开标题界面
   dispatch(setVisibility({ component: 'showTitle', visibility: true }));
   /**

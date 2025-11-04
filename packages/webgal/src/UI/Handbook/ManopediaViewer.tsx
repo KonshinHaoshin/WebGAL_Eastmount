@@ -7,10 +7,8 @@ interface IManopediaViewerProps {
   children: ReactNode;
 }
 
-/**
- * 魔女图鉴查看器组件
- * 点击按钮后全屏显示 2560x1440 的图片
- */
+// todo: 实现魔女图鉴查看器
+// 会实现的……
 export const ManopediaViewer: FC<IManopediaViewerProps> = ({ children }) => {
   const [showViewer, setShowViewer] = useState(false);
   const { playSeClick } = useSoundEffect();
@@ -38,4 +36,3 @@ export const ManopediaViewer: FC<IManopediaViewerProps> = ({ children }) => {
     </>
   );
 };
-
