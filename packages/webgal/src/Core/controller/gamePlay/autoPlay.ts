@@ -59,8 +59,9 @@ export const autoNextSentence = () => {
  */
 const autoPlay = () => {
   const data = webgalStore.getState().userData.optionData.autoSpeed;
-  // 范围为 [250, 1750]
-  const autoPlayDelay = 250 + (100 - data) * 15;
+  // 范围为 [100, 1600]
+  // 一堆人反馈太慢了
+  const autoPlayDelay = 100 + (100 - data) * 15;
   let isBlockingAuto = false;
   WebGAL.gameplay.performController.performList.forEach((e) => {
     if (e.blockingAuto())
