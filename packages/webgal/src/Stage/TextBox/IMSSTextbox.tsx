@@ -39,11 +39,41 @@ export default function IMSSTextbox(props: ITextboxProps) {
   const applyStyle = useApplyStyle('Stage/TextBox/textbox.scss');
   const { playSeClick } = useSoundEffect();
 
+  // 直接监听 WebGAL.gameplay.isAuto 的变化，确保无论从哪里调用 stopAuto() 都能立即更新
+  useEffect(() => {
+    const checkAutoMode = () => {
+      const currentAutoState = WebGAL.gameplay.isAuto;
+      setIsClicked((prevState) => {
+        // 只有当状态真正改变时才更新，避免不必要的重渲染
+        if (currentAutoState !== prevState) {
+          return currentAutoState;
+        }
+        return prevState;
+      });
+    };
+
+    // 立即检查一次
+    checkAutoMode();
+
+    // 定期检查auto模式状态（与 TextBox.tsx 使用相同的检查间隔）
+    const interval = setInterval(checkAutoMode, 100);
+
+    return () => clearInterval(interval);
+  }, []); // 空依赖数组，只在组件挂载时运行一次
+
+  // 同时监听 isAuto prop 的变化，作为备用同步机制
+  useEffect(() => {
+    setIsClicked(isAuto);
+  }, [isAuto]);
+
   // 处理auto按钮点击
   const handleAutoClick = () => {
     switchAuto();
     playSeClick();
-    setIsClicked((prevState) => !prevState);
+    // 立即更新按钮状态（乐观更新），确保按钮立即响应
+    // 直接读取 WebGAL.gameplay.isAuto 的当前值，因为 switchAuto() 已经改变了它
+    // useEffect 会在 isAuto prop 更新后再次同步，确保最终一致性
+    setIsClicked(WebGAL.gameplay.isAuto);
   };
 
   useEffect(() => {
