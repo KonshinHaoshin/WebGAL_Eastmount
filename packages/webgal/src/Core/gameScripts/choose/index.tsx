@@ -16,18 +16,32 @@ import useApplyStyle from '@/hooks/useApplyStyle';
 import { Provider } from 'react-redux';
 import choose01 from '@/assets/dragonspring/choose01.png';
 import choose02 from '@/assets/dragonspring/choose02.png';
+import skeleton from '@/assets/dragonspring/skeleton.png';
 
 class ChooseOption {
   /**
    * 格式：
-   * (showConditionVar>1)[enableConditionVar>2]->text:jump
+   * (showConditionVar>1)[enableConditionVar>2]->text:jump@skeleton
+   * 或
+   * text:jump@skeleton
    */
   public static parse(script: string): ChooseOption {
     const parts = script.split('->');
     const conditonPart = parts.length > 1 ? parts[0] : null;
     const mainPart = parts.length > 1 ? parts[1] : parts[0];
     const mainPartNodes = mainPart.split(/(?<!\\):/g);
-    const option = new ChooseOption(mainPartNodes[0], mainPartNodes[1]);
+
+    let jump = mainPartNodes[1] || '';
+    let showSkeleton = false;
+
+    // 检查 jump 末尾是否有 @skeleton 标记
+    if (jump.endsWith('@skeleton')) {
+      jump = jump.slice(0, -9); // 移除 '@skeleton' (9个字符)
+      showSkeleton = true;
+    }
+
+    const option = new ChooseOption(mainPartNodes[0], jump);
+    option.showSkeleton = showSkeleton;
     if (conditonPart !== null) {
       const showConditionPart = conditonPart.match(/\((.*)\)/);
       if (showConditionPart) {
@@ -45,6 +59,7 @@ class ChooseOption {
   public jumpToScene: boolean;
   public showCondition?: string;
   public enableCondition?: string;
+  public showSkeleton?: boolean;
 
   public constructor(text: string, jump: string) {
     this.text = useEscape(text);
@@ -111,6 +126,9 @@ function Choose(props: { chooseOptions: ChooseOption[] }) {
 
         return (
           <div className={applyStyle('Choose_item_outer', styles.Choose_item_outer)} key={e.jump + i}>
+            {e.showSkeleton && (
+              <img src={skeleton} alt="skeleton" className={applyStyle('Choose_skeleton', styles.Choose_skeleton)} />
+            )}
             <div
               className={className}
               style={{

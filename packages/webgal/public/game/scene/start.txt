@@ -37,7 +37,7 @@ manopedia:off;
 二阶堂希罗:如果您对该引擎有什么疑问|或者愿意为我们这个引擎提供更多更新的素材又或者是单纯地想要讨论剧情
 changeFigure:立绘差分/hiro/hiro_3.png -id=hiro -transform={"position":{"x":0,"y":300},"scale":{"x":1.2,"y":1.2}} -next;
 二阶堂希罗:我们都诚挚地希望您能加我们的小群|979220215
-choose:加一定加:test.txt|好的我马上加:test.txt|不能的，我不会加！:death.txt -spec;
+choose:加一定加:test.txt|好的我马上加:test.txt@skeleton|不能的，我不会加！:death.txt@skeleton;
 二阶堂希罗:以及请不要切换模板，或者更改template文件夹下的内容
 setTransform:{"position":{"x":-675}} -target=hiro -duration=150 -next;
 changeFigure:立绘差分/meruru/meruru_1.png -id=meruru -transform={"position":{"x":675,"y":300},"scale":{"x":1.2,"y":1.2}} -next;
