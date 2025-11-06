@@ -36,71 +36,87 @@ export const Phone: FC = () => {
         playSeClick();
     };
 
-    // 按钮配置：从左到右依次
-    const buttons = [
-        { key: 'save', normal: save01, hover: save02, onClick: () => playSeClick() },
-        { key: 'load', normal: load01, hover: load02, onClick: () => playSeClick() },
-        { key: 'history', normal: history01, hover: history02, onClick: () => playSeClick() },
-        { key: 'setting', normal: setting01, hover: setting02, onClick: () => playSeClick() },
-        { key: 'backtotitle', normal: backtotitle01, hover: backtotitle02, onClick: () => playSeClick() },
-    ];
-
     return (
         <div className={styles.phoneContainer}>
             <div className={styles.phone}>
                 <img src={phone} alt="Phone" className={styles.phoneImage} />
 
-                {/* 左上角 WIFI 图标 */}
-                <div className={styles.wifiIcon}>
-                    <img src={WIFI} alt="WIFI" />
-                </div>
+              {/* 左上角 WIFI 图标 */}
+              <div className={styles.wifiIcon}>
+                  <img src={WIFI} alt="WIFI" />
+              </div>
 
-                {/* 右上角 X 按钮 */}
-                <div className={styles.closeButton} onClick={handleClose} onMouseEnter={playSeEnter}>
-                    <img src={XButton} alt="Close" />
-                </div>
+              {/* 右上角 X 按钮 */}
+              <div className={styles.closeButton} onClick={handleClose} onMouseEnter={playSeEnter}>
+                  <img src={XButton} alt="Close" />
+              </div>
 
-                {/* 功能按钮区域 */}
-                <div className={styles.buttonsContainer}>
-                    {buttons.map((button) => (
-                        <PhoneButton
-                            key={button.key}
-                            normal={button.normal}
-                            hover={button.hover}
-                            onClick={button.onClick}
-                            onMouseEnter={playSeEnter}
-                        />
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
+              {/* 功能按钮区域 */}
+              <PhoneButton
+                  className={styles.saveButton}
+                  normal={save01}
+                  hover={save02}
+                  onClick={() => playSeClick()}
+                  onMouseEnter={playSeEnter}
+              />
+              <PhoneButton
+                  className={styles.loadButton}
+                  normal={load01}
+                  hover={load02}
+                  onClick={() => playSeClick()}
+                  onMouseEnter={playSeEnter}
+              />
+              <PhoneButton
+                  className={styles.historyButton}
+                  normal={history01}
+                  hover={history02}
+                  onClick={() => playSeClick()}
+                  onMouseEnter={playSeEnter}
+              />
+              <PhoneButton
+                  className={styles.settingButton}
+                  normal={setting01}
+                  hover={setting02}
+                  onClick={() => playSeClick()}
+                  onMouseEnter={playSeEnter}
+              />
+              <PhoneButton
+                  className={styles.backtotitleButton}
+                  normal={backtotitle01}
+                  hover={backtotitle02}
+                  onClick={() => playSeClick()}
+                  onMouseEnter={playSeEnter}
+              />
+          </div>
+      </div>
+  );
 };
 
 /**
  * Phone 按钮组件
  */
 interface PhoneButtonProps {
+    className?: string;
     normal: string;
     hover: string;
     onClick: () => void;
     onMouseEnter: () => void;
 }
 
-const PhoneButton: FC<PhoneButtonProps> = ({ normal, hover, onClick, onMouseEnter }) => {
+const PhoneButton: FC<PhoneButtonProps> = ({ className, normal, hover, onClick, onMouseEnter }) => {
     const [isHovered, setIsHovered] = useState(false);
 
     return (
         <div
-            className={styles.phoneButton}
-            onClick={onClick}
-            onMouseEnter={() => {
-                setIsHovered(true);
-                onMouseEnter();
-            }}
-            onMouseLeave={() => setIsHovered(false)}
-        >
-            <img src={isHovered ? hover : normal} alt="Button" />
-        </div>
-    );
+          className={`${styles.phoneButton} ${className || ''}`}
+          onClick={onClick}
+          onMouseEnter={() => {
+              setIsHovered(true);
+              onMouseEnter();
+          }}
+          onMouseLeave={() => setIsHovered(false)}
+      >
+          <img src={isHovered ? hover : normal} alt="Button" />
+      </div>
+  );
 };

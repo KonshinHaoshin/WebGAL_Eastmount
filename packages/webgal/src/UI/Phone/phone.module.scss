@@ -61,19 +61,9 @@
     }
 }
 
-.buttonsContainer {
-    position: absolute;
-    bottom: 100px; // 根据实际布局调整
-    left: 50%;
-    transform: translateX(-50%) rotate(-5deg); // 和 phone 一样的倾斜角度
-    display: flex;
-    gap: 20px; // 按钮之间的间距
-    align-items: center;
-    justify-content: center;
-    pointer-events: auto;
-}
-
+// 按钮基础样式
 .phoneButton {
+    position: absolute;
     cursor: pointer;
     width: 60px; // 根据实际图标大小调整
     height: 60px;
@@ -81,6 +71,7 @@
     align-items: center;
     justify-content: center;
     transition: transform 0.2s ease;
+    pointer-events: auto;
     &:hover {
         transform: scale(1.1);
     }
@@ -89,4 +80,44 @@
         height: 100%;
         object-fit: contain;
     }
+}
+
+// Save 按钮
+.saveButton {
+    width: 150px;
+    height: 150px;
+    top: 120px;
+    left: 140px;
+}
+
+// Load 按钮
+.loadButton {
+    width: 150px;
+    height: 150px;
+    top: 120px;
+    right: 140px;
+}
+
+// History 按钮
+.historyButton {
+    width: 150px;
+    height: 150px;
+    top: 260px;
+    left: 140px;
+}
+
+// Setting 按钮
+.settingButton {
+    width: 150px;
+    height: 150px;
+    top: 260px;
+    right: 140px;
+}
+
+// Back to Title 按钮
+.backtotitleButton {
+    width: 150px;
+    height: 150px;
+    top: 400px;
+    left: 140px;
 }

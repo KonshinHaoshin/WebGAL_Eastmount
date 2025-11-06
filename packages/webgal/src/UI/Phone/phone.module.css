@@ -64,19 +64,8 @@
   object-fit: contain;
 }
 
-.buttonsContainer {
-  position: absolute;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%) rotate(-5deg);
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  justify-content: center;
-  pointer-events: auto;
-}
-
 .phoneButton {
+  position: absolute;
   cursor: pointer;
   width: 60px;
   height: 60px;
@@ -84,6 +73,7 @@
   align-items: center;
   justify-content: center;
   transition: transform 0.2s ease;
+  pointer-events: auto;
 }
 
 .phoneButton:hover {
@@ -94,4 +84,39 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.saveButton {
+  width: 150px;
+  height: 150px;
+  top: 120px;
+  left: 140px;
+}
+
+.loadButton {
+  width: 150px;
+  height: 150px;
+  top: 120px;
+  right: 140px;
+}
+
+.historyButton {
+  width: 150px;
+  height: 150px;
+  top: 260px;
+  left: 140px;
+}
+
+.settingButton {
+  width: 150px;
+  height: 150px;
+  top: 260px;
+  right: 140px;
+}
+
+.backtotitleButton {
+  width: 150px;
+  height: 150px;
+  top: 400px;
+  left: 140px;
 }
