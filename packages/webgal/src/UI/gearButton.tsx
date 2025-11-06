@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setMenuPanelTag, setVisibility } from '@/store/GUIReducer';
-import { MenuPanelTag } from '@/store/guiInterface';
+import { setVisibility } from '@/store/GUIReducer';
 import { RootState } from '@/store/store';
 import useSoundEffect from '@/hooks/useSoundEffect';
 import gear from '@/assets/dragonspring/gear.png';
@@ -21,8 +20,7 @@ export const GearButton: FC = () => {
     }
 
     const handleClick = () => {
-        dispatch(setMenuPanelTag(MenuPanelTag.Option));
-        dispatch(setVisibility({ component: 'showMenuPanel', visibility: true }));
+        dispatch(setVisibility({ component: 'showPhone', visibility: true }));
         playSeClick();
     };
 

@@ -117,6 +117,10 @@ export const Stage: FC = () => {
       <AudioContainer />
       <div
         onClick={() => {
+          // 如果 Phone 显示，则不允许点击
+          if (GUIState.showPhone) {
+            return;
+          }
           // 如果文本框没有显示，则显示文本框
           if (!GUIState.showTextBox) {
             dispatch(setVisibility({ component: 'showTextBox', visibility: true }));
@@ -126,11 +130,15 @@ export const Stage: FC = () => {
           nextSentence();
         }}
         onDoubleClick={() => {
+          // 如果 Phone 显示，则不允许双击
+          if (GUIState.showPhone) {
+            return;
+          }
           WebGAL.events.fullscreenDbClick.emit();
         }}
         id="FullScreenClick"
         // 我们将点击全屏的判定网上抬了点，这样不会挡着自动按钮
-        style={{ left: '40', width: '100%', height: '85%', position: 'absolute', zIndex: '12', top: '0' }}
+        style={{ left: '40', width: '100%', height: '85%', position: 'absolute', zIndex: '12', top: '0', pointerEvents: GUIState.showPhone ? 'none' : 'auto' }}
         onMouseMove={(e) => !GUIState.showControls && updateControlsVisibility(e, stageState, GUIState, dispatch)}
       />
       <IntroContainer />

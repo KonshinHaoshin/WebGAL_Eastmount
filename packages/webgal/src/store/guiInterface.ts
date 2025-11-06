@@ -31,6 +31,7 @@ export interface IGuiState {
   isShowLogo: boolean;
   enableAppreciationMode: boolean; // Pc102
   fontOptimization: boolean; // 字体优化
+  showPhone: boolean; // 是否显示 Phone 界面
 }
 
 export type componentsVisibility = Pick<

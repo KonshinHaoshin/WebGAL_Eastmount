@@ -12,6 +12,7 @@ import Menu from '@/UI/Menu/Menu';
 import { PanicOverlay } from '@/UI/PanicOverlay/PanicOverlay';
 import Title from '@/UI/Title/Title';
 import Translation from '@/UI/Translation/Translation';
+import { Phone } from '@/UI/Phone/Phone';
 import { useEffect } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -48,6 +49,7 @@ function App() {
       <Menu />
       <GlobalDialog />
       <PanicOverlay />
+      <Phone />
       <DevPanel />
     </div>
   );

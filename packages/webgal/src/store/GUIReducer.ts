@@ -29,6 +29,7 @@ const initState: IGuiState = {
   isShowLogo: true,
   enableAppreciationMode: false, // Paf87
   fontOptimization: false,
+  showPhone: false,
 };
 
 /**
