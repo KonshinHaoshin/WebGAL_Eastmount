@@ -72,9 +72,9 @@
     justify-content: center;
     transition: transform 0.2s ease;
     pointer-events: auto;
-    &:hover {
-        transform: scale(1.1);
-    }
+    // &:hover {
+    //     transform: scale(1.1);
+    // }
     img {
         width: 100%;
         height: 100%;

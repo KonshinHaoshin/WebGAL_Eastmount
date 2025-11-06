@@ -19,6 +19,11 @@ export const GearButton: FC = () => {
         return null;
     }
 
+    // Phone 显示时不显示 gear 按钮
+    if (GUIStore.showPhone) {
+        return null;
+    }
+
     const handleClick = () => {
         dispatch(setVisibility({ component: 'showPhone', visibility: true }));
         playSeClick();
