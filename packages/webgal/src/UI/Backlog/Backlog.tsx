@@ -13,7 +13,7 @@ import { WebGAL } from '@/Core/WebGAL';
 import backlogBg from '@/assets/dragonspring/backlog.png';
 import backlog_item_button from '@/assets/dragonspring/backlog_item_left.png';
 import backlog_item_nameContainer from '@/assets/dragonspring/namebox.png';
-import characters from '@/assets/dragonspring/characters.json';
+import useLoadJson from '@/hooks/useLoadJson';
 
 /* ====== 工具函数：把 ReactNode 转为纯文本 ====== */
 function toPlainText(node: React.ReactNode): string {
@@ -47,8 +47,11 @@ function compact(s: string) {
 }
 
 /** 把输入名映射到 characters.json 的规范键（含空格），并返回颜色 */
-function resolveCanonicalNameAndColor(inputName: string): { canonicalKey: string; color?: string } {
-  const dict = characters as Record<string, string>;
+function resolveCanonicalNameAndColor(
+  inputName: string,
+  characters: Record<string, string>,
+): { canonicalKey: string; color?: string } {
+  const dict = characters;
 
   const rawNorm = normalizeSpaces(inputName);
   const rawComp = compact(inputName);
@@ -115,6 +118,7 @@ export const Backlog = () => {
   const [indexHide, setIndexHide] = useState(false);
   const [isDisableScroll, setIsDisableScroll] = useState(false);
   const [limit, setLimit] = useState(20);
+  const characters = useLoadJson<Record<string, string>>('Stage/TextBox/characters.json', {});
 
   useEffect(() => {
     if (!isBacklogOpen) return;
@@ -158,7 +162,7 @@ export const Backlog = () => {
       const nameRaw = compileSentence(backlogItem.currentStageState.showName, 3, true);
       const fullNameInput = nameRaw.map((line) => line.map((c) => toPlainText(c.reactNode)).join('')).join('\n');
 
-      const { canonicalKey, color: surnameColor } = resolveCanonicalNameAndColor(fullNameInput);
+      const { canonicalKey, color: surnameColor } = resolveCanonicalNameAndColor(fullNameInput, characters);
 
       // 检查是否有名字内容（去除空白字符后）
       const hasName = canonicalKey.trim() !== '';
@@ -256,30 +260,6 @@ export const Backlog = () => {
               </div>
 
               {/* 语音播放按钮已屏蔽 */}
-              {false && backlogItem.currentStageState.vocal ? (
-                <div
-                  onClick={() => {
-                    playSeClick();
-                    const el = document.getElementById(
-                      'backlog_audio_play_element_' + indexOfBacklog,
-                    ) as HTMLAudioElement | null;
-                    if (el) {
-                      el.currentTime = 0;
-                      const userDataStore = webgalStore.getState().userData;
-                      const mainVol = userDataStore.optionData.volumeMain;
-                      el.volume = mainVol * 0.01 * (userDataStore.optionData.vocalVolume * 0.01);
-                      // eslint-disable-next-line no-void
-                      el.play().catch(() => void 0);
-                    }
-                  }}
-                  onMouseEnter={playSeEnter}
-                  className={styles.backlog_item_button_element}
-                  aria-label="play voice"
-                  title="播放语音"
-                >
-                  <VolumeNotice theme="outline" size={iconSize} fill="#ffffff" strokeWidth={3} />
-                </div>
-              ) : null}
             </div>
 
             {/* 名字底板 + 名字文字（底图在下，文字在上） */}

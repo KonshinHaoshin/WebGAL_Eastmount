@@ -1,8 +1,9 @@
 changeBg:RGB/Background_001_001.png;
 bgm:Ambient/Ambient_003_001 Chakumero.ogg;
-:欢迎使用由东山燃灯寺等人联合开发的仿魔法少女的魔女审判(以下简称魔判)的webgal引擎喵
-:鉴于webgal技术被引进邦多礼之后带来的mygo和mujica二创的井喷，我们做了一个魔法少女魔女裁判的webgal引擎
-:该引擎是基于Eastmount2.0制作的，所以原Eastmount2.0的功能|如支持聚合模型、webmxgif动态模型都是支持的
+东山燃灯寺:大家好，我是Ajan Eastmount
+东山燃灯寺:欢迎使用由东山燃灯寺等人联合开发的仿魔法少女的魔女审判(以下简称魔判)的webgal引擎喵
+东山燃灯寺:鉴于webgal技术被引进邦多礼之后带来的mygo和mujica二创的井喷，我们做了一个魔法少女魔女裁判的webgal引擎
+东山燃灯寺:该引擎是基于Eastmount2.0制作的，所以原Eastmount2.0的功能|如支持聚合模型、webmxgif动态模型都是支持的
 changeFigure:立绘差分/ema/ema_2.png -id=ema -transform={"position":{"x":0,"y":300},"scale":{"x":1.2,"y":1.2}} -next;
 樱羽艾玛:并且我们在figure/立绘差分文件下为每个角色都预先做了三个png立绘|虽然目前表情拆分有点少，但是未来一定会越来越多的！
 setTransform:{"position":{"x":-675}} -target=ema -duration=150 -next;
@@ -36,7 +37,7 @@ manopedia:off;
 二阶堂希罗:如果您对该引擎有什么疑问|或者愿意为我们这个引擎提供更多更新的素材又或者是单纯地想要讨论剧情
 changeFigure:立绘差分/hiro/hiro_3.png -id=hiro -transform={"position":{"x":0,"y":300},"scale":{"x":1.2,"y":1.2}} -next;
 二阶堂希罗:我们都诚挚地希望您能加我们的小群|979220215
-choose:加一定加|好的我马上加
+choose:加一定加:test.txt|好的我马上加:test.txt|不能的，我不会加！:death.txt -spec;
 二阶堂希罗:以及请不要切换模板，或者更改template文件夹下的内容
 setTransform:{"position":{"x":-675}} -target=hiro -duration=150 -next;
 changeFigure:立绘差分/meruru/meruru_1.png -id=meruru -transform={"position":{"x":675,"y":300},"scale":{"x":1.2,"y":1.2}} -next;

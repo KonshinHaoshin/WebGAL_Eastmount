@@ -7,7 +7,7 @@ import { css } from '@emotion/css';
 import { textSize } from '@/store/userDataInterface';
 import textboxBg from '@/assets/dragonspring/textbox.png';
 import nameBoxBg from '@/assets/dragonspring/namebox.png';
-import characters from '@/assets/dragonspring/characters.json';
+import useLoadJson from '@/hooks/useLoadJson';
 import button_on from '@/assets/dragonspring/button_on.png';
 import button_off from '@/assets/dragonspring/button_off.png';
 import { switchAuto } from '@/Core/controller/gamePlay/autoPlay';
@@ -38,6 +38,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
   const [showCursor, setShowCursor] = useState(false);
   const applyStyle = useApplyStyle('Stage/TextBox/textbox.scss');
   const { playSeClick } = useSoundEffect();
+  const characters = useLoadJson<Record<string, string>>('Stage/TextBox/characters.json', {});
 
   // 直接监听 WebGAL.gameplay.isAuto 的变化，确保无论从哪里调用 stopAuto() 都能立即更新
   useEffect(() => {
@@ -168,15 +169,18 @@ export default function IMSSTextbox(props: ITextboxProps) {
   }
 
   /** 返回：{ canonicalKey, color }
-   * canonicalKey 是在 characters.json 中存在的“规范键”（含空格，如“千早 爱音”）
+   * canonicalKey 是在 characters.json 中存在的"规范键"（含空格，如"千早 爱音"）
    * 若找不到，canonicalKey 为 normalize 后的原文，color 为 undefined
    */
-  function resolveCanonicalNameAndColor(inputName: string): { canonicalKey: string; color?: string } {
+  function resolveCanonicalNameAndColor(
+    inputName: string,
+    characters: Record<string, string>,
+  ): { canonicalKey: string; color?: string } {
     const raw = normalizeSpaces(inputName);
     const compactInput = compact(raw);
 
-    // 1) 先尝试字典“紧凑匹配”：去空格后相等则认为是该键
-    const dict = characters as Record<string, string>;
+    // 1) 先尝试字典"紧凑匹配"：去空格后相等则认为是该键
+    const dict = characters;
     for (const k of Object.keys(dict)) {
       if (compact(k) === compactInput) {
         const color = dict[k];
@@ -247,7 +251,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
     const fullText = line.map((en) => toPlainText(en.reactNode)).join('');
 
     // 拿到规范键（含空格）与颜色
-    const { canonicalKey, color: surnameColor } = resolveCanonicalNameAndColor(fullText);
+    const { canonicalKey, color: surnameColor } = resolveCanonicalNameAndColor(fullText, characters);
 
     // 拆分姓/名（若没有空格，则认为无姓氏之分）
     const tokens = canonicalKey.split(' ');
