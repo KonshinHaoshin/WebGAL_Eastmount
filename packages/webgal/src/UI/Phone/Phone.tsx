@@ -1,8 +1,13 @@
+/* eslint-disable prettier/prettier */
 import { FC, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
-import { setVisibility } from '@/store/GUIReducer';
+import { setVisibility, setMenuPanelTag } from '@/store/GUIReducer';
+import { MenuPanelTag, componentsVisibility } from '@/store/guiInterface';
 import useSoundEffect from '@/hooks/useSoundEffect';
+import { backToTitle } from '@/Core/controller/gamePlay/backToTitle';
+import { showGlogalDialog } from '@/UI/GlobalDialog/GlobalDialog';
+import useTrans from '@/hooks/useTrans';
 import phone from '@/assets/dragonspring/icon/phone.png';
 import WIFI from '@/assets/dragonspring/icon/wifi.png';
 import save01 from '@/assets/dragonspring/icon/save01.png';
@@ -23,8 +28,9 @@ import styles from './phone.module.scss';
  */
 export const Phone: FC = () => {
     const dispatch = useDispatch();
-    const { playSeClick, playSeEnter } = useSoundEffect();
+    const { playSeClick, playSeEnter, playSeDialogOpen } = useSoundEffect();
     const GUIStore = useSelector((state: RootState) => state.GUI);
+    const t = useTrans('gaming.');
 
     // 如果 Phone 不显示，返回 null
     if (!GUIStore.showPhone) {
@@ -34,6 +40,61 @@ export const Phone: FC = () => {
     const handleClose = () => {
         dispatch(setVisibility({ component: 'showPhone', visibility: false }));
         playSeClick();
+    };
+
+    const setComponentVisibility = (component: keyof componentsVisibility, visibility: boolean) => {
+        dispatch(setVisibility({ component, visibility }));
+    };
+
+    const setMenuPanel = (menuPanel: MenuPanelTag) => {
+        dispatch(setMenuPanelTag(menuPanel));
+    };
+
+    // Save 按钮处理函数
+    const handleSave = () => {
+        setMenuPanel(MenuPanelTag.Save);
+        setComponentVisibility('showMenuPanel', true);
+        setComponentVisibility('showPhone', false);
+        playSeClick();
+    };
+
+    // Load 按钮处理函数
+    const handleLoad = () => {
+        setMenuPanel(MenuPanelTag.Load);
+        setComponentVisibility('showMenuPanel', true);
+        setComponentVisibility('showPhone', false);
+        playSeClick();
+    };
+
+    // History 按钮处理函数
+    const handleHistory = () => {
+        setComponentVisibility('showBacklog', true);
+        setComponentVisibility('showTextBox', false);
+        setComponentVisibility('showPhone', false);
+        playSeClick();
+    };
+
+    // Setting 按钮处理函数
+    const handleSetting = () => {
+        setMenuPanel(MenuPanelTag.Option);
+        setComponentVisibility('showMenuPanel', true);
+        setComponentVisibility('showPhone', false);
+        playSeClick();
+    };
+
+    // Back to Title 按钮处理函数
+    const handleBackToTitle = () => {
+        playSeDialogOpen();
+        showGlogalDialog({
+            title: t('buttons.titleTips'),
+            leftText: t('$common.yes'),
+            rightText: t('$common.no'),
+            leftFunc: () => {
+                backToTitle();
+            },
+            rightFunc: () => { },
+        });
+        setComponentVisibility('showPhone', false);
     };
 
     return (
@@ -56,35 +117,35 @@ export const Phone: FC = () => {
                   className={styles.saveButton}
                   normal={save01}
                   hover={save02}
-                  onClick={() => playSeClick()}
+                    onClick={handleSave}
                   onMouseEnter={playSeEnter}
               />
               <PhoneButton
                   className={styles.loadButton}
                   normal={load01}
                   hover={load02}
-                  onClick={() => playSeClick()}
+                    onClick={handleLoad}
                   onMouseEnter={playSeEnter}
               />
               <PhoneButton
                   className={styles.historyButton}
                   normal={history01}
                   hover={history02}
-                  onClick={() => playSeClick()}
+                    onClick={handleHistory}
                   onMouseEnter={playSeEnter}
               />
               <PhoneButton
                   className={styles.settingButton}
                   normal={setting01}
                   hover={setting02}
-                  onClick={() => playSeClick()}
+                    onClick={handleSetting}
                   onMouseEnter={playSeEnter}
               />
               <PhoneButton
                   className={styles.backtotitleButton}
                   normal={backtotitle01}
                   hover={backtotitle02}
-                  onClick={() => playSeClick()}
+                    onClick={handleBackToTitle}
                   onMouseEnter={playSeEnter}
               />
           </div>
@@ -108,15 +169,15 @@ const PhoneButton: FC<PhoneButtonProps> = ({ className, normal, hover, onClick, 
 
     return (
         <div
-          className={`${styles.phoneButton} ${className || ''}`}
-          onClick={onClick}
-          onMouseEnter={() => {
-              setIsHovered(true);
-              onMouseEnter();
-          }}
-          onMouseLeave={() => setIsHovered(false)}
-      >
-          <img src={isHovered ? hover : normal} alt="Button" />
-      </div>
+            className={`${styles.phoneButton} ${className || ''}`}
+            onClick={onClick}
+            onMouseEnter={() => {
+                setIsHovered(true);
+                onMouseEnter();
+            }}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            <img src={isHovered ? hover : normal} alt="Button" />
+        </div>
   );
 };
