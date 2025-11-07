@@ -75,6 +75,7 @@ export const initState: IStageState = {
   inventory: {
     items: {},
   },
+  viewingItemId: null, // 当前正在查看的物品ID
 };
 
 /**
@@ -120,7 +121,9 @@ const stageSlice = createSlice({
         STAGE_KEYS.FIG_R,
         ...state.freeFigure.map((figure) => figure.key),
       ];
-      if (!activeTargets.includes(target)) return;
+      // 允许 item 的 key（以 item- 开头）
+      const isItemKey = target.startsWith('item-');
+      if (!activeTargets.includes(target) && !isItemKey) return;
       // 尝试找到待修改的 Effect
       const effectIndex = state.effects.findIndex((e) => e.target === target);
       if (effectIndex >= 0) {
@@ -294,6 +297,9 @@ const stageSlice = createSlice({
       if (state.inventory.items[itemId].count === 0) {
         delete state.inventory.items[itemId];
       }
+    },
+    setViewingItemId: (state, action: PayloadAction<string | null>) => {
+      state.viewingItemId = action.payload;
     },
   },
 });

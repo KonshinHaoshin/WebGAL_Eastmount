@@ -102,6 +102,10 @@ export default class PixiStage {
   public readonly backgroundContainer: PIXI.Container;
   public backgroundObjects: Array<IStageObject> = [];
   public mainStageObject: IStageObject;
+  // Item 容器相关
+  public itemApp: PIXI.Application | null = null;
+  public readonly itemContainer: PIXI.Container;
+  public itemObjects: Array<IStageObject> = [];
   /**
    * 添加 Spine 立绘
    * @param key 立绘的标识，一般和立绘位置有关
@@ -194,6 +198,37 @@ export default class PixiStage {
       this.backgroundContainer,
     );
     this.currentApp = app;
+
+    // 创建独立的 Item PIXI Application
+    const itemApp = new PIXI.Application({
+      backgroundAlpha: 0,
+      preserveDrawingBuffer: true,
+      autoStart: true,
+    });
+    // 启用交互
+    itemApp.stage.interactive = true;
+    itemApp.stage.hitArea = new PIXI.Rectangle(0, 0, this.stageWidth, this.stageHeight);
+    const itemContainerElement = document.getElementById('itemContainer');
+    if (itemContainerElement) {
+      itemContainerElement.innerHTML = '';
+      itemContainerElement.appendChild(itemApp.view);
+    }
+
+    // 设置样式
+    itemApp.renderer.view.style.position = 'absolute';
+    itemApp.renderer.view.style.display = 'block';
+    itemApp.renderer.view.id = 'itemCanvas';
+    // @ts-ignore
+    itemApp.renderer.autoResize = true;
+    if (appRoot) {
+      itemApp.renderer.resize(appRoot.clientWidth, appRoot.clientHeight);
+    }
+
+    // 创建 Item 容器
+    this.itemContainer = new PIXI.Container();
+    this.itemContainer.sortableChildren = true;
+    itemApp.stage.addChild(this.itemContainer);
+    this.itemApp = itemApp;
     // 每 5s 获取帧率，并且防 loader 死
     const update = () => {
       this.updateFps();
@@ -1352,7 +1387,16 @@ export default class PixiStage {
    * @param key
    */
   public getStageObjByKey(key: string) {
+    // 先检查 itemObjects，然后检查其他对象
+    const itemObj = this.itemObjects.find((e) => e.key === key);
+    if (itemObj) {
+      return itemObj;
+    }
     return [...this.figureObjects, ...this.backgroundObjects, this.mainStageObject].find((e) => e.key === key);
+  }
+
+  public getItemObjByKey(key: string) {
+    return this.itemObjects.find((e) => e.key === key);
   }
 
   public getStageObjByUuid(objUuid: string) {
@@ -1360,7 +1404,7 @@ export default class PixiStage {
   }
 
   public getAllStageObj() {
-    return [...this.figureObjects, ...this.backgroundObjects, this.mainStageObject];
+    return [...this.figureObjects, ...this.backgroundObjects, ...this.itemObjects, this.mainStageObject];
   }
 
   /**
@@ -1398,6 +1442,148 @@ export default class PixiStage {
     //   newEffects.splice(index, 1);
     // }
     // updateCurrentEffects(newEffects);
+  }
+
+  /**
+   * 根据 key 删除 item 对象
+   * @param key
+   */
+  public removeItemObjectByKey(key: string) {
+    const indexItem = this.itemObjects.findIndex((e) => e.key === key);
+    if (indexItem >= 0) {
+      const itemSprite = this.itemObjects[indexItem];
+      for (const element of itemSprite.pixiContainer.children) {
+        element.destroy();
+      }
+      itemSprite.pixiContainer.destroy();
+      this.itemContainer.removeChild(itemSprite.pixiContainer);
+      this.itemObjects.splice(indexItem, 1);
+    }
+    this.updateItemContainerPointerEvents();
+  }
+
+  /**
+   * 更新 itemContainer 的 pointer-events 状态
+   */
+  private updateItemContainerPointerEvents() {
+    const itemContainerElement = document.getElementById('itemContainer');
+    if (itemContainerElement) {
+      const canvas = itemContainerElement.querySelector('canvas');
+      if (canvas) {
+        if (this.itemObjects.length > 0) {
+          canvas.style.pointerEvents = 'auto';
+          logger.debug(`ItemContainer: 启用 canvas pointer-events，当前 item 数量: ${this.itemObjects.length}`);
+        } else {
+          canvas.style.pointerEvents = 'none';
+          logger.debug('ItemContainer: 禁用 canvas pointer-events');
+        }
+      } else {
+        logger.warn('ItemContainer: 找不到 canvas 元素');
+      }
+    } else {
+      logger.warn('ItemContainer: 找不到 itemContainer 元素');
+    }
+  }
+
+  /**
+   * 添加 Item
+   * @param key Item 的标识
+   * @param url Item 图片 url
+   * @param presetPosition 预设位置
+   */
+  public addItem(key: string, url: string, presetPosition: 'left' | 'center' | 'right' = 'center') {
+    if (!this.itemApp) {
+      logger.warn('Item App 未初始化');
+      return;
+    }
+
+    const loader = this.itemApp.loader;
+    // 准备用于存放这个 item 的 Container
+    const thisItemContainer = new WebGALPixiContainer();
+
+    // 是否有相同 key 的 item
+    const setItemIndex = this.itemObjects.findIndex((e) => e.key === key);
+    const isItemSet = setItemIndex >= 0;
+
+    // 已经有一个这个 key 的 item 存在了
+    if (isItemSet) {
+      this.removeItemObjectByKey(key);
+    }
+
+    const metadata = this.getFigureMetadataByKey(key);
+    if (metadata) {
+      if (metadata.zIndex) {
+        thisItemContainer.zIndex = metadata.zIndex;
+      }
+    }
+    // 挂载
+    this.itemContainer.addChild(thisItemContainer);
+    const itemUuid = uuid();
+    this.itemObjects.push({
+      uuid: itemUuid,
+      key: key,
+      pixiContainer: thisItemContainer,
+      sourceUrl: url,
+      sourceType: 'img',
+      sourceExt: this.getExtName(url),
+    });
+    this.updateItemContainerPointerEvents();
+
+    // 完成图片加载后执行的函数
+    const setup = () => {
+      setTimeout(() => {
+        const texture = loader.resources?.[url]?.texture;
+        if (texture && this.getItemObjByKey(key)) {
+          /**
+           * 重设大小
+           */
+          const originalWidth = texture.width;
+          const originalHeight = texture.height;
+          const scaleX = this.stageWidth / originalWidth;
+          const scaleY = this.stageHeight / originalHeight;
+          const targetScale = Math.min(scaleX, scaleY);
+          const itemSprite = new PIXI.Sprite(texture);
+          // 启用交互
+          itemSprite.interactive = true;
+          itemSprite.buttonMode = true;
+          itemSprite.cursor = 'pointer';
+          itemSprite.scale.x = targetScale;
+          itemSprite.scale.y = targetScale;
+          itemSprite.anchor.set(0.5);
+          itemSprite.position.y = this.stageHeight / 2;
+          const targetWidth = originalWidth * targetScale;
+          const targetHeight = originalHeight * targetScale;
+          thisItemContainer.setBaseY(this.stageHeight / 2);
+          if (targetHeight < this.stageHeight) {
+            thisItemContainer.setBaseY(this.stageHeight / 2 + (this.stageHeight - targetHeight) / 2);
+          }
+          if (presetPosition === 'center') {
+            thisItemContainer.setBaseX(this.stageWidth / 2);
+          }
+          if (presetPosition === 'left') {
+            thisItemContainer.setBaseX(targetWidth / 2);
+          }
+          if (presetPosition === 'right') {
+            thisItemContainer.setBaseX(this.stageWidth - targetWidth / 2);
+          }
+          thisItemContainer.pivot.set(0, this.stageHeight / 2);
+          thisItemContainer.addChild(itemSprite);
+          this.updateItemContainerPointerEvents();
+        }
+      }, 0);
+    };
+
+    /**
+     * 加载器部分
+     */
+    if (!loader.resources?.[url]?.texture) {
+      loader.add(url, url).load(() => {
+        setup();
+      });
+    } else {
+      // 复用
+      setup();
+    }
   }
 
   public cacheGC() {

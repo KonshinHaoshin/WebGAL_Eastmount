@@ -249,6 +249,7 @@ export interface IStageState {
 	figureMetaData: figureMetaData;
 	enableManopedia: boolean;
 	inventory: IInventory; // 物品仓库
+	viewingItemId: string | null; // 当前正在查看的物品ID
 }
 
 /**

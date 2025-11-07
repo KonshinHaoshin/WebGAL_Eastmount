@@ -1,3 +1,4 @@
 changeBg:RGB/Background_001_001.png;
 bgm:Ambient/Ambient_003_001 Chakumero.ogg;
-Item:ansk -left -count=1;
+Item:ansk -transform={"position":{"x":0,"y":0},"scale":{"x":0.25,"y":0.25}} -count=1
+东山燃灯寺:item功能测试
