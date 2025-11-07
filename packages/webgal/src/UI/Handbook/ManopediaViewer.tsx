@@ -1,6 +1,6 @@
 import { FC, ReactNode, useState } from 'react';
 import useSoundEffect from '@/hooks/useSoundEffect';
-import manopedia from '@/assets/dragonspring/manopedia.png';
+import { InventoryViewer } from './InventoryViewer';
 import styles from './manopediaViewer.module.scss';
 
 interface IManopediaViewerProps {
@@ -28,8 +28,8 @@ export const ManopediaViewer: FC<IManopediaViewerProps> = ({ children }) => {
       <span onClick={handleClick}>{children}</span>
       {showViewer && (
         <div className={styles.viewerOverlay} onClick={handleClose}>
-          <div className={styles.viewerContainer}>
-            <img src={manopedia} alt="Manopedia" className={styles.viewerImage} onClick={(e) => e.stopPropagation()} />
+          <div className={styles.viewerContainer} onClick={(e) => e.stopPropagation()}>
+            <InventoryViewer onClose={handleClose} />
           </div>
         </div>
       )}
