@@ -28,3 +28,7 @@ packages/webgal/public/game.old
 packages/parser/build
 packages/webgal/src/Core/util/pixiPerformManager/initRegister.ts
 packages/webgal/public/game/lut
+
+# Large files
+*.zip
+packages/webgal/Dragonspring.zip
