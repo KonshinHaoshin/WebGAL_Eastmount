@@ -122,7 +122,17 @@
 
 .outerName {
     position: absolute;
-    left: 20px;
+    left: 20px; // 保持原有样式（可能用于其他情况）
+    top: 0;
+    color: white;
+    z-index: 2;
+    text-shadow: -2px -2px 0 black, 2px -2px 0 black, -2px 2px 0 black, 2px 2px 0 black;
+}
+
+// 无姓氏首字的特殊样式（left: 0，因为外层 span 已经有 left: 20px）
+.outerNameFirst {
+    position: absolute;
+    left: 0; // 相对于 zhanwei，外层 span 已经有 left: 20px
     top: 0;
     color: white;
     z-index: 2;
@@ -130,6 +140,14 @@
 }
 
 .innerName {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+}
+
+// 无姓氏首字的特殊样式
+.innerNameFirst {
     position: absolute;
     left: 0;
     top: 0;

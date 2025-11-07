@@ -22,7 +22,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
     currentDialogKey,
     isText,
     isSafari,
-    isFirefox: boolean,
+    isFirefox,
     fontSize,
     miniAvatar,
     isHasName,
@@ -221,7 +221,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
 
     // ✅ 统一规则：
     // - 姓首字：250%
-    // - 名首字：200%（表现“首字大写”的强调）
+    // - 名首字：200%（表现"首字大写"的强调）
     // - 其他：  150%（全部相同）
     const size = isSurnameFirst ? '250%' : isGivenFirst ? '200%' : '150%';
 
@@ -236,12 +236,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
       return { fontSize: size, color: '#fff', useLayer: true };
     }
 
-    // 3) 无姓氏之分：唯一首字也要强调（200%），其余 150%
-    if (!hasSurname && i === 0) {
-      return { fontSize: '200%', color: '#fff', useLayer: true };
-    }
-
-    // 4) 普通字：统一 150%，叠层
+    // 3) 普通字：统一 150%，叠层
     return { fontSize: size, color: '#fff', useLayer: true };
   }
 
@@ -253,34 +248,32 @@ export default function IMSSTextbox(props: ITextboxProps) {
     // 拿到规范键（含空格）与颜色
     const { canonicalKey, color: surnameColor } = resolveCanonicalNameAndColor(fullText, characters);
 
-    // 拆分姓/名（若没有空格，则认为无姓氏之分）
+    // 拆分"姓 名"（若没有空格，则将整个名字视为"姓"，名为空）
     const tokens = canonicalKey.split(' ');
     const hasSurnameGiven = tokens.length >= 2;
-    const surname = hasSurnameGiven ? tokens[0] : '';
-    const given = hasSurnameGiven ? tokens.slice(1).join('') : '';
+    const surname = hasSurnameGiven ? tokens[0] : canonicalKey; // 有空格时取第一部分作为姓，无空格时整个名字作为"姓"
+    const given = hasSurnameGiven ? tokens.slice(1).join('') : ''; // 有空格时取剩余部分作为名，无空格时名为空
 
-    // 组合成最终要显示的字符数组
-    const display = hasSurnameGiven ? surname + given : canonicalKey;
+    // 组合成最终要显示的字符数组（如果有名，显示姓+名；如果无名，只显示姓）
+    const display = hasSurnameGiven && given.length > 0 ? surname + given : surname;
     const chars = Array.from(display);
 
-    // 计算“名”的起始下标（仅在有姓氏时有效）
-    const givenStartIndex = hasSurnameGiven ? surname.length : -1;
+    // 计算"名"的起始下标（如果名是空的，则不会有名首字）
+    const givenStartIndex = hasSurnameGiven && given.length > 0 ? surname.length : -1; // 有名时从姓氏后开始，无名时为-1
 
     // 渲染函数：保持你原有的大小/描边叠层策略，但根据首字位置调整颜色/大写
     const charSpans = chars.map((origCh, i) => {
       // 按规则处理大写：姓首字 & 名首字（仅 ASCII 有效）
-      const isSurnameFirst = i === 0 && hasSurnameGiven;
-      const isGivenFirst = i === givenStartIndex && hasSurnameGiven;
-      const isOnlyFirst = !hasSurnameGiven && i === 0;
+      const isSurnameFirst = i === 0; // 第一个字符总是姓首字
+      const isGivenFirst = hasSurnameGiven && given.length > 0 && i === givenStartIndex; // 有名且是名首字位置
 
-      const ch = isSurnameFirst || isGivenFirst || isOnlyFirst ? upperFirstLatin(origCh) : origCh;
+      const ch = isSurnameFirst || isGivenFirst ? upperFirstLatin(origCh) : origCh;
 
-      // 复用你原有的风格分配（会给不同序号不同 fontSize/叠层）
       const s = styleForIndex(i, {
         isSurnameFirst,
         isGivenFirst,
         hasSurname: hasSurnameGiven,
-        surnameColor, // string | undefined 没问题，因为 StyleOpts 里是可选
+        surnameColor,
       });
 
       const base: React.CSSProperties = {
@@ -301,7 +294,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
       }
 
       // 2) 名首字：仅大写，不改颜色；走原有叠层（白 + 描边）
-      // 3) 无姓氏之分时：仅首字大写，不改颜色；走原有叠层
+      // 3) 无姓氏之分时：仅首字大写，改颜色；走原有叠层
       //    => 这两种都沿用“useLayer”的路径
       if (s.useLayer) {
         return (

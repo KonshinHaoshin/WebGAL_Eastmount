@@ -1,5 +1,6 @@
 changeBg:RGB/Background_001_001.png;
 bgm:Ambient/Ambient_003_001 Chakumero.ogg;
+典狱长:114514
 东山燃灯寺:大家好，我是Ajan Eastmount
 东山燃灯寺:欢迎使用由东山燃灯寺等人联合开发的仿魔法少女的魔女审判(以下简称魔判)的webgal引擎喵
 东山燃灯寺:鉴于webgal技术被引进邦多礼之后带来的mygo和mujica二创的井喷，我们做了一个魔法少女魔女裁判的webgal引擎

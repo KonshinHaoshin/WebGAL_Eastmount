@@ -83,8 +83,8 @@ interface CharStyle {
 }
 
 interface StyleOpts {
-  isSurnameFirst: boolean; // 姓首字
-  isGivenFirst: boolean; // 名首字
+  isSurnameFirst: boolean;
+  isGivenFirst: boolean;
   hasSurname: boolean; // 是否有“姓 名”结构
   surnameColor?: string; // 姓首字颜色
 }
@@ -101,9 +101,6 @@ function styleForIndex(i: number, opt: StyleOpts): CharStyle {
   }
   if (isGivenFirst) {
     return { fontSize: size, color: '#fff', useLayer: true };
-  }
-  if (!hasSurname && i === 0) {
-    return { fontSize: '200%', color: '#fff', useLayer: true };
   }
   return { fontSize: size, color: '#fff', useLayer: true };
 }
@@ -158,7 +155,6 @@ export const Backlog = () => {
         <div key={`backlog-line-${idx}`}>{line.map((e, i2) => (e === '<br />' ? <br key={`br${i2}`} /> : e))}</div>
       ));
 
-      /// ===== 名字（与 IMSSTextbox 同步）=====
       const nameRaw = compileSentence(backlogItem.currentStageState.showName, 3, true);
       const fullNameInput = nameRaw.map((line) => line.map((c) => toPlainText(c.reactNode)).join('')).join('\n');
 
@@ -167,23 +163,22 @@ export const Backlog = () => {
       // 检查是否有名字内容（去除空白字符后）
       const hasName = canonicalKey.trim() !== '';
 
-      // 拆分"姓 名"
+      // 拆分"姓 名"（若没有空格，则将整个名字视为"姓"，名为空）
       const tokens = canonicalKey.split(' ');
       const hasSurnameGiven = tokens.length >= 2;
-      const surname = hasSurnameGiven ? tokens[0] : '';
-      const given = hasSurnameGiven ? tokens.slice(1).join('') : '';
+      const surname = hasSurnameGiven ? tokens[0] : canonicalKey; // 有空格时取第一部分作为姓，无空格时整个名字作为"姓"
+      const given = hasSurnameGiven ? tokens.slice(1).join('') : ''; // 有空格时取剩余部分作为名，无空格时名为空
 
-      // 显示文本（去空格并拼回）
-      const display = hasSurnameGiven ? surname + given : canonicalKey;
+      // 显示文本（如果有名，显示姓+名；如果无名，只显示姓）
+      const display = hasSurnameGiven && given.length > 0 ? surname + given : surname;
       const chars = Array.from(display);
-      const givenStartIndex = hasSurnameGiven ? surname.length : -1;
+      const givenStartIndex = hasSurnameGiven && given.length > 0 ? surname.length : -1; // 有名时从姓氏后开始，无名时为-1
 
       const nameCharSpans = chars.map((origCh, idx) => {
-        const isSurnameFirst = idx === 0 && hasSurnameGiven;
-        const isGivenFirst = idx === givenStartIndex && hasSurnameGiven;
-        const isOnlyFirst = !hasSurnameGiven && idx === 0;
+        const isSurnameFirst = idx === 0; // 第一个字符总是姓首字
+        const isGivenFirst = hasSurnameGiven && given.length > 0 && idx === givenStartIndex; // 有名且是名首字位置
 
-        const ch = isSurnameFirst || isGivenFirst || isOnlyFirst ? upperFirstLatin(origCh) : origCh;
+        const ch = isSurnameFirst || isGivenFirst ? upperFirstLatin(origCh) : origCh;
 
         const s = styleForIndex(idx, {
           isSurnameFirst,
@@ -196,11 +191,10 @@ export const Backlog = () => {
           fontSize: s.fontSize,
           color: s.color ?? '#fff',
           lineHeight: 1,
-          // 让每个字不额外拉开
           marginRight: 0,
         };
 
-        // 姓首字有颜色：纯色实心
+        // 姓首字有颜色：纯色实心（这种情况不会发生，因为姓是空的）
         if (isSurnameFirst && surnameColor) {
           return (
             <span key={`${ch}-${idx}`} className={styles.name_char} style={baseStyle}>
@@ -209,7 +203,6 @@ export const Backlog = () => {
           );
         }
 
-        // 其它：叠层（与 IMSSTextbox outerName/innerName 等价）
         if (s.useLayer) {
           return (
             <span key={`${ch}-${idx}`} className={styles.name_char} style={baseStyle}>
@@ -222,7 +215,6 @@ export const Backlog = () => {
           );
         }
 
-        // 兜底（基本不会到）
         return (
           <span key={`${ch}-${idx}`} className={styles.name_char} style={baseStyle}>
             {ch}
@@ -262,7 +254,6 @@ export const Backlog = () => {
               {/* 语音播放按钮已屏蔽 */}
             </div>
 
-            {/* 名字底板 + 名字文字（底图在下，文字在上） */}
             {hasName && (
               <div className={styles.backlog_item_content_name}>
                 <img src={backlog_item_nameContainer} alt="namebox" className={styles.name_container_bg} />
