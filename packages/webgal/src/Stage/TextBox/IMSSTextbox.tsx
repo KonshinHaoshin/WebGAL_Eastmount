@@ -219,10 +219,6 @@ export default function IMSSTextbox(props: ITextboxProps) {
   function styleForIndex(i: number, opt: StyleOpts): CharStyle {
     const { isSurnameFirst, isGivenFirst, hasSurname, surnameColor } = opt;
 
-    // ✅ 统一规则：
-    // - 姓首字：250%
-    // - 名首字：200%（表现"首字大写"的强调）
-    // - 其他：  150%（全部相同）
     const size = isSurnameFirst ? '250%' : isGivenFirst ? '200%' : '150%';
 
     // 1) 姓首字：有颜色→纯色实心；无颜色→叠层白描边
