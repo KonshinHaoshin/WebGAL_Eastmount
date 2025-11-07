@@ -176,6 +176,31 @@ export interface IFigureMetadata {
 type figureMetaData = Record<string, IFigureMetadata>;
 
 /**
+ * 仓库物品接口
+ */
+export interface IInventoryItem {
+	id: string; // 物品ID
+	name: string; // 物品名称
+	count: number; // 物品数量
+}
+
+/**
+ * 仓库接口
+ */
+export interface IInventory {
+	items: Record<string, IInventoryItem>; // 以物品ID为键的物品字典
+}
+
+/**
+ * 添加/移除物品的Payload
+ */
+export interface IModifyInventoryItemPayload {
+	itemId: string;
+	count: number; // 正数为添加，负数为移除
+	name?: string; // 如果物品不存在，需要提供名称
+}
+
+/**
  * @interface IStageState 游戏舞台数据接口
  */
 export interface IStageState {
@@ -223,6 +248,7 @@ export interface IStageState {
 	replacedUIlable: Record<string, string>;
 	figureMetaData: figureMetaData;
 	enableManopedia: boolean;
+	inventory: IInventory; // 物品仓库
 }
 
 /**
