@@ -6,7 +6,7 @@
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.9);
-    z-index: 9999;
+    z-index: 10001 !important; // 高于 InventoryViewer (9999) 和 ManopediaViewer (9999)，使用 !important 确保优先级
     display: flex;
     align-items: center;
     justify-content: center;
@@ -120,8 +120,17 @@
     font-family: 'WebgalUI', serif;
 }
 
-.addButton {
+.buttonGroup {
     margin-top: 30px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.useButton,
+.addButton {
     padding: 16px 32px;
     font-size: 22px;
     font-weight: bold;
@@ -150,6 +159,26 @@
     &:active {
         transform: scale(0.98);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+}
+
+.useButton {
+    background: #4a5a3a; // 稍微不同的颜色以区分使用按钮
+    &:hover {
+        background: #5a6a4a;
+    }
+    &:active {
+        background: #3a4a2a;
+    }
+}
+
+.cancelButton {
+    background: #5a3a3a; // 红色系，表示取消操作
+    &:hover {
+        background: #6a4a4a;
+    }
+    &:active {
+        background: #4a2a2a;
     }
 }
 

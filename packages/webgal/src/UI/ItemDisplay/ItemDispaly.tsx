@@ -6,6 +6,8 @@ import useSoundEffect from '@/hooks/useSoundEffect';
 import { itemManager } from '@/Core/Modules/item/itemManager';
 import { IItemDefinition } from '@/store/IItemDefinition';
 import { WebGAL } from '@/Core/WebGAL';
+import { logger } from '@/Core/util/logger';
+import { executeItemEffects } from '@/Core/util/executeItemEffects';
 import styles from './itemDisplay.module.scss';
 
 export const ItemDisplay: FC = () => {
@@ -21,6 +23,12 @@ export const ItemDisplay: FC = () => {
 
     // 获取当前物品数量
     const itemCount = viewingItemId ? inventory.items[viewingItemId]?.count ?? 0 : 0;
+    // 检查物品是否在仓库中
+    const isInInventory = itemCount > 0;
+    // 检查物品是否在舞台上
+    const isOnStage = viewingItemId
+        ? WebGAL.gameplay.pixiStage?.getItemObjByKey(`item-${viewingItemId}`) !== undefined
+        : false;
 
     useEffect(() => {
         if (viewingItemId) {
@@ -60,6 +68,39 @@ export const ItemDisplay: FC = () => {
         }
     };
 
+    // 使用物品
+    const handleUseItem = async () => {
+        if (!viewingItemId || !itemDef || !itemDef.effects || itemDef.effects.length === 0) {
+            logger.warn(`物品 ${viewingItemId} 没有效果`);
+            return;
+        }
+
+        // 执行所有 effects
+        await executeItemEffects(viewingItemId, itemDef.effects);
+
+        // 如果是消耗品，减少数量
+        if (itemDef.consumable !== false) {
+            // 如果物品在仓库中，减少仓库数量
+            if (itemCount > 0) {
+                dispatch(
+                    addInventoryItem({
+                        itemId: viewingItemId,
+                        count: -1,
+                        name: itemDef.name,
+                    }),
+                );
+            } else {
+                // 如果物品在舞台上，移除舞台上的物品显示
+                const key = `item-${viewingItemId}`;
+                WebGAL.gameplay.pixiStage?.removeItemObjectByKey(key);
+            }
+        }
+
+        // 关闭查看器
+        dispatch(stageActions.setViewingItemId({ itemId: null }));
+        playSeClick();
+    };
+
     if (!viewingItemId || !itemDef) {
         return null;
     }
@@ -80,10 +121,30 @@ export const ItemDisplay: FC = () => {
                         {itemDef.category && <div className={styles.itemCategory}>分类: {itemDef.category}</div>}
                         {itemDef.description && <div className={styles.itemDescription}>{itemDef.description}</div>}
                         <div className={styles.itemCount}>数量: {itemCount}</div>
-                        <button className={styles.addButton} onClick={handleAddToInventory}>
-                            {itemIconPath && <img src={itemIconPath} alt={itemDef.name} className={styles.itemIcon} />}
-                            添加到仓库 (+{viewingItemCount})
-                        </button>
+                        <div className={styles.buttonGroup}>
+                            {!isInInventory && isOnStage && (
+                                <button className={styles.addButton} onClick={handleAddToInventory}>
+                                    {itemIconPath && <img src={itemIconPath} alt={itemDef.name} className={styles.itemIcon} />}
+                                    添加到仓库 (+{viewingItemCount})
+                                </button>
+                            )}
+                            {isInInventory && itemDef.effects && itemDef.effects.length > 0 && (
+                                <>
+                                    <button className={styles.useButton} onClick={handleUseItem}>
+                                        {itemIconPath && <img src={itemIconPath} alt={itemDef.name} className={styles.itemIcon} />}
+                                        使用
+                                    </button>
+                                    <button className={styles.cancelButton} onClick={handleClose}>
+                                        取消
+                                    </button>
+                                </>
+                            )}
+                            {!isInInventory && !isOnStage && (
+                                <button className={styles.cancelButton} onClick={handleClose}>
+                                    关闭
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,9 +1,6 @@
 changeBg:RGB/Background_001_001.png;
 bgm:Ambient/Ambient_003_001 Chakumero.ogg;
 manopedia:on;
-Item:simplespear -transform={"position":{"x":0,"y":0},"scale":{"x":0.25,"y":0.25}} -count=1
-东山燃灯寺:item功能测试
-;setVar:attack=(attack||0)+10;
-say:测试
-say:你当前的攻击力是{attack};
-;say:这把长矛看起来很普通，但是它很实用;
+Item:simplespear -transform={"position":{"x":0,"y":0},"scale":{"x":0.25,"y":0.25}} -count=1;
+东山燃灯寺:item功能测试;
+Item:ansk -transform={"position":{"x":0,"y":0},"scale":{"x":0.25,"y":0.25}} -count=1;
