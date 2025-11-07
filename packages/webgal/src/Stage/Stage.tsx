@@ -16,7 +16,7 @@ import { isIOS } from '@/Core/initializeScript';
 import { WebGAL } from '@/Core/WebGAL';
 import { IGuiState } from '@/store/guiInterface';
 import { IStageState } from '@/store/stageInterface';
-import { ItemViewer } from '@/UI/Handbook/ItemViewer';
+import { ItemDisplay } from '@/UI/ItemDisplay/ItemDispaly';
 // import OldStage from '@/Components/Stage/OldStage/OldStage';
 
 function inTextBox(event: React.MouseEvent) {
@@ -144,7 +144,7 @@ export const Stage: FC = () => {
         onMouseMove={(e) => !GUIState.showControls && updateControlsVisibility(e, stageState, GUIState, dispatch)}
       />
       <IntroContainer />
-      <ItemViewer />
+      <ItemDisplay />
     </div>
   );
 };

@@ -158,8 +158,17 @@ export function Item(sentence: ISentence): IPerform {
 
             // 点击事件
             sprite.on('pointerdown', () => {
+              // 获取 count 参数
+              const count = getNumberArgByKey(sentence, 'count') ?? 1;
+              const resolvedCount = typeof count === 'string' ? Number(getValueFromStateElseKey(count, true)) : count;
+
               // 显示物品详情查看器
-              dispatch(stageActions.setViewingItemId(itemIdStr));
+              dispatch(
+                stageActions.setViewingItemId({
+                  itemId: itemIdStr,
+                  count: resolvedCount,
+                }),
+              );
 
               logger.debug(`查看物品: ${itemDef.name} (${itemIdStr})`);
             });

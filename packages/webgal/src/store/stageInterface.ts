@@ -250,6 +250,7 @@ export interface IStageState {
 	enableManopedia: boolean;
 	inventory: IInventory; // 物品仓库
 	viewingItemId: string | null; // 当前正在查看的物品ID
+	viewingItemCount: number; // 当前正在查看的物品数量（用于添加到仓库）
 }
 
 /**

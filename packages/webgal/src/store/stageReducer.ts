@@ -76,6 +76,7 @@ export const initState: IStageState = {
     items: {},
   },
   viewingItemId: null, // 当前正在查看的物品ID
+  viewingItemCount: 1, // 当前正在查看的物品数量（用于添加到仓库）
 };
 
 /**
@@ -298,8 +299,13 @@ const stageSlice = createSlice({
         delete state.inventory.items[itemId];
       }
     },
-    setViewingItemId: (state, action: PayloadAction<string | null>) => {
-      state.viewingItemId = action.payload;
+    setViewingItemId: (state, action: PayloadAction<{ itemId: string | null; count?: number }>) => {
+      state.viewingItemId = action.payload.itemId;
+      if (action.payload.count !== undefined) {
+        state.viewingItemCount = action.payload.count;
+      } else if (action.payload.itemId === null) {
+        state.viewingItemCount = 1;
+      }
     },
   },
 });
