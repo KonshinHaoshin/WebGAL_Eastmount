@@ -2,22 +2,23 @@
   font-size: 150%;
   box-sizing: border-box;
   padding: 0.2em 1em 0.2em 1em;
-  background-color: rgba(50, 50, 50, 0.05);
+  background-color: rgba(240, 242, 245, 0.6);
   margin: 0 0.4em 0 0;
-  color: rgba(160, 170, 160, 1);
+  color: rgba(100, 120, 140, 1);
   cursor: pointer;
   border-bottom: 2px solid transparent;
 }
 
 .NormalButton:hover {
-  border-bottom: 2px solid rgba(81, 110, 65, 0.9);
-  color: rgba(81, 110, 65, 0.9);
+  border-bottom: 2px solid rgba(70, 140, 90, 0.8);
+  color: rgba(70, 140, 90, 1);
   font-weight: bold;
+  background-color: rgba(240, 242, 245, 0.8);
 }
 
 .NormalButtonChecked {
-  background-color: rgba(81, 110, 65, 0.15);
-  border-bottom: 2px solid rgba(81, 110, 65, 0.9);
-  color: rgba(81, 110, 65, 0.9);
+  background-color: rgba(70, 140, 90, 0.2);
+  border-bottom: 2px solid rgba(70, 140, 90, 0.9);
+  color: rgba(70, 140, 90, 1);
   font-weight: bold;
 }

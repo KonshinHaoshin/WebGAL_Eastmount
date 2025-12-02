@@ -90,10 +90,6 @@ export function Display() {
           }}
         />
       </NormalOption>
-      <NormalOption full key="textPreview" title={t('textPreview.title')}>
-        {/* 这是一个临时的组件，用于模拟文本预览的效果 */}
-        <TextPreview />
-      </NormalOption>
     </div>
   );
 }

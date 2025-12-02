@@ -40,8 +40,6 @@ export enum commandType {
   applyStyle,
   wait,
   manopedia,
-  addItem,
-  Item,
 }
 
 /**

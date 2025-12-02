@@ -4,13 +4,13 @@
   align-items: center;
   width: 50px;
   height: 50px;
-  background: rgba(0,0,0,0.1);
+  background: rgba(240, 242, 245, 0.8);
   border-radius: 4px;
   cursor: pointer;
 }
 
 .backButton:hover{
-  background: rgba(0,0,0,0.2);
+  background: rgba(220, 225, 230, 1);
 }
 
 .about{
@@ -23,21 +23,21 @@
 
 .title{
   color: transparent;
-  background: linear-gradient(to left, #227D51, rgba(81, 110, 65, 1));
+  background: linear-gradient(to left, #4a9d6a, rgba(70, 140, 90, 1));
   -webkit-background-clip: text;
   font-size: 200%;
-  //border-bottom: 2px solid rgba(81, 110, 65, 0.9);
+  //border-bottom: 2px solid rgba(70, 140, 90, 0.9);
   padding: 0.15em 0.5em 0.15em 0.1em;
   font-weight: bold;
   margin-top: 20px;
 }
 
 .text{
-  color: rgba(81, 110, 65, 1);
+  color: rgba(70, 140, 90, 1);
   padding: 0 0 0 10px;
   font-size: 135%;
   a{
-    color: rgba(81, 110, 65, 1);
+    color: rgba(70, 140, 90, 1);
   }
 }
 

@@ -8,12 +8,12 @@
 }
 
 .NormalOption_title {
-  //color: rgba(81, 110, 65, 0.9);
+  //color: rgba(70, 140, 90, 0.9);
   color: transparent;
-  background: linear-gradient(to left, #227D51, rgba(81, 110, 65, 1));
+  background: linear-gradient(to left, #4a9d6a, rgba(70, 140, 90, 1));
   -webkit-background-clip: text;
   font-size: 200%;
-  //border-bottom: 2px solid rgba(81, 110, 65, 0.9);
+  //border-bottom: 2px solid rgba(70, 140, 90, 0.9);
   padding: 0.15em 0.5em 0.15em 0.1em;
   font-weight: bold;
 }
@@ -35,15 +35,15 @@
   position: absolute;
   z-index: -1;
   padding: 0.15em 0.5em 0.15em 0.1em;
-  text-shadow: 0.04em 0.04em rgba(81, 110, 65, 0.9),
-    0.05em 0.05em rgba(81, 110, 65, 0.9),
-    0.06em 0.06em rgba(81, 110, 65, 0.9),
-    0.07em 0.07em rgba(81, 110, 65, 0.9),
-    0.08em 0.08em rgba(81, 110, 65, 0.9),
-    0.09em 0.09em rgba(81, 110, 65, 0.9),
-    0.10em 0.10em rgba(81, 110, 65, 0.9);
-  //0.11em 0.11em rgba(81, 110, 65, 0.9),
-  //0.12em 0.12em rgba(81, 110, 65, 0.9);
+  text-shadow: 0.04em 0.04em rgba(70, 140, 90, 0.7),
+    0.05em 0.05em rgba(70, 140, 90, 0.7),
+    0.06em 0.06em rgba(70, 140, 90, 0.7),
+    0.07em 0.07em rgba(70, 140, 90, 0.7),
+    0.08em 0.08em rgba(70, 140, 90, 0.7),
+    0.09em 0.09em rgba(70, 140, 90, 0.7),
+    0.10em 0.10em rgba(70, 140, 90, 0.7);
+  //0.11em 0.11em rgba(70, 140, 90, 0.7),
+  //0.12em 0.12em rgba(70, 140, 90, 0.7);
 }
 
 .NormalOption_buttonList {

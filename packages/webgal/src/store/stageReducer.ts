@@ -16,7 +16,6 @@ import {
   ISetGameVar,
   ISetStagePayload,
   IStageState,
-  IModifyInventoryItemPayload,
 } from '@/store/stageInterface';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import cloneDeep from 'lodash/cloneDeep';
@@ -72,11 +71,6 @@ export const initState: IStageState = {
   replacedUIlable: {},
   figureMetaData: {},
   enableManopedia: false,
-  inventory: {
-    items: {},
-  },
-  viewingItemId: null, // 当前正在查看的物品ID
-  viewingItemCount: 1, // 当前正在查看的物品数量（用于添加到仓库）
 };
 
 /**
@@ -276,41 +270,10 @@ const stageSlice = createSlice({
         state.figureMetaData[action.payload[0]][action.payload[1]] = action.payload[2];
       }
     },
-    /**
-     * 添加/移除物品到仓库
-     * @param state 当前状态
-     * @param action 要添加或移除的物品
-     */
-    addInventoryItem: (state, action: PayloadAction<IModifyInventoryItemPayload>) => {
-      const { itemId, count, name } = action.payload;
-      if (!state.inventory.items[itemId]) {
-        if (!name) {
-          // 如果没有提供名称，无法创建新物品
-          return;
-        }
-        state.inventory.items[itemId] = {
-          id: itemId,
-          name: name,
-          count: 0,
-        };
-      }
-      state.inventory.items[itemId].count = Math.max(0, state.inventory.items[itemId].count + count);
-      if (state.inventory.items[itemId].count === 0) {
-        delete state.inventory.items[itemId];
-      }
-    },
-    setViewingItemId: (state, action: PayloadAction<{ itemId: string | null; count?: number }>) => {
-      state.viewingItemId = action.payload.itemId;
-      if (action.payload.count !== undefined) {
-        state.viewingItemCount = action.payload.count;
-      } else if (action.payload.itemId === null) {
-        state.viewingItemCount = 1;
-      }
-    },
   },
 });
 
-export const { resetStageState, setStage, setStageVar, setFreeFigure, addInventoryItem } = stageSlice.actions;
+export const { resetStageState, setStage, setStageVar, setFreeFigure } = stageSlice.actions;
 export const stageActions = stageSlice.actions;
 export default stageSlice.reducer;
 
