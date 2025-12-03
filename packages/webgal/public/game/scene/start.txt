@@ -1,6 +1,4 @@
 changeBg:RGB/Background_001_001.png;
 bgm:Ambient/Ambient_003_001 Chakumero.ogg;
 manopedia:on;
-Item:simplespear -transform={"position":{"x":0,"y":0},"scale":{"x":0.25,"y":0.25}} -count=1;
-东山燃灯寺:item功能测试;
-Item:ansk -transform={"position":{"x":0,"y":0},"scale":{"x":0.25,"y":0.25}} -count=1;
+choose:0|1;

@@ -16,12 +16,12 @@
   min-width: 50%;
   padding: 2em 1em;
   font-size: 265%;
-  color: #8E354A;
+  color: #000000;
   text-align: center;
   border: none;
   box-shadow: none;
   background: transparent;
-  margin: 0.5em 0;
+  margin: -20px !important;
   transition: color 0.3s ease;
   position: relative;
   min-height: 120px;
@@ -39,12 +39,12 @@
   min-width: 50%;
   padding: 2em 1em;
   font-size: 265%;
-  color: rgba(142, 53, 74, 0.5);
+  color: black;
   text-align: center;
   border: none;
   box-shadow: none;
   background: transparent;
-  margin: 0.5em 0;
+  margin: -20px !important;
   transition: color 0.3s ease;
   position: relative;
   min-height: 120px;
@@ -61,6 +61,7 @@
   color: #000;
   min-width: 50%;
   position: relative;
+  margin: -20px !important;
 }
 
 .Choose_skeleton {

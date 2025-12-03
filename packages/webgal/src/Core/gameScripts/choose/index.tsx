@@ -134,8 +134,7 @@ function Choose(props: { chooseOptions: ChooseOption[] }) {
               style={{
                 fontFamily: font,
                 backgroundImage: `url(${choose01})`, // 默认使用 choose01
-                color: '#8E354A',
-                margin: '6px 0',
+                color: '#000000',
                 padding: '100px 140px',
               }}
               onClick={onClick}
@@ -148,7 +147,7 @@ function Choose(props: { chooseOptions: ChooseOption[] }) {
               onMouseOut={(e) => {
                 // 鼠标离开时切换回 choose01 并恢复文字颜色
                 e.currentTarget.style.backgroundImage = `url(${choose01})`;
-                e.currentTarget.style.color = '#8E354A'; // 恢复默认颜色
+                e.currentTarget.style.color = '#000000'; // 恢复默认颜色
               }}
             >
               {e.text}

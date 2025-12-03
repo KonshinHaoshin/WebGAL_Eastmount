@@ -1,10 +1,11 @@
 .gearButton {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 30px;
+    right: 30px;
     cursor: pointer;
     z-index: 10;
     display: inline-block;
+    scale: 0.9;
 }
 
 .gearIcon {
@@ -15,5 +16,5 @@
 }
 
 .gearButton:hover .gearIcon {
-    transform: scale(0.9);
+    transform: scale(0.8);
 }

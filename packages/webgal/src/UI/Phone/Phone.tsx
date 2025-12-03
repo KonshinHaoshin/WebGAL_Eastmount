@@ -9,7 +9,7 @@ import { backToTitle } from '@/Core/controller/gamePlay/backToTitle';
 import { showGlogalDialog } from '@/UI/GlobalDialog/GlobalDialog';
 import useTrans from '@/hooks/useTrans';
 import phone from '@/assets/dragonspring/icon/phone.png';
-import WIFI from '@/assets/dragonspring/icon/wifi.png';
+// import WIFI from '@/assets/dragonspring/icon/wifi.png';
 import save01 from '@/assets/dragonspring/icon/save01.png';
 import save02 from '@/assets/dragonspring/icon/save02.png';
 import load01 from '@/assets/dragonspring/icon/load01.png';
@@ -102,10 +102,10 @@ export const Phone: FC = () => {
             <div className={styles.phone}>
                 <img src={phone} alt="Phone" className={styles.phoneImage} />
 
-              {/* 左上角 WIFI 图标 */}
+                {/* 左上角 WIFI 图标
               <div className={styles.wifiIcon}>
                   <img src={WIFI} alt="WIFI" />
-              </div>
+              </div> */}
 
               {/* 右上角 X 按钮 */}
               <div className={styles.closeButton} onClick={handleClose} onMouseEnter={playSeEnter}>
