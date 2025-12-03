@@ -22,22 +22,19 @@
 }
 
 .title{
-  color: transparent;
-  background: linear-gradient(to left, #4a9d6a, rgba(70, 140, 90, 1));
-  -webkit-background-clip: text;
+  color: #000000;
   font-size: 200%;
-  //border-bottom: 2px solid rgba(70, 140, 90, 0.9);
   padding: 0.15em 0.5em 0.15em 0.1em;
   font-weight: bold;
   margin-top: 20px;
 }
 
 .text{
-  color: rgba(70, 140, 90, 1);
+  color: #000000;
   padding: 0 0 0 10px;
   font-size: 135%;
   a{
-    color: rgba(70, 140, 90, 1);
+    color: #000000;
   }
 }
 

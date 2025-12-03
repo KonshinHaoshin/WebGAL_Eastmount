@@ -36,18 +36,12 @@
 
 .Save_title_text {
     font-weight: bold;
-    color: transparent;
-    background: linear-gradient(135deg, #9B6FB8 0%, #C5A5E0 100%);
-    text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.1);
-    -webkit-background-clip: text;
+    color: #000000;
 }
 
 .Load_title_text {
     font-weight: bold;
-    color: transparent;
-    background: linear-gradient(135deg, #4A9BCF 0%, #6BB5E8 100%);
-    text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.1);
-    -webkit-background-clip: text;
+    color: #000000;
 }
 
 .Save_Load_content {
@@ -77,7 +71,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(120, 140, 160, 0.7);
+    color: rgba(0, 0, 0, 0.7);
     transition: all 0.3s ease;
     -webkit-user-select: none; // Safari兼容
     user-select: none;
@@ -95,28 +89,28 @@
 }
 
 .Save_Load_top_button_on {
-    color: #9B6FB8;
+    color: #000000;
     font-weight: bold;
-    border-bottom: 2px solid #9B6FB8;
+    border-bottom: 2px solid #000000;
 }
 
 .Save_Load_top_button:hover {
-    color: #8A5FA3;
+    color: #000000;
     font-weight: bold;
-    border-bottom: 4px solid #8A5FA3;
+    border-bottom: 4px solid #000000;
 }
 
 .Load_top_button_on {
     font-weight: bold;
-    border-bottom: 5px solid #4A9BCF;
-    color: #4A9BCF;
-    background-color: rgba(74, 155, 207, 0.15);
+    border-bottom: 5px solid #000000;
+    color: #000000;
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 .Load_top_button:hover {
-    color: #4A9BCF;
+    color: #000000;
     font-weight: bold;
-    border-bottom: 5px solid #4A9BCF;
+    border-bottom: 5px solid #000000;
 }
 
 .Save_Load_content_element {
@@ -183,7 +177,7 @@
 .Save_Load_content_text {
     font-family: "WebgalUI", sans-serif;
     letter-spacing: 0.05em;
-    color: #2c3e50; // 深色文字在亮色背景上
+    color: #000000; // 黑色文字
     background: rgba(250, 252, 255, 0.6); // 半透明亮背景
     font-size: 120%;
     height: 40%;
@@ -200,14 +194,14 @@
 
 .Save_Load_content_speaker {
     font-weight: bold;
-    color: #2c3e50; // 深色文字在亮色背景上
+    color: #000000; // 黑色文字
     padding: 0.35em 0.8em 0.25em 0.8em;
     width: 100%;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .Load_content_speaker {
-    color: #2c3e50;
+    color: #000000;
 }
 
 .Load_content_text {
@@ -258,14 +252,14 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    color: #4a5568;
+    color: #000000;
 }
 
 .titleLine {
     font-size: 90%;
     display: flex;
     justify-content: space-between;
-    color: #6BB5E8;
+    color: #000000;
 }
 
 .index {
@@ -280,7 +274,7 @@
 .speaker {
     margin-top: 0.3em;
     font-weight: bold;
-    color: #9B6FB8;
+    color: #000000;
 }
 
 .text {
