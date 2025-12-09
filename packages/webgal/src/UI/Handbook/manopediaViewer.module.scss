@@ -1,28 +1,26 @@
 @import '@/Core/util/constants.scss';
-
 .viewerOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }
 
 .viewerContainer {
-  width: calc($screenWidth * 0.8);
-  height: calc($screenHeight * 0.8);
-  max-width: 90vw;
-  max-height: 90vh;
-  background: #ffffff;
-  border-radius: 8px;
-  display: flex;
-  cursor: default;
-  overflow: hidden;
+    width: calc($screenWidth * 0.6);
+    height: calc($screenHeight * 0.7);
+    // max-width: 90vw;
+    // max-height: 90vh;
+    background: #ffffff;
+    border-radius: 8px;
+    display: flex;
+    cursor: default;
+    overflow: hidden;
 }
-

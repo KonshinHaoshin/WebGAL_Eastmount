@@ -1,4 +1,12 @@
 changeBg:RGB/Background_001_001.png;
 bgm:Ambient/Ambient_003_001 Chakumero.ogg;
 manopedia:on;
-choose:0|1;
+东山燃灯寺:test
+setVar:love_shione=0;
+:祥音对你的好感度是{love_shione}
+千早爱音:你好
+setVar:love_shione=0;
+:祥音对你的好感度是{love_shione}
+setVar:love_shione=love_shione+20;
+:祥音对你的好感度是{love_shione}
+changeScene:test.txt;

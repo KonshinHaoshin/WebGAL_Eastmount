@@ -67,7 +67,7 @@
 .Choose_skeleton {
   position: absolute;
   left: 100px;
-  top: 50px;
+  top: 30px;
   transform: scale(1.2);
   z-index: 20;
   height: auto;

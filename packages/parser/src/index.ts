@@ -10,6 +10,7 @@ import { IAsset } from './interface/sceneInterface';
 import { sceneParser } from './sceneParser';
 import { IWebGALStyleObj, scss2cssinjsParser } from "./styleParser";
 import { sceneTextPreProcess } from "./sceneTextPreProcessor";
+import { IAffectionConfig, scanAffectionAssets } from './scriptParser/affectionScanner';
 
 export default class SceneParser {
   private readonly SCRIPT_CONFIG_MAP: ConfigMap;
@@ -74,7 +75,36 @@ export default class SceneParser {
     return scss2cssinjsParser(scssString);
   }
 
+  /**
+   * 解析好感度系统 JSON 文件
+   * @param jsonContent JSON 文件内容字符串
+   * @return 解析后的好感度配置
+   */
+  parseAffectionConfig(jsonContent: string): IAffectionConfig {
+    try {
+      const config = JSON.parse(jsonContent) as IAffectionConfig;
+      // 验证配置格式
+      if (!config.character || !config.affectionLevels) {
+        throw new Error('Invalid affection config: missing required fields');
+      }
+      return config;
+    } catch (error) {
+      throw new Error(`Failed to parse affection config: ${error}`);
+    }
+  }
+
+  /**
+   * 从好感度配置中扫描资源
+   * @param affectionConfigs 好感度配置列表
+   * @return 扫描到的资源列表
+   */
+  scanAffectionResources(affectionConfigs: IAffectionConfig[]): IAsset[] {
+    return scanAffectionAssets(affectionConfigs);
+  }
+
 }
 
 export { ADD_NEXT_ARG_LIST, SCRIPT_CONFIG };
 export { sceneTextPreProcess };
+export type { IAffectionConfig } from './scriptParser/affectionScanner';
+export { scanAffectionAssets } from './scriptParser/affectionScanner';

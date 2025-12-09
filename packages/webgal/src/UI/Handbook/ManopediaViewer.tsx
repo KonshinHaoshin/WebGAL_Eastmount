@@ -1,5 +1,6 @@
 import { FC, ReactNode, useState } from 'react';
 import useSoundEffect from '@/hooks/useSoundEffect';
+import { AffectionViewer } from '@/UI/affection/AffectionViewer';
 import styles from './manopediaViewer.module.scss';
 
 interface IManopediaViewerProps {
@@ -26,7 +27,7 @@ export const ManopediaViewer: FC<IManopediaViewerProps> = ({ children }) => {
       {showViewer && (
         <div className={styles.viewerOverlay} onClick={handleClose}>
           <div className={styles.viewerContainer} onClick={(e) => e.stopPropagation()}>
-            {/* 纯白色页面 */}
+            <AffectionViewer />
           </div>
         </div>
       )}
