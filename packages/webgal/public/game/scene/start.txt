@@ -3,7 +3,9 @@ bgm:Ambient/Ambient_003_001 Chakumero.ogg;
 manopedia:on;
 东山燃灯寺:test
 setVar:love_shione=0;
+setVar:test=0;
 :祥音对你的好感度是{love_shione}
+:test的值是{test}
 千早爱音:你好
 setVar:love_shione=0;
 :祥音对你的好感度是{love_shione}

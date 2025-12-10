@@ -1,8 +1,9 @@
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { getValueFromState } from '@/Core/gameScripts/setVar';
 import { useAllAffectionData } from '@/hooks/useAffectionData';
+import useSoundEffect from '@/hooks/useSoundEffect';
 import styles from './affectionViewer.module.scss';
 
 /**
@@ -16,6 +17,11 @@ export const AffectionViewer: FC = () => {
   // 订阅 store 变化，确保变量更新时组件重新渲染
   const stageGameVar = useSelector((state: RootState) => state.stage.GameVar);
   const globalGameVar = useSelector((state: RootState) => state.userData.globalGameVar);
+  const { playSeClick, playSeEnter } = useSoundEffect();
+  
+  // 分页状态：每页显示一个角色
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = affectionConfigs.length;
 
   // 计算每个角色的好感度值和等级
   const affectionData = useMemo(() => {
@@ -70,36 +76,59 @@ export const AffectionViewer: FC = () => {
     );
   }
 
+  // 获取当前页的角色数据
+  const currentCharacterData = affectionData[currentPage - 1];
+
+  // 处理上一页
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      playSeClick();
+    }
+  };
+
+  // 处理下一页
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      playSeClick();
+    }
+  };
+
   return (
     <div className={styles.affectionViewer}>
       <div className={styles.characterList}>
-        {affectionData.map((data) => (
-          <div key={data.config.character.id} className={styles.characterCard}>
+        {currentCharacterData && (
+          <div key={currentCharacterData.config.character.id} className={styles.characterCard}>
             {/* 左侧头像区域 */}
             <div className={styles.avatarSection}>
-              {data.config.character.avatar && (
-                <img src={data.config.character.avatar} alt={data.config.character.name} className={styles.avatar} />
+              {currentCharacterData.config.character.avatar && (
+                <img
+                  src={currentCharacterData.config.character.avatar}
+                  alt={currentCharacterData.config.character.name}
+                  className={styles.avatar}
+                />
               )}
             </div>
 
             {/* 右侧信息区域 */}
             <div className={styles.infoSection}>
               {/* 角色名称 */}
-              <h3 className={styles.characterName}>{data.config.character.name}</h3>
+              <h3 className={styles.characterName}>{currentCharacterData.config.character.name}</h3>
 
               {/* 角色描述 */}
-              <p className={styles.characterDescription}>{data.config.character.description}</p>
+              <p className={styles.characterDescription}>{currentCharacterData.config.character.description}</p>
 
               {/* 好感度数值 */}
               <div className={styles.affectionValue}>
                 <span className={styles.valueLabel}>好感度：</span>
-                <span className={styles.valueNumber}>{data.affectionValue}</span>
+                <span className={styles.valueNumber}>{currentCharacterData.affectionValue}</span>
               </div>
 
               {/* 等级信息 */}
               <div className={styles.levelInfo}>
-                <span className={styles.levelName}>{data.currentLevel?.levelName}</span>
-                <span className={styles.levelDescription}>{data.currentLevel?.description}</span>
+                <span className={styles.levelName}>{currentCharacterData.currentLevel?.levelName}</span>
+                <span className={styles.levelDescription}>{currentCharacterData.currentLevel?.description}</span>
               </div>
 
               {/* 进度条 */}
@@ -107,19 +136,19 @@ export const AffectionViewer: FC = () => {
                 <div className={styles.progressBar}>
                   <div
                     className={styles.progressFill}
-                    style={{ width: `${Math.min(100, Math.max(0, data.levelProgress))}%` }}
+                    style={{ width: `${Math.min(100, Math.max(0, currentCharacterData.levelProgress))}%` }}
                   />
                 </div>
                 <div className={styles.progressText}>
-                  {data.currentLevel?.minValue} / {data.currentLevel?.maxValue}
+                  {currentCharacterData.currentLevel?.minValue} / {currentCharacterData.currentLevel?.maxValue}
                 </div>
               </div>
 
               {/* 已解锁信息 - 显示所有已解锁的信息 */}
-              {data.allUnlockedInfo && data.allUnlockedInfo.length > 0 && (
+              {currentCharacterData.allUnlockedInfo && currentCharacterData.allUnlockedInfo.length > 0 && (
                 <div className={styles.unlockedInfo}>
                   <h4 className={styles.unlockedTitle}>已解锁信息</h4>
-                  {data.allUnlockedInfo.map((info) => (
+                  {currentCharacterData.allUnlockedInfo.map((info) => (
                     <div key={info.id} className={styles.infoItem}>
                       <h5 className={styles.infoTitle}>{info.title}</h5>
                       <p className={styles.infoContent}>{info.content}</p>
@@ -129,7 +158,32 @@ export const AffectionViewer: FC = () => {
               )}
             </div>
           </div>
-        ))}
+        )}
+
+        {/* 分页按钮 - 只在有多个角色时显示 */}
+        {totalPages > 1 && (
+          <div className={styles.pagination}>
+            <button
+              className={`${styles.pageButton} ${currentPage === 1 ? styles.pageButtonDisabled : ''}`}
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              onMouseEnter={playSeEnter}
+            >
+              ← 上一页
+            </button>
+            <div className={styles.pageInfo}>
+              {currentPage} / {totalPages}
+            </div>
+            <button
+              className={`${styles.pageButton} ${currentPage === totalPages ? styles.pageButtonDisabled : ''}`}
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              onMouseEnter={playSeEnter}
+            >
+              下一页 →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

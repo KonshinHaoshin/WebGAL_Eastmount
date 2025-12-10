@@ -22,7 +22,7 @@
     background: rgba(240, 240, 240, 0.4);
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
-    border-radius: 0;
+    border-radius: 20px;
     padding: 25px;
     box-shadow: none;
     display: flex;
@@ -32,22 +32,25 @@
     border: none;
 }
 
-// 左侧头像区域（占 1/3）
+// 左侧立绘区域
 .avatarSection {
     flex: 0 0 auto;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 33.33%;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 40%;
+    height: 100%;
+    overflow: hidden;
 }
 
 .avatar {
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: left center;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
 }
 
 // 右侧信息区域（占 2/3）
@@ -57,21 +60,22 @@
     flex-direction: column;
     justify-content: flex-start;
     padding-left: 20px;
+    padding-top: 40px;
     gap: 10px;
 }
 
 .characterName {
-    font-size: 28px;
+    font-size: 42px;
     font-weight: bold;
     color: #000;
-    margin: 0 0 6px 0;
+    margin: 0 0 8px 0;
     line-height: 1.2;
 }
 
 .characterDescription {
-    font-size: 15px;
+    font-size: 18px;
     color: #000;
-    margin: 0 0 14px 0;
+    margin: 0 0 16px 0;
     line-height: 1.4;
 }
 
@@ -79,16 +83,16 @@
     display: flex;
     align-items: baseline;
     gap: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
 
 .valueLabel {
-    font-size: 16px;
+    font-size: 18px;
     color: #000;
 }
 
 .valueNumber {
-    font-size: 26px;
+    font-size: 32px;
     font-weight: bold;
     color: #4a90e2;
 }
@@ -97,11 +101,11 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
 
 .levelName {
-    font-size: 22px;
+    font-size: 28px;
     font-weight: bold;
     color: #000;
     line-height: 1.3;
@@ -109,22 +113,25 @@
 }
 
 .levelDescription {
-    font-size: 14px;
+    font-size: 17px;
     color: #000;
     line-height: 1.4;
 }
 
 .progressContainer {
     margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .progressBar {
-    width: 100%;
+    width: 70%;
     height: 20px;
     background: rgba(200, 200, 200, 0.5);
     border-radius: 10px;
     overflow: hidden;
-    margin-bottom: 4px;
+    flex-shrink: 0;
 }
 
 .progressFill {
@@ -134,10 +141,10 @@
 }
 
 .progressText {
-    font-size: 13px;
+    font-size: 15px;
     color: #000;
-    text-align: right;
     font-weight: normal;
+    white-space: nowrap;
 }
 
 .unlockedInfo {
@@ -147,31 +154,31 @@
 }
 
 .unlockedTitle {
-    font-size: 17px;
+    font-size: 24px;
     font-weight: bold;
     color: #000;
-    margin: 0 0 10px 0;
+    margin: 0 0 14px 0;
 }
 
 .infoItem {
-    margin-bottom: 10px;
+    margin-bottom: 14px;
     &:last-child {
         margin-bottom: 0;
     }
 }
 
 .infoTitle {
-    font-size: 15px;
+    font-size: 20px;
     font-weight: bold;
     color: #4a90e2;
-    margin: 0 0 3px 0;
+    margin: 0 0 5px 0;
 }
 
 .infoContent {
-    font-size: 13px;
+    font-size: 18px;
     color: #000;
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 .emptyState {
@@ -181,4 +188,55 @@
     height: 100%;
     color: #999;
     font-size: 18px;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    background: rgba(240, 240, 240, 0.4);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+
+.pageButton {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #000;
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: rgba(0, 0, 0, 0.3);
+        transform: scale(1.05);
+    }
+
+    &:active:not(:disabled) {
+        transform: scale(0.98);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.pageButtonDisabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pageInfo {
+    font-size: 18px;
+    font-weight: bold;
+    color: #000;
+    min-width: 80px;
+    text-align: center;
 }
