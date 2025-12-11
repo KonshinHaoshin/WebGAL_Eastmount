@@ -39,6 +39,8 @@ export const contentParser = (
       return assetSetter(contentRaw, fileType.bgm);
     case commandType.unlockCg:
       return assetSetter(contentRaw, fileType.background);
+    case commandType.loadAffectionFile:
+      return assetSetter(contentRaw, fileType.affection);
     default:
       return contentRaw;
   }

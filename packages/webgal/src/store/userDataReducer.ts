@@ -47,6 +47,7 @@ export const initState: IUserData = {
     bgm: [],
     cg: [],
   },
+  affectionFiles: [],
 };
 
 const userDataSlice = createSlice({
@@ -90,6 +91,19 @@ const userDataSlice = createSlice({
       });
       if (!isExist) {
         state.appreciationData.bgm.push(action.payload);
+      }
+    },
+    loadAffectionFile: (state, action: PayloadAction<string>) => {
+      const filename = action.payload;
+      console.log('[loadAffectionFile reducer] 收到文件名:', filename);
+      console.log('[loadAffectionFile reducer] 当前文件列表:', state.affectionFiles);
+      // 检查是否已存在
+      if (!state.affectionFiles.includes(filename)) {
+        // 创建新数组以确保引用变化，触发组件重新渲染
+        state.affectionFiles = [...state.affectionFiles, filename];
+        console.log('[loadAffectionFile reducer] 添加后文件列表:', state.affectionFiles);
+      } else {
+        console.log('[loadAffectionFile reducer] 文件已存在，跳过添加');
       }
     },
     /**
@@ -153,6 +167,7 @@ export const {
   setSlPage,
   unlockCgInUserData,
   unlockBgmInUserData,
+  loadAffectionFile,
   resetOptionSet,
   resetAllData,
 } = userDataSlice.actions;

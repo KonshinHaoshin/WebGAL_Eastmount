@@ -72,5 +72,13 @@ export const assetsScanner = (
       type: fileType.bgm,
     });
   }
+  if (command === commandType.loadAffectionFile) {
+    returnAssetsList.push({
+      name: content,
+      url: content,
+      lineNumber: 0,
+      type: fileType.affection,
+    });
+  }
   return returnAssetsList;
 };

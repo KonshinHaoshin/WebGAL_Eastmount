@@ -38,6 +38,7 @@ import { defineScripts, IConfigInterface, ScriptConfig, ScriptFunction, scriptRe
 import { applyStyle } from '@/Core/gameScripts/applyStyle';
 import { wait } from '@/Core/gameScripts/wait';
 import { manopedia } from '@/Core/gameScripts/manopedia';
+import { loadAffectionFileScript } from '@/Core/gameScripts/loadAffectionFile';
 
 export const SCRIPT_TAG_MAP = defineScripts({
   say: ScriptConfig(commandType.say, say),
@@ -75,6 +76,7 @@ export const SCRIPT_TAG_MAP = defineScripts({
   applyStyle: ScriptConfig(commandType.applyStyle, applyStyle, { next: true }),
   wait: ScriptConfig(commandType.wait, wait),
   manopedia: ScriptConfig(commandType.manopedia, manopedia),
+  loadAffectionFile: ScriptConfig(commandType.loadAffectionFile, loadAffectionFileScript, { next: true }),
 });
 
 export const SCRIPT_CONFIG: IConfigInterface[] = Object.values(SCRIPT_TAG_MAP);

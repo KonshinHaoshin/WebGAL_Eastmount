@@ -96,6 +96,7 @@ export interface IUserData {
   globalGameVar: IGameVar; // 不跟随存档的全局变量
   optionData: IOptionData; // 用户设置选项数据
   appreciationData: IAppreciation;
+  affectionFiles: string[]; // 已加载的好感度文件列表
 }
 
 export interface ISetUserDataPayload {

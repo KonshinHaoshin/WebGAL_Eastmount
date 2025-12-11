@@ -12,6 +12,12 @@ export const runScript = (script: ISentence) => {
   let perform: IPerform = initPerform;
   const funcToRun: ScriptFunction = scriptRegistry[script.command]?.scriptFunction ?? SCRIPT_TAG_MAP.say.scriptFunction; // 默认是say
 
+  // 调试信息
+  if (script.command === 43) { // loadAffectionFile 的枚举值
+    console.log('loadAffectionFile 命令被解析，script:', script);
+    console.log('scriptRegistry[script.command]:', scriptRegistry[script.command]);
+  }
+
   // 调用脚本对应的函数
   perform = funcToRun(script);
 

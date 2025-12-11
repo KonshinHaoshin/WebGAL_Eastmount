@@ -1,14 +1,16 @@
-changeBg:RGB/Background_001_001.png;
+changeBg:https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg;
 bgm:Ambient/Ambient_003_001 Chakumero.ogg;
 manopedia:on;
 东山燃灯寺:test
 setVar:love_shione=0;
-setVar:test=0;
+loadAffectionFile:affection_test.json;
+setVar:love_sakiko=0;
 :祥音对你的好感度是{love_shione}
-:test的值是{test}
+:test的值是{love_sakiko}
 千早爱音:你好
 setVar:love_shione=0;
 :祥音对你的好感度是{love_shione}
 setVar:love_shione=love_shione+20;
+loadAffectionFile:affection_sakiko.json;
 :祥音对你的好感度是{love_shione}
-changeScene:test.txt;
+;changeScene:test.txt;

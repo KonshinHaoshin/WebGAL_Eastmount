@@ -39,6 +39,7 @@ export const SCRIPT_CONFIG = [
   { scriptString: 'applyStyle', scriptType: commandType.applyStyle },
   { scriptString: 'wait', scriptType: commandType.wait },
   { scriptString: 'manopedia', scriptType: commandType.manopedia },
+  { scriptString: 'loadAffectionFile', scriptType: commandType.loadAffectionFile },
 ];
 export const ADD_NEXT_ARG_LIST = [
   commandType.bgm,
@@ -54,6 +55,7 @@ export const ADD_NEXT_ARG_LIST = [
   commandType.playEffect,
   commandType.setTransition,
   commandType.applyStyle,
+  commandType.loadAffectionFile,
 ];
 
 export type ConfigMap = Map<string, ConfigItem>;

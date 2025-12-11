@@ -9,4 +9,6 @@ export enum fileType {
   tex,
   vocal,
   video,
+  lut,
+  affection,
 }

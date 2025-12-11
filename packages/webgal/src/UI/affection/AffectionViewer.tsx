@@ -68,6 +68,12 @@ export const AffectionViewer: FC = () => {
     });
   }, [affectionConfigs, stageGameVar, globalGameVar]);
 
+  // 调试信息
+  console.log('[AffectionViewer] affectionConfigs:', affectionConfigs);
+  console.log('[AffectionViewer] affectionConfigs.length:', affectionConfigs.length);
+  console.log('[AffectionViewer] affectionData:', affectionData);
+  console.log('[AffectionViewer] affectionData.length:', affectionData.length);
+
   if (affectionData.length === 0) {
     return (
       <div className={styles.emptyState}>

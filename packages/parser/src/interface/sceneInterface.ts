@@ -40,6 +40,7 @@ export enum commandType {
   applyStyle,
   wait,
   manopedia,
+  loadAffectionFile,
 }
 
 /**
