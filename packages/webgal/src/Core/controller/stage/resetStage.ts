@@ -21,6 +21,8 @@ export const resetStage = (resetBacklog: boolean, resetSceneAndVar = true) => {
   WebGAL.gameplay.resetGamePlay();
 
   // 清空舞台状态表
+  // 注意：affectionData 会在 resetStageState 时自动清除（因为它在 initState 中初始化为空数组）
+  // 但好感度变量（GameVar）会保留，因为它们会被单独恢复
   const initSceneDataCopy = cloneDeep(initState);
   const currentVars = webgalStore.getState().stage.GameVar;
   webgalStore.dispatch(resetStageState(initSceneDataCopy));

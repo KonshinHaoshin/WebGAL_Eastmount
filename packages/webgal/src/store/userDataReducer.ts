@@ -20,6 +20,7 @@ import {
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import cloneDeep from 'lodash/cloneDeep';
 import { ISetGameVar } from './stageInterface';
+import type { IAffectionConfig } from 'webgal-parser';
 
 const initialOptionSet: IOptionData = {
   slPage: 1,
@@ -48,6 +49,7 @@ export const initState: IUserData = {
     cg: [],
   },
   affectionFiles: [],
+  affectionData: [],
 };
 
 const userDataSlice = createSlice({
@@ -105,6 +107,32 @@ const userDataSlice = createSlice({
       } else {
         console.log('[loadAffectionFile reducer] 文件已存在，跳过添加');
       }
+    },
+    setAffectionData: (state, action: PayloadAction<IAffectionConfig>) => {
+      const config = action.payload;
+      console.log('[setAffectionData reducer] 收到数据:', config.character.id, config.character.name);
+      console.log('[setAffectionData reducer] 当前数据列表:', state.affectionData.map((d) => d.character.id));
+      // 检查是否已存在（通过 character.id）
+      const existingIndex = state.affectionData.findIndex(
+        (item) => item.character.id === config.character.id,
+      );
+      if (existingIndex >= 0) {
+        // 更新现有数据
+        state.affectionData[existingIndex] = config;
+        console.log('[setAffectionData reducer] 更新现有数据:', config.character.id, '索引:', existingIndex);
+        console.log('[setAffectionData reducer] 更新后数据列表:', state.affectionData.map((d) => d.character.id));
+      } else {
+        // 添加新数据
+        state.affectionData = [...state.affectionData, config];
+        console.log('[setAffectionData reducer] 添加新数据:', config.character.id);
+        console.log('[setAffectionData reducer] 添加后数据列表:', state.affectionData.map((d) => d.character.id));
+      }
+    },
+    clearAffectionData: (state) => {
+      // 清除好感度配置文件数据，但保留好感度变量（存储在 GameVar 中）
+      state.affectionData = [];
+      state.affectionFiles = [];
+      console.log('[clearAffectionData reducer] 已清除好感度数据');
     },
     /**
      * 替换用户数据
@@ -168,6 +196,8 @@ export const {
   unlockCgInUserData,
   unlockBgmInUserData,
   loadAffectionFile,
+  setAffectionData,
+  clearAffectionData,
   resetOptionSet,
   resetAllData,
 } = userDataSlice.actions;

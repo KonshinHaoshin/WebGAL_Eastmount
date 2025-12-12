@@ -71,6 +71,7 @@ export const initState: IStageState = {
   replacedUIlable: {},
   figureMetaData: {},
   enableManopedia: false,
+  affectionData: [], // 好感度配置数据
 };
 
 /**

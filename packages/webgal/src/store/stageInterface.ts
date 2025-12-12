@@ -1,5 +1,6 @@
 import { ISentence } from '@/Core/controller/scene/sceneInterface';
 import { BlinkParam, FocusParam } from '@/Core/live2DCore';
+import type { IAffectionConfig } from 'webgal-parser';
 
 /**
  * 游戏内变量
@@ -223,6 +224,7 @@ export interface IStageState {
 	replacedUIlable: Record<string, string>;
 	figureMetaData: figureMetaData;
 	enableManopedia: boolean;
+	affectionData: Array<IAffectionConfig>; // 好感度配置数据
 }
 
 /**

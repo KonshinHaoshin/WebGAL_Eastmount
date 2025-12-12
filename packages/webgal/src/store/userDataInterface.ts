@@ -2,6 +2,7 @@ import { IGameVar, IStageState } from './stageInterface';
 import { language } from '@/config/language';
 import { IBacklogItem } from '@/Core/Modules/backlog';
 import { ISceneEntry } from '@/Core/Modules/scene';
+import type { IAffectionConfig } from 'webgal-parser';
 
 /**
  * 播放速度的枚举类型
@@ -97,6 +98,7 @@ export interface IUserData {
   optionData: IOptionData; // 用户设置选项数据
   appreciationData: IAppreciation;
   affectionFiles: string[]; // 已加载的好感度文件列表
+  affectionData: IAffectionConfig[]; // 已加载的好感度配置数据
 }
 
 export interface ISetUserDataPayload {

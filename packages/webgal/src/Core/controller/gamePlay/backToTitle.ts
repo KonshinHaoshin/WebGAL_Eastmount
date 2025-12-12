@@ -16,6 +16,8 @@ export const backToTitle = () => {
   dispatch(setStage({ key: 'playVocal', value: '' }));
   // 重置魔女图鉴按钮状态
   dispatch(setStage({ key: 'enableManopedia', value: false }));
+  // 注意：好感度数据（affectionData）会在 resetStage 时自动清除
+  // 但好感度变量（GameVar）会保留
   // 重新打开标题界面
   dispatch(setVisibility({ component: 'showTitle', visibility: true }));
   /**

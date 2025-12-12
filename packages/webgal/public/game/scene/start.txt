@@ -13,4 +13,5 @@ setVar:love_shione=0;
 setVar:love_shione=love_shione+20;
 loadAffectionFile:affection_sakiko.json;
 :祥音对你的好感度是{love_shione}
+:祥子对你的好感度是{love_sakiko}
 ;changeScene:test.txt;
