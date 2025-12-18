@@ -111,6 +111,17 @@ const Title: FC = () => {
       onClick: () => void;
       disabled?: boolean;
     }[] = [
+
+        {
+          key: 'start',
+          alt: t('start.title'),
+          normal: NewGame01,
+          hover: NewGame02,
+          onClick: () => {
+            startGame();
+            playSeClick();
+          },
+        },
       {
         key: 'load',
         alt: t('load.title'),
@@ -121,17 +132,7 @@ const Title: FC = () => {
           dispatch(setVisibility({ component: 'showMenuPanel', visibility: true }));
           dispatch(setMenuPanelTag(MenuPanelTag.Load));
         },
-      },
-      {
-        key: 'start',
-        alt: t('start.title'),
-        normal: NewGame01,
-        hover: NewGame02,
-        onClick: () => {
-          startGame();
-          playSeClick();
         },
-      },
       // 暂时没有continue按钮喵~
       // {
       //   key: 'continue',
@@ -173,24 +174,24 @@ const Title: FC = () => {
       });
     }
 
-    arr.push({
-      key: 'exit',
-      alt: t('exit.title'),
-      normal: Exit01,
-      hover: Exit02,
-      onClick: () => {
-        playSeClick();
-        showGlogalDialog({
-          title: t('exit.tips'),
-          leftText: tCommon('yes'),
-          rightText: tCommon('no'),
-          leftFunc: () => {
-            window.close();
-          },
-          rightFunc: () => {},
-        });
-      },
-    });
+    // arr.push({
+    //   key: 'exit',
+    //   alt: t('exit.title'),
+    //   normal: Exit01,
+    //   hover: Exit02,
+    //   onClick: () => {
+    //     playSeClick();
+    //     showGlogalDialog({
+    //       title: t('exit.tips'),
+    //       leftText: tCommon('yes'),
+    //       rightText: tCommon('no'),
+    //       leftFunc: () => {
+    //         window.close();
+    //       },
+    //       rightFunc: () => {},
+    //     });
+    //   },
+    // });
 
     return arr;
   }, [t, tCommon, GUIState.enableAppreciationMode, hasAppreciationItems, dispatch, playSeClick]);
@@ -224,8 +225,8 @@ const Title: FC = () => {
           {/* 按钮外层容器（底部居中） */}
           <div className={applyStyle('Title_buttonContainer', styles.Title_buttonContainer)}>
             <div className={styles.Title_buttonList}>
-              {buttons.map((btn, i) => (
-                <div key={btn.key} className={`${styles.Title_buttonWrapper} ${styles[`pos${i + 1}`]}`}>
+              {buttons.map((btn) => (
+                <div key={btn.key} className={styles[`Title_button_${btn.key}`]}>
                   <ImgButton
                     normal={btn.normal}
                     hover={btn.hover}

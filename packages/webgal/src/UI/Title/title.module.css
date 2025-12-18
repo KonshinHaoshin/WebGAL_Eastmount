@@ -1,0 +1,167 @@
+@charset "UTF-8";
+.Title_backup_background {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1;
+}
+
+.Title_main {
+  position: absolute;
+  inset: 0;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: auto;
+  z-index: 2;
+}
+
+.Title_buttonContainer {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 8%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+/* ✅ Persona 5 风格：水平居中排列 */
+.Title_buttonList {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  /* 垂直居中对齐 */
+  gap: 10vw;
+  /* 使用视口单位，保持响应式间距 */
+  pointer-events: auto;
+  flex-wrap: nowrap;
+  justify-content: center;
+  /* 水平居中 */
+}
+
+/* 图片按钮：基础样式（通用） */
+.Title_imgButton {
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  line-height: 0;
+  outline: none;
+}
+
+.Title_imgButton img {
+  display: block;
+  width: auto;
+  height: auto;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  image-rendering: auto;
+  transition: filter 0.15s ease;
+}
+
+.Title_imgButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  filter: grayscale(30%);
+}
+
+/* 屏幕阅读器可见、视觉上隐藏 */
+.srOnly {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 1px, 1px);
+  white-space: nowrap;
+  border: 0;
+}
+
+.Title_buttonWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================
+   每个按钮单独定义样式
+   ============================================ */
+/* 读档按钮 */
+.Title_button_load {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.Title_button_load .Title_imgButton img {
+  transform: scale(2);
+}
+
+.Title_button_load .Title_imgButton:hover:not(:disabled) img,
+.Title_button_load .Title_imgButton:focus-visible:not(:disabled) img {
+  filter: drop-shadow(0 0.5vh 0.8vw rgba(0, 0, 0, 0.5)) brightness(1.1);
+}
+
+/* 新游戏按钮 */
+.Title_button_start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.Title_button_start .Title_imgButton img {
+  transform: scale(2);
+}
+
+.Title_button_start .Title_imgButton:hover:not(:disabled) img,
+.Title_button_start .Title_imgButton:focus-visible:not(:disabled) img {
+  filter: drop-shadow(0 0.5vh 0.8vw rgba(0, 0, 0, 0.5)) brightness(1.1);
+}
+
+/* 设定按钮 */
+.Title_button_options {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.Title_button_options .Title_imgButton img {
+  transform: scale(2);
+}
+
+.Title_button_options .Title_imgButton:hover:not(:disabled) img,
+.Title_button_options .Title_imgButton:focus-visible:not(:disabled) img {
+  filter: drop-shadow(0 0.5vh 0.8vw rgba(0, 0, 0, 0.5)) brightness(1.1);
+}
+
+/* 鉴赏按钮 */
+.Title_button_extra {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.Title_button_extra .Title_imgButton img {
+  transform: scale(2);
+}
+
+.Title_button_extra .Title_imgButton:hover:not(:disabled) img,
+.Title_button_extra .Title_imgButton:focus-visible:not(:disabled) img {
+  filter: drop-shadow(0 0.5vh 0.8vw rgba(0, 0, 0, 0.5)) brightness(1.1);
+}
+
+/* 退出按钮 */
+.Title_button_exit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.Title_button_exit .Title_imgButton:hover:not(:disabled) img,
+.Title_button_exit .Title_imgButton:focus-visible:not(:disabled) img {
+  filter: drop-shadow(0 0.5vh 0.8vw rgba(0, 0, 0, 0.5)) brightness(1.1);
+}
