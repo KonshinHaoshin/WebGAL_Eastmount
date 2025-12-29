@@ -38,3 +38,90 @@
     background-repeat: no-repeat !important;
     background-position: center !important;
 }
+
+
+/* 右侧五个按钮容器 */
+
+.rightButtonsContainer {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    /* 进一步减少间距，更加紧凑 */
+    padding-right: 2px;
+    /* 进一步减少内边距 */
+    z-index: 10005;
+    /* 提高z-index，确保在frame和itemsDisplay之上 */
+}
+
+
+/* 右侧按钮容器 */
+
+.rightButtonContainer {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-bottom: -5px;
+    /* 负边距让按钮更紧凑，重叠部分 */
+}
+
+
+/* 右侧单个按钮 */
+
+.rightButton {
+    /* 使用图片原始尺寸，但限制最大尺寸 */
+    width: auto;
+    height: auto;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    /* 确保图片保持比例并完整显示 */
+    object-fit: contain;
+    display: block;
+    /* 防止图片被拉伸 */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: pixelated;
+    &:hover {
+        // transform: translateX(-3px);
+        /* 减少位移量，更自然 */
+        z-index: 10002;
+        /* 确保hover时在最上层 */
+    }
+}
+
+
+/* 有alpha通道的frame资产 - 覆盖整个屏幕的框架 */
+
+.frameAsset {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 覆盖整个屏幕 */
+    pointer-events: none;
+    /* 确保不干扰其他元素的交互 */
+    z-index: 10003;
+    /* 在背景之上，itemsDisplay之下 */
+}
+
+
+/* 有alpha通道的items显示资产 - 铺满下面的长条区域 */
+
+.itemsDisplayAsset {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto; /* 保持图片原始比例 */
+    object-fit: cover; /* 铺满宽度，保持比例 */
+    pointer-events: none;
+    /* 确保不干扰其他元素的交互 */
+    z-index: 10004;
+    /* 在frame之上 */
+    /* 确保图片底部对齐 */
+    object-position: bottom;
+}
