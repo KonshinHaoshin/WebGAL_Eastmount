@@ -1,6 +1,7 @@
-changeBg:RGB/Background_001_001.png;
-bgm:Ambient/Ambient_003_001 Chakumero.ogg;
+;changeFigure:立绘差分/hiro/hiro_2.png -id=figure1 -transform={"position":{"x":0,"y":300},"scale":{"x":1.2,"y":1.2}};
+changeBg:RGB/Background_004_001.png -transform={"position":{"x":0,"y":0},"scale":{"x":1,"y":1}};
+典狱长:测试
 manopedia:on;
-Item:simplespear -transform={"position":{"x":0,"y":0},"scale":{"x":0.25,"y":0.25}} -count=1;
-东山燃灯寺:item功能测试;
-Item:ansk -transform={"position":{"x":0,"y":0},"scale":{"x":0.25,"y":0.25}} -count=1;
+addItem:ansk;
+丰川祥子:不懂爱祥的有难了
+千早爱音:哦耶！爱爱的祥！

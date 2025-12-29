@@ -6,6 +6,30 @@ import { getStringArgByKey, getNumberArgByKey } from '@/Core/util/getSentenceArg
 import { logger } from '@/Core/util/logger';
 import { getValueFromStateElseKey } from './setVar';
 import { itemManager } from '@/Core/Modules/item/itemManager';
+import { setVisibility } from '@/store/GUIReducer';
+
+// 用于管理隐藏计时器
+let hideTimer: NodeJS.Timeout | null = null;
+
+/**
+ * 显示魔女图鉴更新提示
+ */
+function showManopediaUpdateHint() {
+  // 触发魔女图鉴更新提示
+  webgalStore.dispatch(setVisibility({ component: 'showManopediaUpdate', visibility: true }));
+  
+  // 清除之前的计时器（如果存在）
+  if (hideTimer) {
+    clearTimeout(hideTimer);
+    hideTimer = null;
+  }
+  
+  // 4.5秒后自动隐藏提示（组件4秒后开始淡出，加上0.5秒动画时间）
+  hideTimer = setTimeout(() => {
+    webgalStore.dispatch(setVisibility({ component: 'showManopediaUpdate', visibility: false }));
+    hideTimer = null;
+  }, 4500);
+}
 
 /**
  * 添加物品到仓库
@@ -29,6 +53,9 @@ export const addItem = (sentence: ISentence): IPerform => {
         name: itemDef.name,
       }));
       logger.debug(`添加物品到仓库: ${itemDef.name} (${resolvedItemId}) x${resolvedCount}`);
+      
+      // 显示魔女图鉴更新提示
+      showManopediaUpdateHint();
     } else {
       // 如果无法加载物品定义，尝试直接添加（需要提供名称）
       const name = getStringArgByKey(sentence, 'name') || String(resolvedItemId);
@@ -38,6 +65,9 @@ export const addItem = (sentence: ISentence): IPerform => {
         name: name,
       }));
       logger.debug(`添加物品到仓库（无定义）: ${name} (${resolvedItemId}) x${resolvedCount}`);
+      
+      // 显示魔女图鉴更新提示
+      showManopediaUpdateHint();
     }
   });
   

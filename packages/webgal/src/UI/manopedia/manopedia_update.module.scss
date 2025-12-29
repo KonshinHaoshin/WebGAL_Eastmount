@@ -1,0 +1,125 @@
+// 整体容器 - 将三个元素作为一个整体
+.itemShowcaseGroup {
+    position: fixed;
+    top: 300px; // 在manopedia_update下面（manopedia_update在300px）
+    left: 250px; // 和manopedia_update一样靠近左边
+    z-index: 9998;
+    pointer-events: none;
+    animation: showcaseGroupAnimation 3s ease-in-out forwards;
+}
+
+// 物品展示容器（frame、framecontainer、item image）
+.itemShowcaseContainer {
+    position: relative;
+    width: 420px;
+    height: 420px;
+}
+
+// frame 边框（最下面）
+.frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.25);
+    width: auto;
+    height: auto;
+    z-index: 1;
+}
+
+// framecontainer 背景（中间）
+.framecontainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: auto;
+    height: auto;
+    z-index: 2;
+}
+
+// 物品图片容器（最上面）
+.itemImageContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 380px;
+    height: 380px;
+    overflow: hidden;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// 物品图片
+.itemImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+// manopediaUpdate 独立显示
+.manopediaUpdateContainer {
+    position: fixed;
+    top: 300px;
+    left: 50px;
+    scale: 1.5;
+    z-index: 9999;
+    pointer-events: none;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.manopediaUpdateImage {
+    width: auto;
+    height: auto;
+    max-width: 300px;
+    filter: drop-shadow(2px 2px 5px rgba(0, 0, 0, 0.7));
+}
+
+// 动画定义
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+// 整体动画：从中间显示 → 迅速上移 → 停留 → 慢慢下移退出
+@keyframes showcaseGroupAnimation {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0) scale(0.8);
+    }
+    10% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+    }
+    20% {
+        transform: translate(0, -20px) scale(1);
+    }
+    70% {
+        transform: translate(0, -20px) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(0, 100px) scale(0.8);
+        opacity: 0;
+    }
+}
+
+.manopediaUpdateContainer.hiding {
+    animation: fadeOut 0.5s ease-in forwards;
+}

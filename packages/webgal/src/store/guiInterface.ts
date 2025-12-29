@@ -32,6 +32,7 @@ export interface IGuiState {
   enableAppreciationMode: boolean; // Pc102
   fontOptimization: boolean; // 字体优化
   showPhone: boolean; // 是否显示 Phone 界面
+  showManopediaUpdate: boolean; // 是否显示魔女图鉴更新提示
 }
 
 export type componentsVisibility = Pick<

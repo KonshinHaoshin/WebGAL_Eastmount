@@ -30,6 +30,7 @@ const initState: IGuiState = {
   enableAppreciationMode: false, // Paf87
   fontOptimization: false,
   showPhone: false,
+  showManopediaUpdate: false,
 };
 
 /**
