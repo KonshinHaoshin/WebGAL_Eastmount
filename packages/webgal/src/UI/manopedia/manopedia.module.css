@@ -89,11 +89,10 @@
 /* 有alpha通道的frame资产 - 覆盖整个屏幕的框架 */
 .frameAsset {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  top: 80px;
+  left: 150px;
+  scale: 0.9;
+  object-fit: contain;
   /* 覆盖整个屏幕 */
   pointer-events: none;
   /* 确保不干扰其他元素的交互 */
@@ -108,13 +107,130 @@
   left: 0;
   width: 100%;
   height: auto;
-  /* 保持图片原始比例 */
+  /* 根据图片比例自适应高度 */
+  max-height: 40%;
+  /* 限制最大高度，防止过高 */
   object-fit: cover;
-  /* 铺满宽度，保持比例 */
+  /* 铺满宽度，裁剪高度 */
   pointer-events: none;
   /* 确保不干扰其他元素的交互 */
   z-index: 10004;
   /* 在frame之上 */
-  /* 确保图片底部对齐 */
-  object-position: bottom;
+  /* 确保图片底部对齐并铺满宽度 */
+  object-position: bottom center;
+}
+
+/* 主展示区 - 显示当前选中的物品 */
+.mainDisplayArea {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  z-index: 10005;
+  /* 在frame和itemsDisplay之上 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  /* 容器不接收事件，但内部元素可以 */
+}
+
+.selectedItemDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  pointer-events: auto;
+  /* 内部元素可以接收事件 */
+}
+
+.itemLargeImage {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.itemInfo {
+  text-align: center;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  max-width: 300px;
+}
+
+.itemName {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.itemDescription {
+  font-size: 16px;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+/* 缩略图列表 */
+.thumbnailList {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  padding: 0 20px;
+  z-index: 10006;
+  /* 在最上层 */
+  flex-wrap: wrap;
+  /* 允许换行 */
+  pointer-events: auto;
+}
+
+.thumbnailItem {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  border: 2px solid transparent;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.thumbnailItem:hover {
+  transform: translateY(-5px) scale(1.1);
+  border-color: #ffd700;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.thumbnailItem.selected {
+  border-color: #ff6b6b;
+  box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+}
+
+.thumbnailImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 5px;
+}
+
+.lockedOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
 }

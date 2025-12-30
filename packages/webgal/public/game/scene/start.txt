@@ -1,7 +1,11 @@
 ;changeFigure:立绘差分/hiro/hiro_2.png -id=figure1 -transform={"position":{"x":0,"y":300},"scale":{"x":1.2,"y":1.2}};
+manopedia:on;
 changeBg:RGB/Background_004_001.png -transform={"position":{"x":0,"y":0},"scale":{"x":1,"y":1}};
 典狱长:测试
 manopedia:on;
 addItem:ansk;
 丰川祥子:不懂爱祥的有难了
 千早爱音:哦耶！爱爱的祥！
+addItem:simplespear;
+千早爱音:简易长矛是什么东西？
+丰川祥子:好奇怪的名
