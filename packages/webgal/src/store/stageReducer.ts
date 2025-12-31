@@ -307,10 +307,19 @@ const stageSlice = createSlice({
         state.viewingItemCount = 1;
       }
     },
+    /**
+     * 清除所有物品
+     * @param state 当前状态
+     */
+    clearAllItems: (state) => {
+      state.inventory.items = {};
+      state.viewingItemId = null;
+      state.viewingItemCount = 1;
+    },
   },
 });
 
-export const { resetStageState, setStage, setStageVar, setFreeFigure, addInventoryItem } = stageSlice.actions;
+export const { resetStageState, setStage, setStageVar, setFreeFigure, addInventoryItem, clearAllItems } = stageSlice.actions;
 export const stageActions = stageSlice.actions;
 export default stageSlice.reducer;
 
