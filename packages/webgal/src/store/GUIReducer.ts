@@ -31,6 +31,7 @@ const initState: IGuiState = {
   fontOptimization: false,
   showPhone: false,
   showManopediaUpdate: false,
+  manopediaUpdateItem: null,
 };
 
 /**
@@ -47,8 +48,16 @@ const GUISlice = createSlice({
      */
     setVisibility: (state, action: PayloadAction<setVisibilityPayload>) => {
       getStorage();
-      const { component, visibility } = action.payload;
+      const { component, visibility, itemInfo } = action.payload;
       state[component] = visibility;
+      
+      // 如果是显示魔女图鉴更新提示，并且有物品信息，则存储物品信息
+      if (component === 'showManopediaUpdate' && itemInfo) {
+        state.manopediaUpdateItem = itemInfo;
+      } else if (component === 'showManopediaUpdate' && !visibility) {
+        // 隐藏提示时清空物品信息
+        state.manopediaUpdateItem = null;
+      }
     },
     /**
      * 设置MenuPanel的当前选中项

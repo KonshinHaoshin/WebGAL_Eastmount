@@ -6,9 +6,6 @@ import styles from './manopedia_update.module.scss';
 import frame from '@/assets/dragonspring/manopedia/frame.png';
 import framecontainer from '@/assets/dragonspring/manopedia/frame_container.png';
 
-// 临时使用固定物品图片，后续可以从store获取
-const DEFAULT_ITEM_IMAGE = './game/Item/ansk/128x128.png';
-
 interface ItemShowcaseProps {
     itemImageUrl: string;
     isVisible: boolean;
@@ -44,6 +41,7 @@ export const ManopediaUpdate: FC = () => {
     const [isHiding, setIsHiding] = useState(false);
     const [showItemShowcase, setShowItemShowcase] = useState(false);
     const showManopediaUpdate = useSelector((state: RootState) => state.GUI.showManopediaUpdate);
+    const manopediaUpdateItem = useSelector((state: RootState) => state.GUI.manopediaUpdateItem);
 
     useEffect(() => {
         if (showManopediaUpdate && !isVisible) {
@@ -81,9 +79,12 @@ export const ManopediaUpdate: FC = () => {
         return null;
     }
 
+    // 获取物品图片URL，如果store中有物品信息则使用，否则使用默认图片
+    const itemImageUrl = manopediaUpdateItem?.itemImage || './game/Item/ansk/128x128.png';
+
     return (
         <>
-            <ItemShowcase itemImageUrl={DEFAULT_ITEM_IMAGE} isVisible={showItemShowcase} />
+            <ItemShowcase itemImageUrl={itemImageUrl} isVisible={showItemShowcase} />
             <div className={`${styles.manopediaUpdateContainer} ${isHiding ? styles.hiding : ''}`}>
                 <img src={manopediaUpdate} alt="Manopedia Update" className={styles.manopediaUpdateImage} />
             </div>

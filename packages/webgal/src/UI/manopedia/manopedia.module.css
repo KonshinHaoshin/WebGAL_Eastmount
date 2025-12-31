@@ -32,8 +32,6 @@
   height: 250px;
   cursor: pointer !important;
   transition: transform 0.3s ease;
-  z-index: 10002;
-  /* 将背景相关样式移到这里 */
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
@@ -49,11 +47,8 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 2px;
-  /* 进一步减少间距，更加紧凑 */
   padding-right: 2px;
-  /* 进一步减少内边距 */
-  z-index: 10005;
-  /* 提高z-index，确保在frame和itemsDisplay之上 */
+  z-index: 10003;
 }
 
 /* 右侧按钮容器 */
@@ -62,44 +57,96 @@
   justify-content: flex-end;
   width: 100%;
   margin-bottom: -5px;
-  /* 负边距让按钮更紧凑，重叠部分 */
 }
 
 /* 右侧单个按钮 */
 .rightButton {
-  /* 使用图片原始尺寸，但限制最大尺寸 */
   width: auto;
   height: auto;
   cursor: pointer;
   transition: all 0.3s ease;
-  /* 确保图片保持比例并完整显示 */
   object-fit: contain;
   display: block;
-  /* 防止图片被拉伸 */
   image-rendering: -webkit-optimize-contrast;
   image-rendering: pixelated;
 }
 
 .rightButton:hover {
-  /* 减少位移量，更自然 */
   z-index: 10002;
-  /* 确保hover时在最上层 */
 }
 
-/* 有alpha通道的frame资产 - 覆盖整个屏幕的框架 */
-.frameAsset {
+/* Frame容器 - 统一管理位置和缩放 */
+.frameContainer {
   position: fixed;
-  top: 80px;
-  left: 150px;
-  scale: 0.9;
-  object-fit: contain;
-  /* 覆盖整个屏幕 */
-  pointer-events: none;
-  /* 确保不干扰其他元素的交互 */
-  z-index: 10003;
-  /* 在背景之上，itemsDisplay之下 */
+  top: 120px;
+  /* 移动位置 */
+  left: 0;
+  scale: 1.3;
+  /* 统一缩放 */
+  width: 800px;
+  /* 原始尺寸 */
+  height: 600px;
+  /* 原始尺寸 */
+  transform-origin: top left;
+  /* 确保缩放正确 */
+  z-index: 10001;
 }
 
+/* Frame背景 */
+.frameAsset {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 主展示区 - 在同一个容器内 */
+.mainDisplayArea {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.selectedItemDisplay {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  scale: 0.6;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  padding: 10%;
+  box-sizing: border-box;
+}
+
+/* 物品大图 - 填充并裁剪超出部分 */
+.itemLargeImage {
+  width: 100%;
+  /* 填充容器宽度 */
+  height: 100%;
+  /* 填充容器高度 */
+  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
+  object-position: center center;
+  /* 防止图片被拉伸变形 */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* } */
 /* 有alpha通道的items显示资产 - 铺满下面的长条区域 */
 .itemsDisplayAsset {
   position: fixed;
@@ -107,70 +154,11 @@
   left: 0;
   width: 100%;
   height: auto;
-  /* 根据图片比例自适应高度 */
   max-height: 40%;
-  /* 限制最大高度，防止过高 */
   object-fit: cover;
-  /* 铺满宽度，裁剪高度 */
   pointer-events: none;
-  /* 确保不干扰其他元素的交互 */
   z-index: 10004;
-  /* 在frame之上 */
-  /* 确保图片底部对齐并铺满宽度 */
   object-position: bottom center;
-}
-
-/* 主展示区 - 显示当前选中的物品 */
-.mainDisplayArea {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 60%;
-  height: 60%;
-  z-index: 10005;
-  /* 在frame和itemsDisplay之上 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  /* 容器不接收事件，但内部元素可以 */
-}
-
-.selectedItemDisplay {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  pointer-events: auto;
-  /* 内部元素可以接收事件 */
-}
-
-.itemLargeImage {
-  max-width: 200px;
-  max-height: 200px;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-}
-
-.itemInfo {
-  text-align: center;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  max-width: 300px;
-}
-
-.itemName {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.itemDescription {
-  font-size: 16px;
-  line-height: 1.4;
-  opacity: 0.9;
 }
 
 /* 缩略图列表 */
@@ -183,10 +171,8 @@
   justify-content: center;
   gap: 15px;
   padding: 0 20px;
-  z-index: 10006;
-  /* 在最上层 */
+  z-index: 10005;
   flex-wrap: wrap;
-  /* 允许换行 */
   pointer-events: auto;
 }
 
@@ -199,18 +185,6 @@
   transition: all 0.3s ease;
   position: relative;
   border: 2px solid transparent;
-  background: rgba(0, 0, 0, 0.3);
-}
-
-.thumbnailItem:hover {
-  transform: translateY(-5px) scale(1.1);
-  border-color: #ffd700;
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-}
-
-.thumbnailItem.selected {
-  border-color: #ff6b6b;
-  box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
 }
 
 .thumbnailImage {
@@ -226,11 +200,18 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
   font-size: 12px;
   font-weight: bold;
+}
+
+.loadingContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: 24px;
 }

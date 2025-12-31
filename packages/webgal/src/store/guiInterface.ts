@@ -33,11 +33,16 @@ export interface IGuiState {
   fontOptimization: boolean; // 字体优化
   showPhone: boolean; // 是否显示 Phone 界面
   showManopediaUpdate: boolean; // 是否显示魔女图鉴更新提示
+  manopediaUpdateItem: {
+    itemId: string;
+    itemName: string;
+    itemImage: string;
+  } | null; // 魔女图鉴更新提示的物品信息
 }
 
 export type componentsVisibility = Pick<
   IGuiState,
-  Exclude<keyof IGuiState, 'currentMenuTag' | 'titleBg' | 'titleBgm' | 'logoImage' | 'theme'>
+  Exclude<keyof IGuiState, 'currentMenuTag' | 'titleBg' | 'titleBgm' | 'logoImage' | 'theme' | 'manopediaUpdateItem'>
 >;
 // 标题资源
 export type GuiAsset = Pick<IGuiState, 'titleBgm' | 'titleBg'>;
@@ -52,6 +57,11 @@ export interface IGuiStore {
 export interface setVisibilityPayload {
   component: keyof componentsVisibility;
   visibility: boolean;
+  itemInfo?: {
+    itemId: string;
+    itemName: string;
+    itemImage: string;
+  };
 }
 
 export interface setAssetPayload {

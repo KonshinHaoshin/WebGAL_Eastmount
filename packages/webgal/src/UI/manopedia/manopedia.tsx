@@ -1,4 +1,4 @@
-import { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import useSoundEffect from '@/hooks/useSoundEffect';
 import styles from './manopedia.module.scss';
@@ -22,10 +22,8 @@ import frame from '@/assets/dragonspring/manopedia/manopedia_frame.png';
 import itemsDisplay from '@/assets/dragonspring/manopedia/manopedia_items.png';
 
 // 导入游戏相关模块
-import { webgalStore } from '@/store/store';
 import { itemManager } from '@/Core/Modules/item/itemManager';
 import { IItemDefinition } from '@/store/IItemDefinition';
-import { IInventoryItem } from '@/store/stageInterface';
 
 // 物品数据接口（扩展游戏物品定义）
 interface ManopediaItem extends IItemDefinition {
@@ -45,7 +43,8 @@ type ButtonType = 'exhibit' | 'figure' | 'map' | 'rule' | 'record';
 export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
     const { playSeClick, playSeEnter } = useSoundEffect();
     const [isCloseButtonHovered, setIsCloseButtonHovered] = useState(false);
-    const [hoveredButton, setHoveredButton] = useState<ButtonType>('exhibit'); // Exhibit初始为hover状态
+    const [activeButton, setActiveButton] = useState<ButtonType>('exhibit'); // 当前激活的按钮
+    const [hoveredButton, setHoveredButton] = useState<ButtonType | null>(null); // 当前hover的按钮
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null); // 当前选中的物品ID
     const [items, setItems] = useState<ManopediaItem[]>([]); // 物品数据
     const [isLoading, setIsLoading] = useState(true); // 加载状态
@@ -59,10 +58,6 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
             setIsLoading(true);
             try {
                 // 获取所有已定义的物品
-                const allItemDefinitions = itemManager.getAllItems();
-
-
-                // 重新获取物品定义
                 const itemDefinitions = itemManager.getAllItems();
 
                 // 转换物品数据
@@ -102,6 +97,17 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
         loadItems();
     }, [inventoryItems]);
 
+    // 使用useMemo优化性能
+    const obtainedItems = useMemo(() =>
+        items.filter((item) => item.obtained),
+        [items]
+    );
+
+    const selectedItem = useMemo(() =>
+        items.find((item) => item.id === selectedItemId),
+        [items, selectedItemId]
+    );
+
     const handleClose = () => {
         playSeClick();
         onClose();
@@ -122,11 +128,12 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
     };
 
     const handleButtonLeave = () => {
-        setHoveredButton('exhibit'); // 鼠标离开时恢复Exhibit为hover状态
+        setHoveredButton(null); // 鼠标离开时清除hover状态
     };
 
     const handleButtonClick = (buttonType: ButtonType) => {
         playSeClick();
+        setActiveButton(buttonType); // 设置当前激活的按钮
         // 这里可以添加各个按钮的点击逻辑
         console.log(`点击了按钮: ${buttonType}`);
     };
@@ -140,11 +147,23 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
         }
     };
 
-    // 获取当前选中的物品
-    const selectedItem = items.find((item) => item.id === selectedItemId);
+    // 按钮配置
+    const buttons: { type: ButtonType; normal: string; hover: string }[] = [
+        { type: 'exhibit', normal: Exhibit, hover: ExhibitHover },
+        { type: 'figure', normal: Figure, hover: FigureHover },
+        { type: 'map', normal: Map, hover: MapHover },
+        { type: 'rule', normal: Rule, hover: RuleHover },
+        { type: 'record', normal: Record, hover: RecordHover },
+    ];
 
-    // 获取已获得的物品（用于缩略图列表）
-    const obtainedItems = items.filter((item) => item.obtained);
+    // 按钮顺序配置
+    const buttonOrder: Record<ButtonType, number> = {
+        'exhibit': 1,
+        'figure': 2,
+        'map': 3,
+        'rule': 4,
+        'record': 5,
+    };
 
     // 如果正在加载，显示加载状态
     if (isLoading) {
@@ -157,35 +176,26 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
         );
     }
 
-    // 按钮配置
-    const buttons: { type: ButtonType; normal: string; hover: string }[] = [
-        { type: 'exhibit', normal: Exhibit, hover: ExhibitHover },
-        { type: 'figure', normal: Figure, hover: FigureHover },
-        { type: 'map', normal: Map, hover: MapHover },
-        { type: 'rule', normal: Rule, hover: RuleHover },
-        { type: 'record', normal: Record, hover: RecordHover },
-    ];
-
     return (
         <div className={styles.manopediaOverlay} style={{ backgroundImage: `url(${manopediaBackgorund})` }}>
-            {/* 有alpha通道的frame资产 - 主展示区背景 */}
-            <img src={frame} alt="manopedia frame" className={styles.frameAsset} />
+            {/* Frame容器 - 包含frame背景和主展示区 */}
+            <div className={styles.frameContainer}>
+                {/* frame背景 */}
+                <img src={frame} alt="manopedia frame" className={styles.frameAsset} />
 
-            {/* 主展示区 - 显示当前选中的物品大图 */}
-            <div className={styles.mainDisplayArea}>
-                {selectedItem?.obtained && (
-                    <div className={styles.selectedItemDisplay}>
-                        <img
-                            src={selectedItem.image}
-                            alt={selectedItem.name}
-                            className={styles.itemLargeImage}
-                        />
-                        <div className={styles.itemInfo}>
-                            <h3 className={styles.itemName}>{selectedItem.name}</h3>
-                            <p className={styles.itemDescription}>{selectedItem.description}</p>
+                {/* 主展示区 - 显示当前选中的物品大图 */}
+                <div className={styles.mainDisplayArea}>
+                    {selectedItem?.obtained && (
+                        <div className={styles.selectedItemDisplay}>
+                            <img
+                                src={selectedItem.image}
+                                alt={selectedItem.name}
+                                className={styles.itemLargeImage}
+                            />
                         </div>
-                    </div>
-                )}
+                    )}
+                    {/* 移除所有提示信息 */}
+                </div>
             </div>
 
             {/* 有alpha通道的items显示资产 - 缩略图列表背景 */}
@@ -201,7 +211,6 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
                         onMouseEnter={() => playSeEnter()}
                     >
                         <img src={item.icon} alt={item.name} className={styles.thumbnailImage} />
-                        {!item.obtained && <div className={styles.lockedOverlay}>未获得</div>}
                     </div>
                 ))}
             </div>
@@ -212,21 +221,10 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
                     <div
                         key={button.type}
                         className={styles.rightButtonContainer}
-                        style={{
-                            order:
-                                button.type === 'map'
-                                    ? 3
-                                    : button.type === 'exhibit'
-                                        ? 1
-                                        : button.type === 'figure'
-                                            ? 2
-                                            : button.type === 'rule'
-                                                ? 4
-                                                : 5,
-                        }}
+                        style={{ order: buttonOrder[button.type] }}
                     >
                         <img
-                            src={hoveredButton === button.type ? button.hover : button.normal}
+                            src={hoveredButton === button.type || activeButton === button.type ? button.hover : button.normal}
                             alt={button.type}
                             className={styles.rightButton}
                             onClick={() => handleButtonClick(button.type)}
