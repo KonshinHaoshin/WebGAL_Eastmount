@@ -21,6 +21,8 @@ import RecordHover from '@/assets/dragonspring/manopedia/Record_on.png';
 import frame from '@/assets/dragonspring/manopedia/manopedia_frame.png';
 import itemsDisplay from '@/assets/dragonspring/manopedia/manopedia_items.png';
 
+import nameContainer from '@/assets/dragonspring/manopedia/nameContainer.png';
+
 // 导入游戏相关模块
 import { itemManager } from '@/Core/Modules/item/itemManager';
 import { IItemDefinition } from '@/store/IItemDefinition';
@@ -60,52 +62,49 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
                 // 获取所有已定义的物品
                 const itemDefinitions = itemManager.getAllItems();
 
-                // 转换物品数据
-                const manopediaItems: ManopediaItem[] = itemDefinitions.map((itemDef) => {
-                    const inventoryItem = inventoryItems[itemDef.id];
-                    const obtained = !!inventoryItem && inventoryItem.count > 0;
+          // 转换物品数据
+          const manopediaItems: ManopediaItem[] = itemDefinitions.map((itemDef) => {
+              const inventoryItem = inventoryItems[itemDef.id];
+              const obtained = !!inventoryItem && inventoryItem.count > 0;
 
-                    return {
-                        ...itemDef,
-                        obtained,
-                        count: inventoryItem?.count || 0,
-                        description: itemDef.description || '暂无描述',
-                    };
-                });
+            return {
+                ...itemDef,
+                obtained,
+                count: inventoryItem?.count || 0,
+                description: itemDef.description || '暂无描述',
+            };
+        });
 
-                // 按是否已获得排序（已获得的在前）
-                manopediaItems.sort((a, b) => {
-                    if (a.obtained && !b.obtained) return -1;
-                    if (!a.obtained && b.obtained) return 1;
-                    return 0;
-                });
+          // 按是否已获得排序（已获得的在前）
+          manopediaItems.sort((a, b) => {
+              if (a.obtained && !b.obtained) return -1;
+              if (!a.obtained && b.obtained) return 1;
+              return 0;
+          });
 
-                setItems(manopediaItems);
+          setItems(manopediaItems);
 
-                // 设置默认选中的物品（第一个已获得的物品）
-                const firstObtainedItem = manopediaItems.find(item => item.obtained);
-                if (firstObtainedItem) {
-                    setSelectedItemId(firstObtainedItem.id);
-                }
-            } catch (error) {
-                console.error('加载物品数据失败:', error);
-            } finally {
-                setIsLoading(false);
+          // 设置默认选中的物品（第一个已获得的物品）
+            const firstObtainedItem = manopediaItems.find((item) => item.obtained);
+            if (firstObtainedItem) {
+                setSelectedItemId(firstObtainedItem.id);
             }
-        };
+        } catch (error) {
+            console.error('加载物品数据失败:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-        loadItems();
-    }, [inventoryItems]);
+      loadItems();
+  }, [inventoryItems]);
 
     // 使用useMemo优化性能
-    const obtainedItems = useMemo(() =>
-        items.filter((item) => item.obtained),
-        [items]
-    );
+    const obtainedItems = useMemo(() => items.filter((item) => item.obtained), [items]);
 
-    const selectedItem = useMemo(() =>
-        items.find((item) => item.id === selectedItemId),
-        [items, selectedItemId]
+    const selectedItem = useMemo(
+        () => items.find((item) => item.id === selectedItemId),
+        [items, selectedItemId],
     );
 
     const handleClose = () => {
@@ -158,12 +157,12 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
 
     // 按钮顺序配置
     const buttonOrder: Record<ButtonType, number> = {
-        'exhibit': 1,
-        'figure': 2,
-        'map': 3,
-        'rule': 4,
-        'record': 5,
-    };
+      exhibit: 1,
+      figure: 2,
+      map: 3,
+      rule: 4,
+      record: 5,
+  };
 
     // 如果正在加载，显示加载状态
     if (isLoading) {
@@ -183,71 +182,103 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
                 {/* frame背景 */}
                 <img src={frame} alt="manopedia frame" className={styles.frameAsset} />
 
-                {/* 主展示区 - 显示当前选中的物品大图 */}
-                <div className={styles.mainDisplayArea}>
-                    {selectedItem?.obtained && (
-                        <div className={styles.selectedItemDisplay}>
-                            <img
-                                src={selectedItem.image}
-                                alt={selectedItem.name}
-                                className={styles.itemLargeImage}
-                            />
-                        </div>
-                    )}
-                    {/* 移除所有提示信息 */}
-                </div>
+              {/* 主展示区 - 显示当前选中的物品大图 */}
+              <div className={styles.mainDisplayArea}>
+                  {selectedItem?.obtained && (
+                      <div className={styles.selectedItemDisplay}>
+                          <img
+                              src={selectedItem.image}
+                              alt={selectedItem.name}
+                              className={styles.itemLargeImage}
+                          />
+                      </div>
+                  )}
+                  {/* 移除所有提示信息 */}
+              </div>
+          </div>
+
+          {/* 物品名称容器 - 右上部分 */}
+          {selectedItem?.obtained && (
+              <div className={styles.nameContainerWrapper}>
+                  <img src={nameContainer} alt="Name Container" className={styles.nameContainerImage} />
+                  <div className={styles.nameContainerContent}>
+                      <div className={styles.itemName}>
+                          {selectedItem.name && selectedItem.name.length > 0 && (
+                              <>
+                                  <span className={styles.firstCharacter}>{selectedItem.name.charAt(0)}</span>
+                                  <span className={styles.restCharacters}>{selectedItem.name.slice(1)}</span>
+                              </>
+                          )}
+                      </div>
+                  </div>
+              </div>
+          )}
+
+          {/* 物品描述容器 - 名称容器下方 */}
+          {selectedItem?.obtained && (
+              <div className={styles.descriptionContainerWrapper}>
+                  <div className={styles.descriptionContainerContent}>
+                      <div className={styles.itemDescription}>
+                          {selectedItem.description || '暂无描述'}
+                      </div>
+                  </div>
+              </div>
+          )}
+
+          {/* 有alpha通道的items显示资产 - 缩略图列表背景 */}
+          <img src={itemsDisplay} alt="manopedia items display" className={styles.itemsDisplayAsset} />
+
+          {/* 缩略图列表 - 显示已获得的物品 */}
+          <div className={styles.thumbnailList}>
+              {obtainedItems.map((item) => (
+                  <div
+                      key={item.id}
+                      className={`${styles.thumbnailItem} ${selectedItemId === item.id ? styles.selected : ''}`}
+                      onClick={() => handleItemClick(item.id)}
+                      onMouseEnter={() => playSeEnter()}
+                  >
+                <img src={item.image} alt={item.name} className={styles.thumbnailImage} />
             </div>
+        ))}
+          </div>
 
-            {/* 有alpha通道的items显示资产 - 缩略图列表背景 */}
-            <img src={itemsDisplay} alt="manopedia items display" className={styles.itemsDisplayAsset} />
-
-            {/* 缩略图列表 - 显示已获得的物品 */}
-            <div className={styles.thumbnailList}>
-                {obtainedItems.map((item) => (
-                    <div
-                        key={item.id}
-                        className={`${styles.thumbnailItem} ${selectedItemId === item.id ? styles.selected : ''}`}
-                        onClick={() => handleItemClick(item.id)}
-                        onMouseEnter={() => playSeEnter()}
-                    >
-                        <img src={item.icon} alt={item.name} className={styles.thumbnailImage} />
-                    </div>
-                ))}
-            </div>
-
-            {/* 右侧五个功能按钮 */}
-            <div className={styles.rightButtonsContainer} onMouseLeave={handleButtonLeave}>
-                {buttons.map((button) => (
-                    <div
-                        key={button.type}
-                        className={styles.rightButtonContainer}
-                        style={{ order: buttonOrder[button.type] }}
-                    >
-                        <img
-                            src={hoveredButton === button.type || activeButton === button.type ? button.hover : button.normal}
-                            alt={button.type}
-                            className={styles.rightButton}
-                            onClick={() => handleButtonClick(button.type)}
-                            onMouseEnter={() => handleButtonEnter(button.type)}
-                        />
-                    </div>
-                ))}
-            </div>
-
-            {/* 关闭按钮 */}
-            <div
-                className={styles.closeButtonsContainer}
-                onClick={handleClose}
-                onMouseEnter={handleCloseButtonEnter}
-                onMouseLeave={handleCloseButtonLeave}
-            >
-                <div
-                    className={styles.closeButton}
-                    style={{
-                        backgroundImage: `url(${isCloseButtonHovered ? closeButtonHover : closeButton})`,
-                    }}
+          {/* 右侧五个功能按钮 */}
+          <div className={styles.rightButtonsContainer} onMouseLeave={handleButtonLeave}>
+              {buttons.map((button) => (
+                  <div
+                      key={button.type}
+                      className={styles.rightButtonContainer}
+                      style={{ order: buttonOrder[button.type] }}
+                  >
+                      <img
+                    src={
+                        hoveredButton === button.type || activeButton === button.type
+                            ? button.hover
+                            : button.normal
+                    }
+                    alt={button.type}
+                    className={styles.rightButton}
+                    onClick={() => handleButtonClick(button.type)}
+                    onMouseEnter={() => handleButtonEnter(button.type)}
                 />
             </div>
-        </div>
-    );
+        ))}
+          </div>
+
+          {/* 关闭按钮 */}
+          <div
+              className={styles.closeButtonsContainer}
+              onClick={handleClose}
+              onMouseEnter={handleCloseButtonEnter}
+              onMouseLeave={handleCloseButtonLeave}
+          >
+              <div
+                  className={styles.closeButton}
+                  style={{
+                      backgroundImage: `url(${isCloseButtonHovered ? closeButtonHover : closeButton})`,
+                  }}
+              />
+          </div>
+      </div>
+  );
 };

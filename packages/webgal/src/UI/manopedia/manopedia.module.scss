@@ -4,7 +4,6 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -155,7 +154,7 @@
     object-position: center center;
     /* 防止图片被拉伸变形 */
     image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
+    image-rendering: pixelated;
 }
 
 
@@ -182,12 +181,12 @@
 
 .thumbnailList {
     position: fixed;
-    bottom: 20px;
-    left: 0;
+    bottom: 60px;
+    left: 80px;
     width: 100%;
     display: flex;
-    justify-content: center;
-    gap: 15px;
+    justify-content: left;
+    gap: 40px;
     padding: 0 20px;
     z-index: 10005;
     flex-wrap: wrap;
@@ -195,8 +194,8 @@
 }
 
 .thumbnailItem {
-    width: 60px;
-    height: 60px;
+    width: 200px;
+    height: 200px;
     border-radius: 8px;
     overflow: hidden;
     cursor: pointer;
@@ -232,4 +231,130 @@
     transform: translate(-50%, -50%);
     text-align: center;
     font-size: 24px;
+}
+
+
+/* 物品名称和描述容器样式 - 固定位置 */
+
+.nameContainerWrapper {
+    position: fixed;
+    top: -200px;
+    right: 550px;
+    transform-origin: top right;
+    z-index: 10001;
+    width: 800px;
+    height: 800px;
+    pointer-events: none;
+}
+
+.nameContainerImage {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    scale: 0.7;
+    object-fit: contain;
+    z-index: 1;
+    /* 确保缩放一致性 */
+    transform: scale(1);
+    /* 保持原始尺寸 */
+}
+
+.nameContainerContent {
+    position: absolute;
+    top: 40px;
+    /* 相对于wrapper的位置调整 */
+    right: 90px;
+    /* 相对于wrapper的位置调整 */
+    width: calc(100% - 180px);
+    /* 根据偏移调整宽度 */
+    height: calc(100% - 80px);
+    /* 根据偏移调整高度 */
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    /* 减少内边距，因为已经有位置偏移了 */
+    box-sizing: border-box;
+    /* 移除scale，由wrapper统一控制 */
+    transform: scale(1);
+}
+
+.itemName {
+    font-size: 36px;
+    font-weight: bold;
+    color: #000;
+    position: relative;
+    left: 65px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.firstCharacter {
+    font-size: 64px;
+    position: relative;
+    top: 10px;
+}
+
+.restCharacters {
+    font-size: 48px;
+    position: relative;
+    top: 16px;
+    color: #000;
+}
+
+.itemDescription {
+    font-size: 32px;
+    color: #000;
+    position: relative;
+    left: 220px;
+    display: flex;
+    justify-content: flex-start;
+    // white-space: nowrap;
+    line-height: 1.4;
+    max-height: 60px;
+    // overflow: hidden;
+    text-overflow: ellipsis;
+    line-clamp: 3;
+    width: 100%;
+}
+
+
+/* 物品描述容器样式 - 名称容器下方 */
+
+.descriptionContainerWrapper {
+    position: fixed;
+    top: 280px;
+    /* 在名称容器下方 */
+    right: 710px;
+    transform-origin: top right;
+    z-index: 10001;
+    width: 800px;
+    height: 200px;
+    /* 描述容器高度较小 */
+    pointer-events: none;
+}
+
+.descriptionContainerContent {
+    position: absolute;
+    top: 20px;
+    right: 90px;
+    width: calc(100% - 180px);
+    height: calc(100% - 40px);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 10px;
+    box-sizing: border-box;
+    transform: scale(1);
 }
