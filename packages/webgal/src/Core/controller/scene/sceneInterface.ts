@@ -40,9 +40,9 @@ export enum commandType {
   applyStyle,
   wait,
   manopedia,
-  addItem,
-  Item,
-  clearItem,
+  addItem, // 添加道具（无需交互）
+  Item, // 添加道具（需交互）
+  clearItem, // 清除道具
 }
 
 /**

@@ -204,6 +204,7 @@
   justify-content: center;
   font-size: 12px;
   font-weight: bold;
+  font-family: "思源宋体", serif;
 }
 
 .loadingContainer {
@@ -213,6 +214,7 @@
   transform: translate(-50%, -50%);
   text-align: center;
   font-size: 24px;
+  font-family: "思源宋体", serif;
 }
 
 /* 物品名称和描述容器样式 - 固定位置 */
@@ -276,12 +278,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
+  font-family: "思源宋体", serif;
 }
 
 .firstCharacter {
-  font-size: 64px;
+  font-size: 72px;
   position: relative;
-  top: 10px;
+  top: 1px;
+  font-family: "思源宋体", serif;
 }
 
 .restCharacters {
@@ -289,6 +293,7 @@
   position: relative;
   top: 16px;
   color: #000;
+  font-family: "思源宋体", serif;
 }
 
 .itemDescription {
@@ -303,6 +308,8 @@
   text-overflow: ellipsis;
   line-clamp: 3;
   width: 100%;
+  font-family: "思源宋体", serif;
+  font-weight: 800;
 }
 
 /* 物品描述容器样式 - 名称容器下方 */

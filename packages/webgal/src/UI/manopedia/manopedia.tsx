@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, useMemo } from 'react';
+import React, { FC, useState, useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import useSoundEffect from '@/hooks/useSoundEffect';
 import styles from './manopedia.module.scss';
@@ -146,6 +146,20 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
         }
     };
 
+    // 将文本中的\n换行符转换为JSX的<br />标签
+    const formatDescription = (text: string | undefined) => {
+        if (!text) return '暂无描述';
+
+        // 将\n换行符分割成数组，然后映射为带<br />的JSX元素
+        const lines = text.split('\n');
+        return lines.map((line, index) => (
+            <React.Fragment key={index}>
+                {line}
+                {index < lines.length - 1 && <br />}
+            </React.Fragment>
+        ));
+    };
+
     // 按钮配置
     const buttons: { type: ButtonType; normal: string; hover: string }[] = [
         { type: 'exhibit', normal: Exhibit, hover: ExhibitHover },
@@ -164,10 +178,56 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
       record: 5,
   };
 
+    // 处理滚轮事件
+    const handleWheelEvent = (e: React.WheelEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.nativeEvent.preventDefault();
+        e.nativeEvent.stopPropagation();
+        return false;
+    };
+
+    // 处理触摸移动事件
+    const handleTouchMoveEvent = (e: React.TouchEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.nativeEvent.preventDefault();
+        e.nativeEvent.stopPropagation();
+        return false;
+    };
+
+    // 屏蔽鼠标滚轮事件
+    useEffect(() => {
+        const handleWheel = (e: WheelEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        const handleTouchMove = (e: TouchEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        // 添加事件监听器
+        window.addEventListener('wheel', handleWheel, { passive: false });
+        window.addEventListener('touchmove', handleTouchMove, { passive: false }); // 也屏蔽触摸滚动
+
+        // 清理函数
+        return () => {
+            window.removeEventListener('wheel', handleWheel);
+            window.removeEventListener('touchmove', handleTouchMove);
+        };
+    }, []);
+
     // 如果正在加载，显示加载状态
     if (isLoading) {
         return (
-            <div className={styles.manopediaOverlay} style={{ backgroundImage: `url(${manopediaBackgorund})` }}>
+            <div
+                className={styles.manopediaOverlay}
+                style={{ backgroundImage: `url(${manopediaBackgorund})` }}
+                onWheel={handleWheelEvent}
+                onTouchMove={handleTouchMoveEvent}
+            >
                 <div className={styles.loadingContainer}>
                     <div className={styles.loadingText}>加载物品数据中...</div>
                 </div>
@@ -176,7 +236,12 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
     }
 
     return (
-        <div className={styles.manopediaOverlay} style={{ backgroundImage: `url(${manopediaBackgorund})` }}>
+        <div
+            className={styles.manopediaOverlay}
+            style={{ backgroundImage: `url(${manopediaBackgorund})` }}
+            onWheel={handleWheelEvent}
+            onTouchMove={handleTouchMoveEvent}
+        >
             {/* Frame容器 - 包含frame背景和主展示区 */}
             <div className={styles.frameContainer}>
                 {/* frame背景 */}
@@ -219,7 +284,7 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
               <div className={styles.descriptionContainerWrapper}>
                   <div className={styles.descriptionContainerContent}>
                       <div className={styles.itemDescription}>
-                          {selectedItem.description || '暂无描述'}
+                            {formatDescription(selectedItem.description)}
                       </div>
                   </div>
               </div>

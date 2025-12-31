@@ -13,5 +13,5 @@ addItem:simplespear;
 丰川祥子:好奇怪的名
 addItem:key;
 千早爱音:这是什么？钥匙？
-clearItem:;
+;clearItem:;
 丰川祥子:好奇怪的东西哦

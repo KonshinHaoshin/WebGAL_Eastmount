@@ -42,6 +42,7 @@ export enum commandType {
   manopedia,
   addItem,
   Item,
+  clearItem,
 }
 
 /**
