@@ -155,6 +155,7 @@
     /* 防止图片被拉伸变形 */
     image-rendering: -webkit-optimize-contrast;
     image-rendering: pixelated;
+    transition: transform 0.3s ease;
 }
 
 
@@ -202,6 +203,11 @@
     transition: all 0.3s ease;
     position: relative;
     border: 2px solid transparent;
+
+    &:hover {
+        transform: scale(1.1);
+        z-index: 10006;
+    }
 }
 
 .thumbnailImage {
