@@ -27,6 +27,7 @@ export const changeBg = (sentence: ISentence): IPerform => {
 	const transformString = getStringArgByKey(sentence, 'transform');
 	let duration = getNumberArgByKey(sentence, 'duration') ?? 1000;
 	const ease = getStringArgByKey(sentence, 'ease') ?? '';
+	const type = getStringArgByKey(sentence, 'type') ?? 'default';
 
 	// 解析 LUT 参数
 	const lutArg = getStringArgByKey(sentence, 'lut');
@@ -47,25 +48,36 @@ export const changeBg = (sentence: ISentence): IPerform => {
 		dispatch(stageActions.removeEffectByTargetId(`bg-main`));
 	}
 
-	// 处理 transform 和 默认 transform
-	let animationObj: AnimationFrame[];
-	if (transformString) {
-		try {
-			const frame = JSON.parse(transformString.toString()) as AnimationFrame;
-			animationObj = generateTransformAnimationObj('bg-main', frame, duration, ease);
-			// 因为是切换，必须把一开始的 alpha 改为 0
-			animationObj[0].alpha = 0;
-			const animationName = (Math.random() * 10).toString(16);
-			const newAnimation: IUserAnimation = { name: animationName, effects: animationObj };
-			WebGAL.animationManager.addAnimation(newAnimation);
-			duration = getAnimateDuration(animationName);
-			WebGAL.animationManager.nextEnterAnimationName.set('bg-main', animationName);
-		} catch (e) {
-			// 解析都错误了，歇逼吧
+	if (type === 'blinds') {
+		// 百叶窗效果：先淡出到黑，再百叶窗进场
+		// 设置退出动画为 universalSoftOff
+		WebGAL.animationManager.nextExitAnimationName.set('bg-main-off', 'universalSoftOff');
+		WebGAL.animationManager.nextExitAnimationDuration.set('bg-main-off', 1000);
+		// 设置进入动画为 blindsIn
+		WebGAL.animationManager.nextEnterAnimationName.set('bg-main', 'blindsIn');
+		WebGAL.animationManager.nextEnterAnimationDuration.set('bg-main', 3000);
+		duration = 3000; // 默认总时长 3 秒
+	} else {
+		// 处理 transform 和 默认 transform
+		let animationObj: AnimationFrame[];
+		if (transformString) {
+			try {
+				const frame = JSON.parse(transformString.toString()) as AnimationFrame;
+				animationObj = generateTransformAnimationObj('bg-main', frame, duration, ease);
+				// 因为是切换，必须把一开始的 alpha 改为 0
+				animationObj[0].alpha = 0;
+				const animationName = (Math.random() * 10).toString(16);
+				const newAnimation: IUserAnimation = { name: animationName, effects: animationObj };
+				WebGAL.animationManager.addAnimation(newAnimation);
+				duration = getAnimateDuration(animationName);
+				WebGAL.animationManager.nextEnterAnimationName.set('bg-main', animationName);
+			} catch (e) {
+				// 解析都错误了，歇逼吧
+				applyDefaultTransform();
+			}
+		} else {
 			applyDefaultTransform();
 		}
-	} else {
-		applyDefaultTransform();
 	}
 
 	function applyDefaultTransform() {

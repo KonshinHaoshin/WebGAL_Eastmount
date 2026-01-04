@@ -28,7 +28,7 @@ import styles from './phone.module.scss';
  */
 export const Phone: FC = () => {
     const dispatch = useDispatch();
-    const { playSeClick, playSeEnter, playSeDialogOpen } = useSoundEffect();
+    const { playSeClick, playSeEnter, playSeDialogOpen, playSeCloseGear } = useSoundEffect();
     const GUIStore = useSelector((state: RootState) => state.GUI);
     const t = useTrans('gaming.');
 
@@ -38,8 +38,8 @@ export const Phone: FC = () => {
     }
 
     const handleClose = () => {
+        playSeCloseGear();
         dispatch(setVisibility({ component: 'showPhone', visibility: false }));
-        playSeClick();
     };
 
     const setComponentVisibility = (component: keyof componentsVisibility, visibility: boolean) => {

@@ -57,9 +57,7 @@ export const TextBox = () => {
     // 监听auto模式变化
     const checkAutoMode = () => {
       const currentAutoState = WebGAL.gameplay.isAuto;
-      if (currentAutoState !== isAuto) {
-        setIsAuto(currentAutoState);
-      }
+      setIsAuto((prev) => (currentAutoState !== prev ? currentAutoState : prev));
     };
 
     // 定期检查auto模式状态

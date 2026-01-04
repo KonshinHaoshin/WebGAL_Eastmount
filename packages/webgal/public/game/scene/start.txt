@@ -12,6 +12,7 @@ addItem:simplespear;
 千早爱音:简易长矛是什么东西？
 丰川祥子:好奇怪的名
 addItem:key;
+changeBg:RGB/Background_001_001.png -transform={"position":{"x":0,"y":0},"scale":{"x":1,"y":1}} -type=blinds;
 千早爱音:这是什么？钥匙？
 ;clearItem:;
 丰川祥子:好奇怪的东西哦

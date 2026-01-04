@@ -5,6 +5,12 @@ import switch_1 from '@/assets/se/switch-1.mp3';
 import mouse_enter from '@/assets/se/mouse-enter.mp3';
 import dialog_se from '@/assets/se/dialog.mp3';
 import click_se from '@/assets/se/click.mp3';
+import open_media from '@/assets/dragonspring/ogg/open_media.ogg';
+import open_gearbutton from '@/assets/dragonspring/ogg/open_gearbutton.ogg';
+import close_pedia from '@/assets/dragonspring/ogg/close_pedia.ogg';
+import close_gearbutton from '@/assets/dragonspring/ogg/close_gearbutton.ogg';
+import choose_se from '@/assets/dragonspring/ogg/choose.ogg';
+import pedia_choose from '@/assets/dragonspring/ogg/pedia_choose.ogg';
 import { useDispatch } from 'react-redux';
 import { webgalStore } from '@/store/store';
 
@@ -15,25 +21,49 @@ const useSoundEffect = () => {
   const dispatch = useDispatch();
 
   const playSeEnter = () => {
-    dispatch(setStage({ key: 'uiSe', value: mouse_enter }));
+    // 禁用鼠标悬停音效
+    // dispatch(setStage({ key: 'uiSe', value: mouse_enter }));
   };
   const playSeClick = () => {
-    dispatch(setStage({ key: 'uiSe', value: click_se }));
+    dispatch(setStage({ key: 'uiSe', value: choose_se }));
+  };
+  const playSeManopedia = () => {
+    webgalStore.dispatch(setStage({ key: 'uiSe', value: open_media }));
+  };
+  const playSeGear = () => {
+    webgalStore.dispatch(setStage({ key: 'uiSe', value: open_gearbutton }));
+  };
+  const playSeCloseGear = () => {
+    webgalStore.dispatch(setStage({ key: 'uiSe', value: close_gearbutton }));
+  };
+  const playSeCloseManopedia = () => {
+    webgalStore.dispatch(setStage({ key: 'uiSe', value: close_pedia }));
+  };
+  const playSePediaChoose = () => {
+    webgalStore.dispatch(setStage({ key: 'uiSe', value: pedia_choose }));
   };
   const playSeSwitch = () => {
-    dispatch(setStage({ key: 'uiSe', value: switch_1 }));
+    // 禁用开关/切换音效
+    // dispatch(setStage({ key: 'uiSe', value: switch_1 }));
   };
   const playSePageChange = () => {
-    dispatch(setStage({ key: 'uiSe', value: page_flip_1 }));
+    // 禁用翻页音效
+    // dispatch(setStage({ key: 'uiSe', value: page_flip_1 }));
   };
 
   const playSeDialogOpen = () => {
-    dispatch(setStage({ key: 'uiSe', value: dialog_se }));
+    // 禁用对话框打开音效
+    // dispatch(setStage({ key: 'uiSe', value: dialog_se }));
   };
 
   return {
     playSeEnter,
     playSeClick,
+    playSeManopedia,
+    playSeGear,
+    playSeCloseGear,
+    playSeCloseManopedia,
+    playSePediaChoose,
     playSePageChange,
     playSeDialogOpen,
     playSeSwitch,
@@ -45,10 +75,11 @@ const useSoundEffect = () => {
  */
 export const useSEByWebgalStore = () => {
   const playSeEnter = () => {
-    webgalStore.dispatch(setStage({ key: 'uiSe', value: mouse_enter }));
+    // 禁用鼠标悬停音效
+    // webgalStore.dispatch(setStage({ key: 'uiSe', value: mouse_enter }));
   };
   const playSeClick = () => {
-    webgalStore.dispatch(setStage({ key: 'uiSe', value: click_se }));
+    webgalStore.dispatch(setStage({ key: 'uiSe', value: choose_se }));
   };
   return {
     playSeEnter, // 鼠标进入

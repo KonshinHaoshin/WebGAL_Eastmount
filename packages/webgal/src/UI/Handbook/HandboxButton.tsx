@@ -10,19 +10,19 @@ import { ManopediaViewer } from './ManopediaViewer';
  * 魔女图鉴按钮组件
  */
 export const HandboxButton: FC = () => {
-    const { playSeClick, playSeEnter } = useSoundEffect();
-    const stageState = useSelector((state: RootState) => state.stage);
+  const { playSeClick } = useSoundEffect();
+  const stageState = useSelector((state: RootState) => state.stage);
 
-    // 只有当 enableManopedia 为 true 时才显示按钮
-    if (!stageState.enableManopedia) {
-        return null;
-    }
+  // 只有当 enableManopedia 为 true 时才显示按钮
+  if (!stageState.enableManopedia) {
+    return null;
+  }
 
-    return (
-        <span className={styles.handboxButton} onMouseEnter={playSeEnter}>
-            <ManopediaViewer>
-                <img src={manopedia} alt="Manopedia" className={styles.handboxIcon} />
-            </ManopediaViewer>
-        </span>
-    );
+  return (
+    <span className={styles.handboxButton}>
+      <ManopediaViewer>
+        <img src={manopedia} alt="Manopedia" className={styles.handboxIcon} />
+      </ManopediaViewer>
+    </span>
+  );
 };

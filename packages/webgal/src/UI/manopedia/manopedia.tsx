@@ -43,7 +43,7 @@ type ButtonType = 'exhibit' | 'figure' | 'map' | 'rule' | 'record';
  * 魔女图鉴界面组件 - 显示物品展示和五个功能按钮
  */
 export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
-    const { playSeClick, playSeEnter } = useSoundEffect();
+    const { playSeClick, playSeEnter, playSeManopedia, playSeCloseManopedia, playSePediaChoose } = useSoundEffect();
     const [isCloseButtonHovered, setIsCloseButtonHovered] = useState(false);
     const [activeButton, setActiveButton] = useState<ButtonType>('exhibit'); // 当前激活的按钮
     const [hoveredButton, setHoveredButton] = useState<ButtonType | null>(null); // 当前hover的按钮
@@ -108,7 +108,7 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
     );
 
     const handleClose = () => {
-        playSeClick();
+        playSeCloseManopedia();
         onClose();
     };
 
@@ -131,7 +131,7 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
     };
 
     const handleButtonClick = (buttonType: ButtonType) => {
-        playSeClick();
+        playSePediaChoose();
         setActiveButton(buttonType); // 设置当前激活的按钮
         // 这里可以添加各个按钮的点击逻辑
         console.log(`点击了按钮: ${buttonType}`);
@@ -141,7 +141,7 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
     const handleItemClick = (itemId: string) => {
         const item = items.find((item) => item.id === itemId);
         if (item?.obtained) {
-            playSeClick();
+            // 移除点击证物的音效
             setSelectedItemId(itemId);
         }
     };

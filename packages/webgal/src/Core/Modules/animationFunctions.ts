@@ -7,9 +7,16 @@ import { baseTransform } from '@/store/stageInterface';
 import { generateTimelineObj } from '@/Core/controller/stage/pixi/animations/timeline';
 import { WebGAL } from '@/Core/WebGAL';
 import PixiStage, { IAnimationObject } from '@/Core/controller/stage/pixi/PixiController';
+import { webgalAnimations } from '@/Core/controller/stage/pixi/animations';
 
 // eslint-disable-next-line max-params
 export function getAnimationObject(animationName: string, target: string, duration: number, writeDefault: boolean) {
+  // 先尝试从预设动画中找
+  const presetAnimation = webgalAnimations.find((ani) => ani.name === animationName);
+  if (presetAnimation) {
+    return presetAnimation.animationGenerateFunc(target, duration);
+  }
+
   const effect = WebGAL.animationManager.getAnimations().find((ani) => ani.name === animationName);
   if (effect) {
     const mappedEffects = effect.effects.map((effect) => {
@@ -34,6 +41,12 @@ export function getAnimationObject(animationName: string, target: string, durati
 }
 
 export function getAnimateDuration(animationName: string) {
+  // 先尝试从预设动画中找
+  const presetAnimation = webgalAnimations.find((ani) => ani.name === animationName);
+  if (presetAnimation) {
+    return 1000; // 预设动画的默认持续时间
+  }
+
   const effect = WebGAL.animationManager.getAnimations().find((ani) => ani.name === animationName);
   if (effect) {
     let duration = 0;
@@ -69,10 +82,11 @@ export function getEnterExitAnimation(
     const animarionName = WebGAL.animationManager.nextEnterAnimationName.get(target);
     if (animarionName && !targetEffect) {
       logger.debug('取代默认进入动画', target);
-      animation = getAnimationObject(animarionName, realTarget ?? target, getAnimateDuration(animarionName), false);
-      duration = getAnimateDuration(animarionName);
+      duration = WebGAL.animationManager.nextEnterAnimationDuration.get(target) ?? getAnimateDuration(animarionName);
+      animation = getAnimationObject(animarionName, realTarget ?? target, duration, false);
       // 用后重置
       WebGAL.animationManager.nextEnterAnimationName.delete(target);
+      WebGAL.animationManager.nextEnterAnimationDuration.delete(target);
     }
     return { duration, animation };
   } else {
@@ -85,10 +99,11 @@ export function getEnterExitAnimation(
     const animarionName = WebGAL.animationManager.nextExitAnimationName.get(target);
     if (animarionName) {
       logger.debug('取代默认退出动画', target);
-      animation = getAnimationObject(animarionName, realTarget ?? target, getAnimateDuration(animarionName), false);
-      duration = getAnimateDuration(animarionName);
+      duration = WebGAL.animationManager.nextExitAnimationDuration.get(target) ?? getAnimateDuration(animarionName);
+      animation = getAnimationObject(animarionName, realTarget ?? target, duration, false);
       // 用后重置
       WebGAL.animationManager.nextExitAnimationName.delete(target);
+      WebGAL.animationManager.nextExitAnimationDuration.delete(target);
     }
     return { duration, animation };
   }
