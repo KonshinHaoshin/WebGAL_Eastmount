@@ -1,6 +1,6 @@
 import { Stage } from '@/Stage/Stage';
 import { Backlog } from '@/UI/Backlog/Backlog';
-import { BottomControlPanel } from '@/UI/BottomControlPanel/BottomControlPanel';
+// import { BottomControlPanel } from '@/UI/BottomControlPanel/BottomControlPanel';
 import { BottomControlPanelFilm } from '@/UI/BottomControlPanel/BottomControlPanelFilm';
 import DevPanel from '@/UI/DevPanel/DevPanel';
 import { Extra } from '@/UI/Extra/Extra';
@@ -41,7 +41,7 @@ function App() {
     <div className="App">
       <Translation />
       <Stage />
-      <BottomControlPanel />
+      {/* <BottomControlPanel /> */}
       <BottomControlPanelFilm />
       <GearButton />
       <HandboxButton />

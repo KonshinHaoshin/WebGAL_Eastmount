@@ -139,9 +139,9 @@ export const ManopediaUpdate: FC = () => {
             // 获取最新的物品（队列中的最后一个）
             const latestItem = queueRef.current[queueRef.current.length - 1];
 
-            // 更新当前显示的物品为最新的
-            setCurrentItemId(latestItem.id);
-            setCurrentItemImage(latestItem.itemImage);
+          // 更新当前显示的物品为最新的
+          setCurrentItemId(latestItem.id);
+          setCurrentItemImage(latestItem.itemImage);
 
             // 重新开始展示动画
             startShowcaseAnimation();
@@ -172,32 +172,51 @@ export const ManopediaUpdate: FC = () => {
             setIsHiding(true);
           timersRef.current.removeTimer = setTimeout(() => {
               setIsVisible(false);
-            // 当前物品展示完成，处理下一个
-            removeCurrentFromQueue();
-            setTimeout(() => {
-                processQueue();
-            }, 100);
-        }, 500);
+              // 当前物品展示完成，处理下一个
+              removeCurrentFromQueue();
+              setTimeout(() => {
+                  processQueue();
+              }, 100);
+          }, 500);
       }, 4000);
     };
 
     useEffect(() => {
-        if (showManopediaUpdate && manopediaUpdateItem) {
-            // 如果有新的物品添加，添加到队列
-            const itemId = manopediaUpdateItem.itemId || `item-${Date.now()}`;
-            const itemImage = manopediaUpdateItem.itemImage || './game/Item/ansk/128x128.png';
+        if (showManopediaUpdate) {
+            if (manopediaUpdateItem) {
+                // 如果有物品信息，添加到队列显示物品
+                const itemId = manopediaUpdateItem.itemId || `item-${Date.now()}`;
+                const itemImage = manopediaUpdateItem.itemImage || './game/Item/ansk/128x128.png';
 
-            addToQueue(itemId, itemImage);
-        } else if (!showManopediaUpdate && isVisible) {
-            // 如果状态变为false但组件还可见，开始隐藏动画
-            setIsHiding(true);
-            setShowItemShowcase(false);
-            clearAllTimers();
+              addToQueue(itemId, itemImage);
+          } else {
+              // 如果没有物品信息，只显示提示图片
+              // 清除之前的定时器
+              clearAllTimers();
 
-            timersRef.current.removeTimer = setTimeout(() => {
-                setIsVisible(false);
-            }, 500);
-        }
+              // 显示提示图片
+              setIsVisible(true);
+              setIsHiding(false);
+              setShowItemShowcase(false); // 不显示物品展示
+
+              // 4秒后开始隐藏
+              timersRef.current.hideTimer = setTimeout(() => {
+                  setIsHiding(true);
+                  timersRef.current.removeTimer = setTimeout(() => {
+                      setIsVisible(false);
+                  }, 500);
+              }, 4000);
+          }
+      } else if (!showManopediaUpdate && isVisible) {
+          // 如果状态变为false但组件还可见，开始隐藏动画
+          setIsHiding(true);
+          setShowItemShowcase(false);
+          clearAllTimers();
+
+          timersRef.current.removeTimer = setTimeout(() => {
+              setIsVisible(false);
+          }, 500);
+      }
 
         // 清理函数
         return () => {
