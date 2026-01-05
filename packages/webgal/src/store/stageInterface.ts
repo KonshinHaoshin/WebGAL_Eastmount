@@ -254,6 +254,7 @@ export interface IStageState {
 	isEvidenceMode: boolean; // 是否处于证据模式
 	evidenceTarget: string; // 证据模式的目标物品ID
 	evidenceJumpScenes: string[]; // 证据模式的跳转场景 [成功场景, 失败场景]
+	showManopedia: boolean; // 是否显示图鉴界面
 }
 
 /**

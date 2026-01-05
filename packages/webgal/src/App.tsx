@@ -15,13 +15,20 @@ import Translation from '@/UI/Translation/Translation';
 import { Phone } from '@/UI/Phone/Phone';
 import { ItemDisplay } from '@/UI/ItemDisplay/ItemDispaly';
 import { ManopediaUpdate } from '@/UI/manopedia/manopedia_update';
+import { Manopedia } from '@/UI/manopedia/manopedia';
 import { ShowItem } from '@/UI/manopedia/showItem';
 import { useEffect } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { initializeScript } from './Core/initializeScript';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from './store/store';
+import { setStage } from './store/stageReducer';
 
 function App() {
+  const showManopedia = useSelector((state: RootState) => state.stage.showManopedia);
+  const dispatch = useDispatch();
+
   useEffect(() => {
     initializeScript();
     AOS.init({
@@ -57,6 +64,13 @@ function App() {
       <ItemDisplay />
       <ManopediaUpdate />
       <ShowItem />
+      {showManopedia && (
+        <Manopedia
+          onClose={() => {
+            dispatch(setStage({ key: 'showManopedia', value: false }));
+          }}
+        />
+      )}
     </div>
   );
 }

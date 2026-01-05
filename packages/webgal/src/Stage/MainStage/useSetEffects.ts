@@ -42,5 +42,8 @@ function convertTransform(transform: ITransform | undefined) {
     return {};
   }
   const { position, ...rest } = transform;
-  return { ...rest, x: position.x, y: position.y };
+  if (position && typeof position.x === 'number' && typeof position.y === 'number') {
+    return { ...rest, x: position.x, y: position.y };
+  }
+  return { ...rest };
 }

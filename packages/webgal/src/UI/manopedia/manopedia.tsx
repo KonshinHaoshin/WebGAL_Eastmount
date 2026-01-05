@@ -1,5 +1,5 @@
-import React, { FC, useState, useEffect, useMemo, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import React, { FC, useState, useEffect, useMemo } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import useSoundEffect from '@/hooks/useSoundEffect';
 import styles from './manopedia.module.scss';
 import manopediaBackgorund from '@/assets/dragonspring/manopedia/manopedia.png';
@@ -34,16 +34,15 @@ import { IItemDefinition } from '@/store/IItemDefinition';
 import { setStage } from '@/store/stageReducer';
 import { WebGAL } from '@/Core/WebGAL';
 import { changeScene } from '@/Core/controller/scene/changeScene';
-import { webgalStore } from '@/store/store';
 
 // 物品数据接口（扩展游戏物品定义）
 interface ManopediaItem extends IItemDefinition {
-    obtained: boolean; // 是否已获得
-    count: number; // 物品数量
+  obtained: boolean; // 是否已获得
+  count: number; // 物品数量
 }
 
 interface ManopediaProps {
-    onClose: () => void;
+  onClose: () => void;
 }
 
 type ButtonType = 'exhibit' | 'figure' | 'map' | 'rule' | 'record';
@@ -52,359 +51,289 @@ type ButtonType = 'exhibit' | 'figure' | 'map' | 'rule' | 'record';
  * 魔女图鉴界面组件 - 显示物品展示和五个功能按钮
  */
 export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
-    const { playSeClick, playSeEnter, playSeManopedia, playSeCloseManopedia, playSePediaChoose } = useSoundEffect();
-    const [isCloseButtonHovered, setIsCloseButtonHovered] = useState(false);
-    const [activeButton, setActiveButton] = useState<ButtonType>('exhibit'); // 当前激活的按钮
-    const [hoveredButton, setHoveredButton] = useState<ButtonType | null>(null); // 当前hover的按钮
-    const [selectedItemId, setSelectedItemId] = useState<string | null>(null); // 当前选中的物品ID
-    const [items, setItems] = useState<ManopediaItem[]>([]); // 物品数据
-    const [isLoading, setIsLoading] = useState(true); // 加载状态
-    const [isEvidenceButtonHovered, setIsEvidenceButtonHovered] = useState(false); // 出示按钮hover状态
+  const { playSeClick, playSeEnter, playSeCloseManopedia, playSePediaChoose } = useSoundEffect();
+  const [isCloseButtonHovered, setIsCloseButtonHovered] = useState(false);
+  const [activeButton, setActiveButton] = useState<ButtonType>('exhibit'); // 当前激活的按钮
+  const [hoveredButton, setHoveredButton] = useState<ButtonType | null>(null); // 当前hover的按钮
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null); // 当前选中的物品ID
+  const [items, setItems] = useState<ManopediaItem[]>([]); // 物品数据
+  const [isLoading, setIsLoading] = useState(true); // 加载状态
+  const [isEvidenceButtonHovered, setIsEvidenceButtonHovered] = useState(false); // 出示按钮hover状态
 
-    // 从Redux store获取库存物品
-    const inventoryItems = useSelector((state: any) => state.stage.inventory.items);
-    // 从Redux store获取证据模式状态
-    const isEvidenceMode = useSelector((state: any) => state.stage.isEvidenceMode);
-    const evidenceTarget = useSelector((state: any) => state.stage.evidenceTarget);
-    const evidenceJumpScenes = useSelector((state: any) => state.stage.evidenceJumpScenes);
+  const dispatch = useDispatch();
 
-    // 加载物品数据
-    useEffect(() => {
-        const loadItems = async () => {
-            setIsLoading(true);
-            try {
-                // 获取所有已定义的物品
-                const itemDefinitions = itemManager.getAllItems();
+  // 从Redux store获取库存物品
+  const inventoryItems = useSelector((state: any) => state.stage.inventory.items);
+  // 从Redux store获取证据模式状态
+  const isEvidenceMode = useSelector((state: any) => state.stage.isEvidenceMode);
+  const evidenceTarget = useSelector((state: any) => state.stage.evidenceTarget);
+  const evidenceJumpScenes = useSelector((state: any) => state.stage.evidenceJumpScenes);
 
-          // 转换物品数据
-          const manopediaItems: ManopediaItem[] = itemDefinitions.map((itemDef) => {
-              const inventoryItem = inventoryItems[itemDef.id];
-              const obtained = !!inventoryItem && inventoryItem.count > 0;
-
-            return {
-                ...itemDef,
-                obtained,
-                count: inventoryItem?.count || 0,
-                description: itemDef.description || '暂无描述',
-            };
+  // 加载物品数据
+  useEffect(() => {
+    const loadItems = async () => {
+      setIsLoading(true);
+      try {
+        const itemDefinitions = itemManager.getAllItems();
+        const manopediaItems: ManopediaItem[] = itemDefinitions.map((itemDef) => {
+          const inventoryItem = inventoryItems[itemDef.id];
+          const obtained = !!inventoryItem && inventoryItem.count > 0;
+          return {
+            ...itemDef,
+            obtained,
+            count: inventoryItem?.count || 0,
+            description: itemDef.description || '暂无描述',
+          };
         });
 
-          // 按是否已获得排序（已获得的在前）
-          manopediaItems.sort((a, b) => {
-              if (a.obtained && !b.obtained) return -1;
-              if (!a.obtained && b.obtained) return 1;
-              return 0;
-          });
+        manopediaItems.sort((a, b) => {
+          if (a.obtained && !b.obtained) return -1;
+          if (!a.obtained && b.obtained) return 1;
+          return 0;
+        });
 
-          setItems(manopediaItems);
+        setItems(manopediaItems);
 
-          // 设置默认选中的物品（第一个已获得的物品）
-            const firstObtainedItem = manopediaItems.find((item) => item.obtained);
-            if (firstObtainedItem) {
-                setSelectedItemId(firstObtainedItem.id);
-            }
-        } catch (error) {
-            console.error('加载物品数据失败:', error);
-        } finally {
-            setIsLoading(false);
+        const firstObtainedItem = manopediaItems.find((item) => item.obtained);
+        if (firstObtainedItem) {
+          setSelectedItemId(firstObtainedItem.id);
         }
+      } catch (error) {
+        console.error('加载物品数据失败:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
-
-      loadItems();
+    loadItems();
   }, [inventoryItems]);
 
-    // 使用useMemo优化性能
-    const obtainedItems = useMemo(() => items.filter((item) => item.obtained), [items]);
+  const obtainedItems = useMemo(() => items.filter((item) => item.obtained), [items]);
+  const selectedItem = useMemo(() => items.find((item) => item.id === selectedItemId), [items, selectedItemId]);
 
-    const selectedItem = useMemo(
-        () => items.find((item) => item.id === selectedItemId),
-        [items, selectedItemId],
-    );
-
-    const handleClose = () => {
-        playSeCloseManopedia();
-        onClose();
-    };
-
-    const handleCloseButtonEnter = () => {
-        setIsCloseButtonHovered(true);
-        playSeEnter();
-    };
-
-    const handleCloseButtonLeave = () => {
-        setIsCloseButtonHovered(false);
-    };
-
-    const handleButtonEnter = (buttonType: ButtonType) => {
-        setHoveredButton(buttonType);
-        playSeEnter();
-    };
-
-    const handleButtonLeave = () => {
-        setHoveredButton(null); // 鼠标离开时清除hover状态
-    };
-
-    const handleButtonClick = (buttonType: ButtonType) => {
-        playSePediaChoose();
-        setActiveButton(buttonType); // 设置当前激活的按钮
-        // 这里可以添加各个按钮的点击逻辑
-        console.log(`点击了按钮: ${buttonType}`);
-    };
-
-    // 处理物品点击
-    const handleItemClick = (itemId: string) => {
-        const item = items.find((item) => item.id === itemId);
-        if (item?.obtained) {
-            // 移除点击证物的音效
-            setSelectedItemId(itemId);
-        }
-    };
-
-    // 处理出示点击
-    const handlePresentClick = () => {
-        if (!selectedItemId) return;
-
-        playSeClick();
-
-        const isCorrect = selectedItemId === evidenceTarget;
-        const successScene = evidenceJumpScenes[0];
-        const failScene = evidenceJumpScenes[1];
-
-        // 关闭图鉴
-        onClose();
-
-        // 卸载演出
-        WebGAL.gameplay.performController.unmountPerform('presentTheEvidence');
-
-        // 跳转逻辑
-        if (isCorrect && successScene) {
-            changeScene(successScene, successScene);
-        } else if (!isCorrect && failScene) {
-            changeScene(failScene, failScene);
-        } else {
-            // 如果没有跳转场景，或者不跳转，就继续进行下面的语句
-            // unmountPerform 已经会让引擎继续了
-        }
-    };
-
-    // 将文本中的\n换行符转换为JSX的<br />标签
-    const formatDescription = (text: string | undefined) => {
-        if (!text) return '暂无描述';
-
-        // 将\n换行符分割成数组，然后映射为带<br />的JSX元素
-        const lines = text.split('\n');
-        return lines.map((line, index) => (
-            <React.Fragment key={index}>
-                {line}
-                {index < lines.length - 1 && <br />}
-            </React.Fragment>
-        ));
-    };
-
-    // 按钮配置
-    const buttons: { type: ButtonType; normal: string; hover: string }[] = [
-        { type: 'exhibit', normal: Exhibit, hover: ExhibitHover },
-        { type: 'figure', normal: Figure, hover: FigureHover },
-        { type: 'map', normal: Map, hover: MapHover },
-        { type: 'rule', normal: Rule, hover: RuleHover },
-        { type: 'record', normal: Record, hover: RecordHover },
-    ];
-
-    // 按钮顺序配置
-    const buttonOrder: Record<ButtonType, number> = {
-      exhibit: 1,
-      figure: 2,
-      map: 3,
-      rule: 4,
-      record: 5,
+  const handleClose = () => {
+    playSeCloseManopedia();
+    onClose();
   };
 
-    // 处理滚轮事件
-    const handleWheelEvent = (e: React.WheelEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        e.nativeEvent.preventDefault();
-        e.nativeEvent.stopPropagation();
-        return false;
-    };
+  const handleCloseButtonEnter = () => {
+    setIsCloseButtonHovered(true);
+    playSeEnter();
+  };
 
-    // 处理触摸移动事件
-    const handleTouchMoveEvent = (e: React.TouchEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        e.nativeEvent.preventDefault();
-        e.nativeEvent.stopPropagation();
-        return false;
-    };
+  const handleCloseButtonLeave = () => {
+    setIsCloseButtonHovered(false);
+  };
 
-    // 屏蔽鼠标滚轮事件
-    useEffect(() => {
-        const handleWheel = (e: WheelEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-        };
+  const handleButtonEnter = (buttonType: ButtonType) => {
+    setHoveredButton(buttonType);
+    playSeEnter();
+  };
 
-        const handleTouchMove = (e: TouchEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-        };
+  const handleButtonLeave = () => {
+    setHoveredButton(null);
+  };
 
-        // 添加事件监听器
-        window.addEventListener('wheel', handleWheel, { passive: false });
-        window.addEventListener('touchmove', handleTouchMove, { passive: false }); // 也屏蔽触摸滚动
+  const handleButtonClick = (buttonType: ButtonType) => {
+    playSePediaChoose();
+    setActiveButton(buttonType);
+  };
 
-        // 清理函数
-        return () => {
-            window.removeEventListener('wheel', handleWheel);
-            window.removeEventListener('touchmove', handleTouchMove);
-        };
-    }, []);
+  const handleItemClick = (itemId: string) => {
+    const item = items.find((item) => item.id === itemId);
+    if (item?.obtained) {
+      setSelectedItemId(itemId);
+    }
+  };
 
-    // 如果正在加载，显示加载状态
-    if (isLoading) {
-        return (
-            <div
-                className={styles.manopediaOverlay}
-                style={{ backgroundImage: `url(${manopediaBackgorund})` }}
-                onWheel={handleWheelEvent}
-                onTouchMove={handleTouchMoveEvent}
-            >
-                <div className={styles.loadingContainer}>
-                    <div className={styles.loadingText}>加载物品数据中...</div>
-                </div>
-            </div>
-        );
+  const handlePresentClick = () => {
+    if (!selectedItemId) return;
+    playSeClick();
+
+    const isCorrect = selectedItemId === evidenceTarget;
+    const successScene = evidenceJumpScenes[0];
+    const failScene = evidenceJumpScenes[1];
+
+    console.log('Present Evidence:', { selectedItemId, evidenceTarget, isCorrect, successScene, failScene });
+
+    // 1. 如果有跳转需求，先执行跳转
+    if (isCorrect && successScene) {
+      console.log('Jumping to success scene:', successScene);
+      changeScene(successScene, successScene);
+    } else if (!isCorrect && failScene) {
+      console.log('Jumping to fail scene:', failScene);
+      changeScene(failScene, failScene);
     }
 
+    // 2. 无论是否跳转，都关闭图鉴 UI
+    onClose();
+
+    // 3. 最后卸载阻塞演出，使用 force 确保卸载成功
+    WebGAL.gameplay.performController.unmountPerform('presentTheEvidence', true);
+  };
+
+  const formatDescription = (text: string | undefined) => {
+    if (!text) return '暂无描述';
+    const lines = text.split('\n');
+    return lines.map((line, index) => (
+      <React.Fragment key={index}>
+        {line}
+        {index < lines.length - 1 && <br />}
+      </React.Fragment>
+    ));
+  };
+
+  const buttons: { type: ButtonType; normal: string; hover: string }[] = [
+    { type: 'exhibit', normal: Exhibit, hover: ExhibitHover },
+    { type: 'figure', normal: Figure, hover: FigureHover },
+    { type: 'map', normal: Map, hover: MapHover },
+    { type: 'rule', normal: Rule, hover: RuleHover },
+    { type: 'record', normal: Record, hover: RecordHover },
+  ];
+
+  const buttonOrder: Record<ButtonType, number> = {
+    exhibit: 1,
+    figure: 2,
+    map: 3,
+    rule: 4,
+    record: 5,
+  };
+
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, []);
+
+  if (isLoading) {
     return (
-        <div
-            className={styles.manopediaOverlay}
-            style={{ backgroundImage: `url(${manopediaBackgorund})` }}
-            onWheel={handleWheelEvent}
-            onTouchMove={handleTouchMoveEvent}
-        >
-            {/* Frame容器 - 包含frame背景和主展示区 */}
-            <div className={styles.frameContainer}>
-                {/* frame背景 */}
-                <img src={frame} alt="manopedia frame" className={styles.frameAsset} />
-
-              {/* 主展示区 - 显示当前选中的物品大图 */}
-              <div className={styles.mainDisplayArea}>
-                  {selectedItem?.obtained && (
-                      <div className={styles.selectedItemDisplay}>
-                          <img
-                              src={selectedItem.image}
-                              alt={selectedItem.name}
-                              className={styles.itemLargeImage}
-                          />
-                          {/* 出示按钮 */}
-                          {isEvidenceMode && (
-                              <div
-                                  className={styles.evidenceButtonContainer}
-                                  onMouseEnter={() => {
-                                      setIsEvidenceButtonHovered(true);
-                                      playSeEnter();
-                                  }}
-                                  onMouseLeave={() => setIsEvidenceButtonHovered(false)}
-                                  onClick={handlePresentClick}
-                              >
-                                  <img src={presentTheEvidence_button} alt="present button" className={styles.evidenceButtonBase} />
-                                  <img
-                                      src={presentTheEvidence_hover}
-                                      alt="present hover"
-                                      className={`${styles.evidenceButtonHover} ${isEvidenceButtonHovered ? styles.visible : ''}`}
-                                  />
-                                  <img src={presentTheEvidence_text} alt="present text" className={styles.evidenceButtonText} />
-                              </div>
-                          )}
-                      </div>
-                  )}
-                  {/* 移除所有提示信息 */}
-              </div>
-          </div>
-
-          {/* 物品名称容器 - 右上部分 */}
-          {selectedItem?.obtained && (
-              <div className={styles.nameContainerWrapper}>
-                  <img src={nameContainer} alt="Name Container" className={styles.nameContainerImage} />
-                  <div className={styles.nameContainerContent}>
-                      <div className={styles.itemName}>
-                          {selectedItem.name && selectedItem.name.length > 0 && (
-                              <>
-                                  <span className={styles.firstCharacter}>{selectedItem.name.charAt(0)}</span>
-                                  <span className={styles.restCharacters}>{selectedItem.name.slice(1)}</span>
-                              </>
-                          )}
-                      </div>
-                  </div>
-              </div>
-          )}
-
-          {/* 物品描述容器 - 名称容器下方 */}
-          {selectedItem?.obtained && (
-              <div className={styles.descriptionContainerWrapper}>
-                  <div className={styles.descriptionContainerContent}>
-                      <div className={styles.itemDescription}>
-                            {formatDescription(selectedItem.description)}
-                      </div>
-                  </div>
-              </div>
-          )}
-
-          {/* 有alpha通道的items显示资产 - 缩略图列表背景 */}
-          <img src={itemsDisplay} alt="manopedia items display" className={styles.itemsDisplayAsset} />
-
-          {/* 缩略图列表 - 显示已获得的物品 */}
-          <div className={styles.thumbnailList}>
-              {obtainedItems.map((item) => (
-                  <div
-                      key={item.id}
-                      className={`${styles.thumbnailItem} ${selectedItemId === item.id ? styles.selected : ''}`}
-                      onClick={() => handleItemClick(item.id)}
-                      onMouseEnter={() => playSeEnter()}
-                  >
-                <img src={item.image} alt={item.name} className={styles.thumbnailImage} />
-            </div>
-        ))}
-          </div>
-
-          {/* 右侧五个功能按钮 */}
-          <div className={styles.rightButtonsContainer} onMouseLeave={handleButtonLeave}>
-              {buttons.map((button) => (
-                  <div
-                      key={button.type}
-                      className={styles.rightButtonContainer}
-                      style={{ order: buttonOrder[button.type] }}
-                  >
-                      <img
-                    src={
-                        hoveredButton === button.type || activeButton === button.type
-                            ? button.hover
-                            : button.normal
-                    }
-                    alt={button.type}
-                    className={styles.rightButton}
-                    onClick={() => handleButtonClick(button.type)}
-                    onMouseEnter={() => handleButtonEnter(button.type)}
-                />
-            </div>
-        ))}
-          </div>
-
-          {/* 关闭按钮 */}
-          <div
-              className={styles.closeButtonsContainer}
-              onClick={handleClose}
-              onMouseEnter={handleCloseButtonEnter}
-              onMouseLeave={handleCloseButtonLeave}
-          >
-              <div
-                  className={styles.closeButton}
-                  style={{
-                      backgroundImage: `url(${isCloseButtonHovered ? closeButtonHover : closeButton})`,
-                  }}
-              />
-          </div>
+      <div
+        className={styles.manopediaOverlay}
+        style={{ backgroundImage: `url(${manopediaBackgorund})` }}
+      >
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingText}>加载物品数据中...</div>
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div
+      className={styles.manopediaOverlay}
+      style={{ backgroundImage: `url(${manopediaBackgorund})` }}
+    >
+      <div className={styles.frameContainer}>
+        <img src={frame} alt="manopedia frame" className={styles.frameAsset} />
+        <div className={styles.mainDisplayArea}>
+          {selectedItem?.obtained && (
+            <div className={styles.selectedItemDisplay}>
+              <img src={selectedItem.image} alt={selectedItem.name} className={styles.itemLargeImage} />
+              {isEvidenceMode && (
+                <div
+                  className={styles.evidenceButtonContainer}
+                  onMouseEnter={() => {
+                    setIsEvidenceButtonHovered(true);
+                    playSeEnter();
+                  }}
+                  onMouseLeave={() => setIsEvidenceButtonHovered(false)}
+                  onClick={handlePresentClick}
+                >
+                  <img src={presentTheEvidence_button} alt="present button" className={styles.evidenceButtonBase} />
+                  <img
+                    src={presentTheEvidence_hover}
+                    alt="present hover"
+                    className={`${styles.evidenceButtonHover} ${isEvidenceButtonHovered ? styles.visible : ''}`}
+                  />
+                  <img src={presentTheEvidence_text} alt="present text" className={styles.evidenceButtonText} />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {selectedItem?.obtained && (
+        <div className={styles.nameContainerWrapper}>
+          <img src={nameContainer} alt="Name Container" className={styles.nameContainerImage} />
+          <div className={styles.nameContainerContent}>
+            <div className={styles.itemName}>
+              {selectedItem.name && selectedItem.name.length > 0 && (
+                <>
+                  <span className={styles.firstCharacter}>{selectedItem.name.charAt(0)}</span>
+                  <span className={styles.restCharacters}>{selectedItem.name.slice(1)}</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedItem?.obtained && (
+        <div className={styles.descriptionContainerWrapper}>
+          <div className={styles.descriptionContainerContent}>
+            <div className={styles.itemDescription}>{formatDescription(selectedItem.description)}</div>
+          </div>
+        </div>
+      )}
+
+      <img src={itemsDisplay} alt="manopedia items display" className={styles.itemsDisplayAsset} />
+
+      <div className={styles.thumbnailList}>
+        {obtainedItems.map((item) => (
+          <div
+            key={item.id}
+            className={`${styles.thumbnailItem} ${selectedItemId === item.id ? styles.selected : ''}`}
+            onClick={() => handleItemClick(item.id)}
+            onMouseEnter={() => playSeEnter()}
+          >
+            <img src={item.image} alt={item.name} className={styles.thumbnailImage} />
+          </div>
+        ))}
+      </div>
+
+      <div className={styles.rightButtonsContainer}>
+        {buttons.map((button) => (
+          <div
+            key={button.type}
+            className={styles.rightButtonContainer}
+            style={{ order: buttonOrder[button.type] }}
+          >
+            <img
+              src={hoveredButton === button.type || activeButton === button.type ? button.hover : button.normal}
+              alt={button.type}
+              className={styles.rightButton}
+              onClick={() => handleButtonClick(button.type)}
+              onMouseEnter={() => handleButtonEnter(button.type)}
+              onMouseLeave={handleButtonLeave}
+            />
+          </div>
+        ))}
+      </div>
+
+      <div
+        className={styles.closeButtonsContainer}
+        onClick={handleClose}
+        onMouseEnter={handleCloseButtonEnter}
+        onMouseLeave={handleCloseButtonLeave}
+      >
+        <div
+          className={styles.closeButton}
+          style={{
+            backgroundImage: `url(${isCloseButtonHovered ? closeButtonHover : closeButton})`,
+          }}
+        />
+      </div>
+    </div>
   );
 };

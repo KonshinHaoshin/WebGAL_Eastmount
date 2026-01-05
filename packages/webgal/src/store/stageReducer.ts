@@ -80,6 +80,7 @@ export const initState: IStageState = {
   isEvidenceMode: false,
   evidenceTarget: '',
   evidenceJumpScenes: [],
+  showManopedia: false,
 };
 
 /**
