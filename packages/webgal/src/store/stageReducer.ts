@@ -77,6 +77,9 @@ export const initState: IStageState = {
   },
   viewingItemId: null, // 当前正在查看的物品ID
   viewingItemCount: 1, // 当前正在查看的物品数量（用于添加到仓库）
+  isEvidenceMode: false,
+  evidenceTarget: '',
+  evidenceJumpScenes: [],
 };
 
 /**

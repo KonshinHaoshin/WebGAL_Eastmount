@@ -251,6 +251,9 @@ export interface IStageState {
 	inventory: IInventory; // 物品仓库
 	viewingItemId: string | null; // 当前正在查看的物品ID
 	viewingItemCount: number; // 当前正在查看的物品数量（用于添加到仓库）
+	isEvidenceMode: boolean; // 是否处于证据模式
+	evidenceTarget: string; // 证据模式的目标物品ID
+	evidenceJumpScenes: string[]; // 证据模式的跳转场景 [成功场景, 失败场景]
 }
 
 /**

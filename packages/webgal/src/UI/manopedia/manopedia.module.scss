@@ -125,7 +125,6 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
-    overflow: hidden;
 }
 
 .selectedItemDisplay {
@@ -156,6 +155,53 @@
     image-rendering: -webkit-optimize-contrast;
     image-rendering: pixelated;
     transition: transform 0.3s ease;
+}
+
+.evidenceButtonContainer {
+    position: fixed;
+    bottom: -600px; // 根据实际布局调整
+    left: 250px;
+    transform: translateX(-50%);
+    scale:0.7;
+    width: 100%; // 调整为合适的大小
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+.evidenceButtonBase {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.evidenceButtonHover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    object-fit: contain;
+    &.visible {
+        opacity: 1;
+    }
+}
+
+.evidenceButtonText {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    scale:0.6;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    z-index: 2;
 }
 
 

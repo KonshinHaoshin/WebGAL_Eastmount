@@ -44,6 +44,7 @@ export enum commandType {
   Item,
   clearItem,
   showItem,
+  presentTheEvidence,
 }
 
 /**

@@ -45,6 +45,7 @@ export enum commandType {
   clearItem, // 清除道具
   showItem, // 显示物品提示
   pediaUpdate, // 显示魔女图鉴更新提示
+  presentTheEvidence, // 出示证物
 }
 
 /**

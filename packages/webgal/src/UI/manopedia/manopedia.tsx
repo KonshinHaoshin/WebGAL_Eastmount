@@ -23,9 +23,18 @@ import itemsDisplay from '@/assets/dragonspring/manopedia/manopedia_items.png';
 
 import nameContainer from '@/assets/dragonspring/manopedia/nameContainer.png';
 
+// 出示证据相关图片
+import presentTheEvidence_button from '@/assets/dragonspring/manopedia/presentTheEvidence_button.png';
+import presentTheEvidence_hover from '@/assets/dragonspring/manopedia/presentTheEvidence_hover.png';
+import presentTheEvidence_text from '@/assets/dragonspring/manopedia/presentTheEvidence_text.png';
+
 // 导入游戏相关模块
 import { itemManager } from '@/Core/Modules/item/itemManager';
 import { IItemDefinition } from '@/store/IItemDefinition';
+import { setStage } from '@/store/stageReducer';
+import { WebGAL } from '@/Core/WebGAL';
+import { changeScene } from '@/Core/controller/scene/changeScene';
+import { webgalStore } from '@/store/store';
 
 // 物品数据接口（扩展游戏物品定义）
 interface ManopediaItem extends IItemDefinition {
@@ -50,9 +59,14 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null); // 当前选中的物品ID
     const [items, setItems] = useState<ManopediaItem[]>([]); // 物品数据
     const [isLoading, setIsLoading] = useState(true); // 加载状态
+    const [isEvidenceButtonHovered, setIsEvidenceButtonHovered] = useState(false); // 出示按钮hover状态
 
     // 从Redux store获取库存物品
     const inventoryItems = useSelector((state: any) => state.stage.inventory.items);
+    // 从Redux store获取证据模式状态
+    const isEvidenceMode = useSelector((state: any) => state.stage.isEvidenceMode);
+    const evidenceTarget = useSelector((state: any) => state.stage.evidenceTarget);
+    const evidenceJumpScenes = useSelector((state: any) => state.stage.evidenceJumpScenes);
 
     // 加载物品数据
     useEffect(() => {
@@ -143,6 +157,33 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
         if (item?.obtained) {
             // 移除点击证物的音效
             setSelectedItemId(itemId);
+        }
+    };
+
+    // 处理出示点击
+    const handlePresentClick = () => {
+        if (!selectedItemId) return;
+
+        playSeClick();
+
+        const isCorrect = selectedItemId === evidenceTarget;
+        const successScene = evidenceJumpScenes[0];
+        const failScene = evidenceJumpScenes[1];
+
+        // 关闭图鉴
+        onClose();
+
+        // 卸载演出
+        WebGAL.gameplay.performController.unmountPerform('presentTheEvidence');
+
+        // 跳转逻辑
+        if (isCorrect && successScene) {
+            changeScene(successScene, successScene);
+        } else if (!isCorrect && failScene) {
+            changeScene(failScene, failScene);
+        } else {
+            // 如果没有跳转场景，或者不跳转，就继续进行下面的语句
+            // unmountPerform 已经会让引擎继续了
         }
     };
 
@@ -256,6 +297,26 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
                               alt={selectedItem.name}
                               className={styles.itemLargeImage}
                           />
+                          {/* 出示按钮 */}
+                          {isEvidenceMode && (
+                              <div
+                                  className={styles.evidenceButtonContainer}
+                                  onMouseEnter={() => {
+                                      setIsEvidenceButtonHovered(true);
+                                      playSeEnter();
+                                  }}
+                                  onMouseLeave={() => setIsEvidenceButtonHovered(false)}
+                                  onClick={handlePresentClick}
+                              >
+                                  <img src={presentTheEvidence_button} alt="present button" className={styles.evidenceButtonBase} />
+                                  <img
+                                      src={presentTheEvidence_hover}
+                                      alt="present hover"
+                                      className={`${styles.evidenceButtonHover} ${isEvidenceButtonHovered ? styles.visible : ''}`}
+                                  />
+                                  <img src={presentTheEvidence_text} alt="present text" className={styles.evidenceButtonText} />
+                              </div>
+                          )}
                       </div>
                   )}
                   {/* 移除所有提示信息 */}

@@ -55,8 +55,8 @@ export const changeBg = (sentence: ISentence): IPerform => {
 		WebGAL.animationManager.nextExitAnimationDuration.set('bg-main-off', 1000);
 		// 设置进入动画为 blindsIn
 		WebGAL.animationManager.nextEnterAnimationName.set('bg-main', 'blindsIn');
-		WebGAL.animationManager.nextEnterAnimationDuration.set('bg-main', 3000);
-		duration = 3000; // 默认总时长 3 秒
+		WebGAL.animationManager.nextEnterAnimationDuration.set('bg-main', 1000);
+		duration = 1333; // 默认总时长约 1.33 秒
 	} else {
 		// 处理 transform 和 默认 transform
 		let animationObj: AnimationFrame[];
@@ -114,7 +114,7 @@ export const changeBg = (sentence: ISentence): IPerform => {
 		stopFunction: () => {
 			WebGAL.gameplay.pixiStage?.stopPresetAnimationOnTarget('bg-main');
 		},
-		blockingNext: () => false,
+		blockingNext: () => (type === 'blinds' ? true : false),
 		blockingAuto: () => true,
 		stopTimeout: undefined, // 暂时不用，后面会交给自动清除
 	};

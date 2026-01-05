@@ -39,6 +39,7 @@ export const SCRIPT_CONFIG = [
   { scriptString: 'applyStyle', scriptType: commandType.applyStyle },
   { scriptString: 'wait', scriptType: commandType.wait },
   { scriptString: 'manopedia', scriptType: commandType.manopedia },
+  { scriptString: 'presentTheEvidence', scriptType: commandType.presentTheEvidence },
 ];
 export const ADD_NEXT_ARG_LIST = [
   commandType.bgm,
