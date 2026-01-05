@@ -38,6 +38,12 @@ export interface IGuiState {
     itemName: string;
     itemImage: string;
   } | null; // 魔女图鉴更新提示的物品信息
+  showItem: boolean; // 是否显示物品提示（只显示物品图片）
+  showItemInfo: {
+    itemId: string;
+    itemName: string;
+    itemImage: string;
+  } | null; // 物品提示的物品信息
 }
 
 export type componentsVisibility = Pick<

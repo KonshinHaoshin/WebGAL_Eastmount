@@ -16,3 +16,4 @@ changeBg:RGB/Background_001_001.png -transform={"position":{"x":0,"y":0},"scale"
 千早爱音:这是什么？钥匙？
 ;clearItem:;
 丰川祥子:好奇怪的东西哦
+showItem:key;

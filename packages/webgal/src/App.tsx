@@ -15,6 +15,7 @@ import Translation from '@/UI/Translation/Translation';
 import { Phone } from '@/UI/Phone/Phone';
 import { ItemDisplay } from '@/UI/ItemDisplay/ItemDispaly';
 import { ManopediaUpdate } from '@/UI/manopedia/manopedia_update';
+import { ShowItem } from '@/UI/manopedia/showItem';
 import { useEffect } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -55,6 +56,7 @@ function App() {
       <DevPanel />
       <ItemDisplay />
       <ManopediaUpdate />
+      <ShowItem />
     </div>
   );
 }

@@ -43,6 +43,7 @@ export enum commandType {
   addItem, // 添加道具（无需交互）
   Item, // 添加道具（需交互）
   clearItem, // 清除道具
+  showItem, // 显示物品提示
 }
 
 /**

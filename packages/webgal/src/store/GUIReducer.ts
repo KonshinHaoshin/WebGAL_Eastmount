@@ -58,6 +58,14 @@ const GUISlice = createSlice({
         // 隐藏提示时清空物品信息
         state.manopediaUpdateItem = null;
       }
+      
+      // 如果是显示物品提示，并且有物品信息，则存储物品信息
+      if (component === 'showItem' && itemInfo) {
+        state.showItemInfo = itemInfo;
+      } else if (component === 'showItem' && !visibility) {
+        // 隐藏提示时清空物品信息
+        state.showItemInfo = null;
+      }
     },
     /**
      * 设置MenuPanel的当前选中项

@@ -43,6 +43,7 @@ export enum commandType {
   addItem,
   Item,
   clearItem,
+  showItem,
 }
 
 /**

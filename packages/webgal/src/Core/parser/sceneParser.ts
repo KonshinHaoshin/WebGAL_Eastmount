@@ -41,6 +41,7 @@ import { manopedia } from '@/Core/gameScripts/manopedia';
 import { addItem } from '@/Core/gameScripts/addItem';
 import { Item } from '@/Core/gameScripts/Item';
 import { clearItem } from '@/Core/gameScripts/clearItem';
+import { showItem } from '@/Core/gameScripts/showItem';
 
 export const SCRIPT_TAG_MAP = defineScripts({
   say: ScriptConfig(commandType.say, say),
@@ -81,6 +82,7 @@ export const SCRIPT_TAG_MAP = defineScripts({
   addItem: ScriptConfig(commandType.addItem, addItem, { next: true }),
   Item: ScriptConfig(commandType.Item, Item),
   clearItem: ScriptConfig(commandType.clearItem, clearItem, { next: true }),
+  showItem: ScriptConfig(commandType.showItem, showItem, { next: true }),
 });
 
 export const SCRIPT_CONFIG: IConfigInterface[] = Object.values(SCRIPT_TAG_MAP);
