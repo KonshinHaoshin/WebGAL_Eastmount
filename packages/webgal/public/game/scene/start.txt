@@ -4,6 +4,8 @@
 ;pediaUpdate:;
 changeBg:RGB/Background_004_001.png -transform={"position":{"x":0,"y":0},"scale":{"x":1,"y":1}};
 典狱长:测试
+thinking:ema/ema.png 我反对！:1.txt@objection.png|我觉得没问题:2.txt;
+
 manopedia:on;
 addItem:ansk;
 changeFigure:立绘差分/ema/ema_1.png -id=ema -transform={"position":{"x":-497.96,"y":400.78},"scale":{"x":1.2,"y":1.2}} -right;

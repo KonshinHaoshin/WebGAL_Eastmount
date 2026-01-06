@@ -104,6 +104,11 @@ export const Stage: FC = () => {
 
   useHotkey();
 
+  // 检查是否有 thinking 或 choose perform 在运行
+  const isModalDialogActive = stageState.PerformList.some(
+    (perform) => perform.id === 'thinking' || perform.id === 'choose',
+  );
+
   return (
     <div className={styles.MainStage_main}>
       <FullScreenPerform />
@@ -113,6 +118,7 @@ export const Stage: FC = () => {
       <div id="pixiContianer" className={styles.pixiContainer} style={{ zIndex: isIOS ? '-5' : undefined }} />
       <div id="itemContainer" className={styles.itemContainer} />
       <div id="chooseContainer" className={styles.chooseContainer} />
+      <div id="thinkingContainer" className={styles.thinkingContainer} />
       {GUIState.showTextBox && stageState.enableFilm === '' && !stageState.isDisableTextbox && <TextBox />}
       {GUIState.showTextBox && stageState.enableFilm !== '' && <TextBoxFilm />}
       <AudioContainer />
@@ -139,7 +145,15 @@ export const Stage: FC = () => {
         }}
         id="FullScreenClick"
         // 我们将点击全屏的判定网上抬了点，这样不会挡着自动按钮
-        style={{ left: '40', width: '100%', height: '85%', position: 'absolute', zIndex: '12', top: '0', pointerEvents: GUIState.showPhone ? 'none' : 'auto' }}
+        style={{
+          left: '40',
+          width: '100%',
+          height: '85%',
+          position: 'absolute',
+          zIndex: '12',
+          top: '0',
+          pointerEvents: GUIState.showPhone || isModalDialogActive ? 'none' : 'auto',
+        }}
         onMouseMove={(e) => !GUIState.showControls && updateControlsVisibility(e, stageState, GUIState, dispatch)}
       />
       <IntroContainer />

@@ -1,0 +1,106 @@
+.Thinking_Main {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    pointer-events: auto;
+}
+
+.Thinking_Overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.Thinking_Character {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.Thinking_Character_Image {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+    max-width: 760px;
+    /* 立绘原始宽度 */
+}
+
+.Thinking_Options {
+    position: absolute;
+    top: 50%;
+    left: 60%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    align-items: flex-start;
+    pointer-events: auto;
+}
+
+.Thinking_Option_Container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.Thinking_Button_Icon {
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    width: 200px;
+    height: 180px;
+    z-index: 6;
+    pointer-events: none;
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        pointer-events: none;
+    }
+}
+
+.Thinking_Bubble {
+    width: 1030px;
+    /* 固定宽度 */
+    height: 300px;
+    /* 固定高度 */
+    padding: 20px 30px;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    color: #333;
+    font-size: 36px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 5;
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+
+/* 调试 hover 状态 */
+
+// .Thinking_Bubble:hover {
+//     border-color: blue;
+//     transform: scale(1.05);
+// }

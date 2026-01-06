@@ -44,6 +44,7 @@ import { clearItem } from '@/Core/gameScripts/clearItem';
 import { showItem } from '@/Core/gameScripts/showItem';
 import { pediaUpdate } from '@/Core/gameScripts/pediaUpdate';
 import { presentTheEvidence } from '@/Core/gameScripts/presentTheEvidence';
+import { thinking } from '@/Core/gameScripts/thinking';
 
 export const SCRIPT_TAG_MAP = defineScripts({
   say: ScriptConfig(commandType.say, say),
@@ -87,6 +88,7 @@ export const SCRIPT_TAG_MAP = defineScripts({
   showItem: ScriptConfig(commandType.showItem, showItem, { next: true }),
   pediaUpdate: ScriptConfig(commandType.pediaUpdate, pediaUpdate, { next: true }),
   presentTheEvidence: ScriptConfig(commandType.presentTheEvidence, presentTheEvidence),
+  thinking: ScriptConfig(commandType.thinking, thinking),
 });
 
 export const SCRIPT_CONFIG: IConfigInterface[] = Object.values(SCRIPT_TAG_MAP);
