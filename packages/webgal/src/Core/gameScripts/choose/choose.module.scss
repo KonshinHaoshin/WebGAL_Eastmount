@@ -16,12 +16,12 @@
     min-width: 50%;
     padding: 2em 1em;
     font-size: 265%;
-    color: #8E354A; // 默认颜色
+    color: #000000; // 默认颜色
     text-align: center;
     border: none;
     box-shadow: none;
     background: transparent;
-    margin: 0.5em 0;
+    margin: -20px !important;
     transition: color 0.3s ease; // 添加文字颜色过渡效果
     position: relative;
     min-height: 120px;
@@ -39,12 +39,12 @@
     min-width: 50%;
     padding: 2em 1em;
     font-size: 265%;
-    color: rgba(142, 53, 74, 0.5);
+    color: rgba(0, 0, 0, 1);
     text-align: center;
     border: none;
     box-shadow: none;
     background: transparent;
-    margin: 0.5em 0;
+    margin: -20px !important;
     transition: color 0.3s ease; // 添加文字颜色过渡效果
     position: relative;
     min-height: 120px;
@@ -61,12 +61,13 @@
     color: #000;
     min-width: 50%;
     position: relative;
+    margin: -20px !important;
 }
 
 .Choose_skeleton {
     position: absolute;
     left: 100px;
-    top: 50px;
+    top: 30px;
     transform: scale(1.2);
     z-index: 20; // 高于 choose 选项的 z-index (13)
     height: auto;

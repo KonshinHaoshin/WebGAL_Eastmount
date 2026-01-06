@@ -1,0 +1,72 @@
+@charset "UTF-8";
+.GlobalDialog_main {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  z-index: 20;
+  background: transparent;
+  color: white;
+  opacity: 1;
+  animation: showGlobalDialog 0.33s forwards;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "思源宋体", serif;
+}
+
+.glabalDialog_container_inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-flow: column;
+  background: url("@/assets/dragonspring/alert.png") center/100% auto no-repeat;
+  padding: 1em 5em 1.5em 5em;
+}
+
+.glabalDialog_container {
+  width: 100%;
+  height: 100%;
+}
+
+.title {
+  font-size: 200%;
+  color: #463c3a;
+  font-weight: bold;
+  transform: translateY(500px);
+}
+
+.button_list {
+  display: flex;
+  margin: auto 0 0 0;
+  transform: translateY(-500px);
+}
+
+.button {
+  font-size: 200%;
+  padding: 0.15em 1em 0.15em 1em;
+  margin: 0.5em 5em 0.2em 5em;
+  cursor: pointer;
+  transition: background-color 0.33s, color 0.33s, font-weight 0.33s, transform 0.33s;
+  background: url("@/assets/dragonspring/button.png") center/contain no-repeat;
+  color: white;
+  display: flex;
+  scale: 3;
+  align-items: center;
+  justify-content: center;
+}
+
+.button span {
+  transform: scale(0.5);
+  display: inline-block;
+}
+
+@keyframes showGlobalDialog {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
