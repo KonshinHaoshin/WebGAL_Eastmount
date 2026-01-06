@@ -41,7 +41,7 @@ export function showGlogalDialog(props: IShowGlobalDialogProps) {
               <span>{props.leftText}</span>
             </div>
             <div className={styles.button} onClick={handleRight}>
-              <span>{props.rightText}</span>
+              <span dangerouslySetInnerHTML={{ __html: props.rightText }} />
             </div>
           </div>
         </div>

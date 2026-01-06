@@ -35,6 +35,9 @@ import { setStage } from '@/store/stageReducer';
 import { WebGAL } from '@/Core/WebGAL';
 import { changeScene } from '@/Core/controller/scene/changeScene';
 
+// 导入证据确认对话框
+import { showEvidenceConfirmDialog, hideEvidenceConfirmDialog } from '@/UI/EvidenceConfirmDialog/EvidenceConfirmDialog';
+
 // 物品数据接口（扩展游戏物品定义）
 interface ManopediaItem extends IItemDefinition {
   obtained: boolean; // 是否已获得
@@ -147,7 +150,29 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
 
   const handlePresentClick = () => {
     if (!selectedItemId) return;
-    playSeClick();
+
+    // 显示确认对话框
+    showEvidenceConfirmDialog({
+      title: '确定要提交此项证据吗？',
+      leftText: '返回',
+      rightText: '是',
+      leftFunc: () => {
+        // 用户点击返回，不做任何操作
+        console.log('用户取消了出示证据');
+      },
+      rightFunc: () => {
+        // 用户确认出示证据
+        executePresentEvidence();
+      },
+      onClose: () => {
+        // 对话框关闭时的回调
+        hideEvidenceConfirmDialog();
+      },
+    });
+  };
+
+  const executePresentEvidence = () => {
+    if (!selectedItemId) return;
 
     const isCorrect = selectedItemId === evidenceTarget;
     const successScene = evidenceJumpScenes[0];
@@ -217,10 +242,7 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
 
   if (isLoading) {
     return (
-      <div
-        className={styles.manopediaOverlay}
-        style={{ backgroundImage: `url(${manopediaBackgorund})` }}
-      >
+      <div className={styles.manopediaOverlay} style={{ backgroundImage: `url(${manopediaBackgorund})` }}>
         <div className={styles.loadingContainer}>
           <div className={styles.loadingText}>加载物品数据中...</div>
         </div>
@@ -229,10 +251,7 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
   }
 
   return (
-    <div
-      className={styles.manopediaOverlay}
-      style={{ backgroundImage: `url(${manopediaBackgorund})` }}
-    >
+    <div className={styles.manopediaOverlay} style={{ backgroundImage: `url(${manopediaBackgorund})` }}>
       <div className={styles.frameContainer}>
         <img src={frame} alt="manopedia frame" className={styles.frameAsset} />
         <div className={styles.mainDisplayArea}>
@@ -304,11 +323,7 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
 
       <div className={styles.rightButtonsContainer}>
         {buttons.map((button) => (
-          <div
-            key={button.type}
-            className={styles.rightButtonContainer}
-            style={{ order: buttonOrder[button.type] }}
-          >
+          <div key={button.type} className={styles.rightButtonContainer} style={{ order: buttonOrder[button.type] }}>
             <img
               src={hoveredButton === button.type || activeButton === button.type ? button.hover : button.normal}
               alt={button.type}
@@ -329,9 +344,7 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
       >
         <div
           className={styles.closeButton}
-          style={{
-            backgroundImage: `url(${isCloseButtonHovered ? closeButtonHover : closeButton})`,
-          }}
+          style={{ backgroundImage: `url(${isCloseButtonHovered ? closeButtonHover : closeButton})` }}
         />
       </div>
     </div>

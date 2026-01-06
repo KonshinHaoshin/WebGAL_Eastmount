@@ -86,13 +86,13 @@ export const Phone: FC = () => {
     const handleBackToTitle = () => {
         playSeDialogOpen();
         showGlogalDialog({
-            title: t('buttons.titleTips'),
-            leftText: t('$common.yes'),
-            rightText: t('$common.no'),
-            leftFunc: () => {
+            title: '即将返回标题界面。',
+            leftText: '取消',
+            rightText: '<span style="color: #d28a98; display: inline-block; transform: scale(1.0); transform-origin: center">前</span>往标题界面',
+            leftFunc: () => { },
+            rightFunc: () => {
                 backToTitle();
             },
-            rightFunc: () => { },
         });
         setComponentVisibility('showPhone', false);
     };

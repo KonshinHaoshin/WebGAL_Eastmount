@@ -1,20 +1,21 @@
-.GlobalDialog_main {
+.EvidenceConfirmDialog_main {
     height: 100%;
     width: 100%;
-    position: absolute;
-    z-index: 20;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 20000; // 比魔女图鉴更高的层级
     background: transparent;
     color: white;
     opacity: 1;
-    animation: showGlobalDialog 0.33s forwards;
+    animation: showEvidenceConfirmDialog 0.33s forwards;
     display: flex;
     justify-content: center;
     align-items: center;
-    //font-family: "WebgalUI", -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     font-family: "思源宋体", serif;
 }
 
-.glabalDialog_container_inner {
+.evidenceConfirmDialog_container_inner {
     width: 100%;
     height: 100%;
     display: flex;
@@ -25,7 +26,7 @@
     padding: 1em 5em 1.5em 5em;
 }
 
-.glabalDialog_container {
+.evidenceConfirmDialog_container {
     width: 100%;
     height: 100%;
 }
@@ -49,7 +50,6 @@
     margin: 0.5em 5em 0.2em 5em;
     cursor: pointer;
     transition: background-color 0.33s, color 0.33s, font-weight 0.33s, transform 0.33s;
-    // border-radius: 5px;
     background: url('@/assets/dragonspring/button.png') center/contain no-repeat;
     color: white;
     display: flex;
@@ -57,13 +57,9 @@
     align-items: center;
     justify-content: center;
     width: 200px;
-    /* 固定宽度 */
     height: 80px;
-    /* 固定高度 */
     min-width: 200px;
-    /* 最小宽度 */
     min-height: 80px;
-    /* 最小高度 */
 }
 
 .button span {
@@ -72,21 +68,10 @@
     align-items: center;
     justify-content: center;
     max-width: 90%;
-    /* 限制文字最大宽度 */
-    // overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     width: 100%;
     text-align: center;
-}
-
-
-/* 针对红色文字的特殊样式 */
-
-.button span span[style*="color: red"] {
-    font-size: inherit !important;
-    line-height: inherit !important;
-    display: inline;
 }
 
 // .button:hover {
@@ -97,7 +82,16 @@
 //     background: url('@/assets/dragonspring/button.png') center/contain no-repeat;
 //     filter: brightness(1.2);
 // }
-@keyframes showGlobalDialog {
+
+/* 针对特殊颜色的样式 */
+
+.button span[style*="color: #da98a3"] {
+    font-size: inherit !important;
+    line-height: inherit !important;
+    display: inline;
+}
+
+@keyframes showEvidenceConfirmDialog {
     0% {
         opacity: 0;
     }

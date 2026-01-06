@@ -73,14 +73,14 @@ export const MenuPanel = () => {
         clickFunc={() => {
           playSeDialogOpen();
           showGlogalDialog({
-            title: t('$gaming.buttons.titleTips'),
-            leftText: t('$common.yes'),
-            rightText: t('$common.no'),
-            leftFunc: () => {
+            title: '即将返回标题界面。',
+            leftText: '取消',
+            rightText: '<span style="color: red">前</span>往标题界面',
+            leftFunc: () => { },
+            rightFunc: () => {
               backToTitle();
               dispatch(setVisibility({ component: 'showMenuPanel', visibility: false }));
             },
-            rightFunc: () => {},
           });
         }}
         tagName={t('title.title')}

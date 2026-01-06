@@ -7,6 +7,7 @@ import { Extra } from '@/UI/Extra/Extra';
 import { GearButton } from '@/UI/gearButton';
 import { HandboxButton } from '@/UI/Handbook/HandboxButton';
 import GlobalDialog from '@/UI/GlobalDialog/GlobalDialog';
+import EvidenceConfirmDialog from '@/UI/EvidenceConfirmDialog/EvidenceConfirmDialog';
 import Logo from '@/UI/Logo/Logo';
 import Menu from '@/UI/Menu/Menu';
 import { PanicOverlay } from '@/UI/PanicOverlay/PanicOverlay';
@@ -58,6 +59,7 @@ function App() {
       <Extra />
       <Menu />
       <GlobalDialog />
+      <EvidenceConfirmDialog />
       <PanicOverlay />
       <Phone />
       <DevPanel />
