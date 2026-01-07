@@ -13,6 +13,8 @@ import { choose } from '@/Core/gameScripts/choose';
 import { comment } from '@/Core/gameScripts/comment';
 import { filmMode } from '@/Core/gameScripts/filmMode';
 import { judgment } from '@/Core/gameScripts/judgment';
+import { testimony } from '@/Core/gameScripts/testimony';
+import { clearTestimony } from '@/Core/gameScripts/clearTestimony';
 import { refute } from '@/Core/gameScripts/refute';
 import { getUserInput } from '@/Core/gameScripts/getUserInput';
 import { intro } from '@/Core/gameScripts/intro';
@@ -74,6 +76,8 @@ export const SCRIPT_TAG_MAP = defineScripts({
   unlockBgm: ScriptConfig(commandType.unlockBgm, unlockBgm, { next: true }),
   filmMode: ScriptConfig(commandType.filmMode, filmMode, { next: true }),
   judgment: ScriptConfig(commandType.judgment, judgment, { next: true }),
+  testimony: ScriptConfig(commandType.testimony, testimony),
+  clearTestimony: ScriptConfig(commandType.clearTestimony, clearTestimony, { next: true }),
   refute: ScriptConfig(commandType.refute, refute),
   setTextbox: ScriptConfig(commandType.setTextbox, setTextbox),
   setAnimation: ScriptConfig(commandType.setAnimation, setAnimation),

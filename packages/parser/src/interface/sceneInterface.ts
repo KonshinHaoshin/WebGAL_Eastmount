@@ -49,6 +49,8 @@ export enum commandType {
   thinking, // 思考选择
   refute, // 反驳
   judgment, // 审问
+  testimony, // 证言
+  clearTestimony // 清空证言
 }
 
 /**

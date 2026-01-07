@@ -41,6 +41,8 @@ export const SCRIPT_CONFIG = [
   { scriptString: 'manopedia', scriptType: commandType.manopedia },
   { scriptString: 'presentTheEvidence', scriptType: commandType.presentTheEvidence },
   { scriptString: 'judgment', scriptType: commandType.judgment },
+  { scriptString: 'testimony', scriptType: commandType.testimony },
+  { scriptString: 'clearTestimony', scriptType: commandType.clearTestimony },
   { scriptString: 'refute', scriptType: commandType.refute },
 ];
 export const ADD_NEXT_ARG_LIST = [
@@ -58,6 +60,8 @@ export const ADD_NEXT_ARG_LIST = [
   commandType.setTransition,
   commandType.applyStyle,
   commandType.judgment,
+  commandType.testimony,
+  commandType.clearTestimony,
   commandType.refute,
 ];
 

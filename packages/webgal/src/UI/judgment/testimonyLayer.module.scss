@@ -1,0 +1,82 @@
+.container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px;
+}
+
+.testimonyList {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  width: 100%;
+}
+
+.testimonyItem {
+  display: flex;
+  width: 100%;
+  pointer-events: none;
+
+  &.left {
+    justify-content: flex-start;
+    text-align: left;
+    // 使用旋转代替倾斜
+    transform: rotate(-2deg);
+    padding-left: 100px;
+  }
+  &.right {
+    justify-content: flex-end;
+    text-align: right;
+  }
+  &.center {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+.textWrapper {
+  max-width: 85%;
+  // 移除背景和边框，直接显示文字
+  background: transparent;
+  padding: 10px 20px;
+  pointer-events: auto;
+}
+
+.text {
+  color: #fff;
+  font-family: "WebgalUI", serif;
+  // 字体进一步放大
+  font-size: 76px;
+  transform: scaleX(1.2);
+  // 移除阴影
+  text-shadow: none;
+  word-break: break-all;
+  // 黑边变细
+  -webkit-text-stroke: 1px #000;
+}
+
+.keyword {
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+  padding: 0 5px;
+  // 移除 hover 缩放和发光
+  transition: none;
+
+  &:hover {
+    transform: none;
+    text-shadow: none;
+  }
+
+  // 移除下划线
+  &::after {
+    display: none;
+  }
+}

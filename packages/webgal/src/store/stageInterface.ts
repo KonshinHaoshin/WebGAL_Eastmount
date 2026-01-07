@@ -201,6 +201,16 @@ export interface IModifyInventoryItemPayload {
 }
 
 /**
+ * 证言数据接口
+ */
+export interface ITestimonyData {
+	content: string;
+	refutes: Record<string, string>;
+	colors: Record<string, string>;
+	pos?: 'left' | 'right' | 'center';
+}
+
+/**
  * @interface IStageState 游戏舞台数据接口
  */
 export interface IStageState {
@@ -259,6 +269,7 @@ export interface IStageState {
 	evidenceTarget: string; // 证据模式的目标物品ID
 	evidenceJumpScenes: string[]; // 证据模式的跳转场景 [成功场景, 失败场景]
 	showManopedia: boolean; // 是否显示图鉴界面
+	testimonyData: ITestimonyData[]; // 证言数据列表
 }
 
 /**

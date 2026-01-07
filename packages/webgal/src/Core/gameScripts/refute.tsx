@@ -24,6 +24,7 @@ export const refute = (sentence: ISentence): IPerform => {
   if (stageState.judgment !== '') {
     webgalStore.dispatch(setStage({ key: 'judgment', value: '' }));
     webgalStore.dispatch(setStage({ key: 'isJudgmentFastForward', value: false }));
+    webgalStore.dispatch(setStage({ key: 'testimonyData', value: [] }));
 
     // 如果处于自动模式，立即解除
     if (WebGAL.gameplay.isAuto) {

@@ -44,6 +44,7 @@ export const say = (sentence: ISentence): IPerform => {
   // 设置文本显示
   dispatch(setStage({ key: 'showText', value: dialogToShow }));
   dispatch(setStage({ key: 'vocal', value: '' }));
+  dispatch(setStage({ key: 'testimonyData', value: [] }));
 
   // 清除语音
   if (!(userDataState.optionData.voiceInterruption === voiceOption.no && vocal === null)) {

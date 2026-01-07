@@ -7,25 +7,31 @@ judgment:begins -timer=0:20:000 -timeout=1.txt;
 ; 典狱长:测试
 ; thinking:ema/ema.png 我反对！:@objection.png|我觉得没问题:;
 manopedia:off;
+label:zhengyan;
+testimony:首先，凶手来到房间前的时候。 -left -refutes={"凶手":"label.txt"} -colors={"凶手":"#FF69B4"};
+testimony:房间已经涂满了白色颜料。 -left -refutes={"白色颜料":"1.txt"} -colors={"白色颜料":"#FF69B4"};
+testimony:诺亚自己做的，没错吧。 -left -refutes={"诺亚":"label_noah","没错吧":"label_check"} -colors={"诺亚":"#FF69B4","没错吧":"#FF69B4"};
+clearTestimony:;
+jumpLabel:zhengyan;
 refute:refute/soyo.webm -goto=114514;
 :;
-典狱长:测试
-千早爱音:测试
-judgment:concluded;
-addItem:ansk;
-manopedia:off;
-label:114514;
-changeFigure:立绘差分/ema/ema_1.png -id=ema -transform={"position":{"x":-497.96,"y":400.78},"scale":{"x":1.2,"y":1.2}} -right;
-changeFigure:立绘差分/sherry/sherry_2.png -id=sherry -transform={"position":{"x":411.77,"y":400.27},"scale":{"x":1.2,"y":1.2}} -left;
-丰川祥子:不懂爱祥的有难了
-千早爱音:哦耶！爱爱的祥！
-addItem:simplespear;
-千早爱音:简易长矛是什么东西？
-丰川祥子:好奇怪的名
-addItem:key;
-changeBg:RGB/Background_001_001.png -transform={"position":{"x":0,"y":0},"scale":{"x":1,"y":1}} -type=blinds;
-千早爱音:这是什么？钥匙？
-;clearItem:;
-丰川祥子:好奇怪的东西哦
-:请出示爱祥证物;
-presentTheEvidence:1.txt|2.txt @ansk;
+; 典狱长:测试
+; 千早爱音:测试
+; judgment:concluded;
+; addItem:ansk;
+; manopedia:off;
+; label:114514;
+; changeFigure:立绘差分/ema/ema_1.png -id=ema -transform={"position":{"x":-497.96,"y":400.78},"scale":{"x":1.2,"y":1.2}} -right;
+; changeFigure:立绘差分/sherry/sherry_2.png -id=sherry -transform={"position":{"x":411.77,"y":400.27},"scale":{"x":1.2,"y":1.2}} -left;
+; 丰川祥子:不懂爱祥的有难了
+; 千早爱音:哦耶！爱爱的祥！
+; addItem:simplespear;
+; 千早爱音:简易长矛是什么东西？
+; 丰川祥子:好奇怪的名
+; addItem:key;
+; changeBg:RGB/Background_001_001.png -transform={"position":{"x":0,"y":0},"scale":{"x":1,"y":1}} -type=blinds;
+; 千早爱音:这是什么？钥匙？
+; ;clearItem:;
+; 丰川祥子:好奇怪的东西哦
+; :请出示爱祥证物;
+; presentTheEvidence:1.txt|2.txt @ansk;

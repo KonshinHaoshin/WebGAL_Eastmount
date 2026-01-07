@@ -23,3 +23,18 @@ export function getStringArgByKey(sentence: ISentence, argKey: string): string |
   const argValue = getSentenceArgByKey(sentence, argKey);
   return toSafeString(argValue);
 }
+
+export function getObjectArgByKey(sentence: ISentence, argKey: string): any | null {
+  const argValue = getSentenceArgByKey(sentence, argKey);
+  if (typeof argValue === 'string') {
+    try {
+      return JSON.parse(argValue);
+    } catch (e) {
+      return null;
+    }
+  }
+  if (typeof argValue === 'object') {
+    return argValue;
+  }
+  return null;
+}
