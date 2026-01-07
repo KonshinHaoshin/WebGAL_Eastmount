@@ -68,6 +68,7 @@ export const initState: IStageState = {
   // currentPerformDelay: 0
   currentConcatDialogPrev: '',
   enableFilm: '',
+  judgment: '',
   isDisableTextbox: false,
   replacedUIlable: {},
   figureMetaData: {},

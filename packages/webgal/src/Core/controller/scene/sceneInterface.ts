@@ -47,6 +47,7 @@ export enum commandType {
   pediaUpdate, // 显示魔女图鉴更新提示
   presentTheEvidence, // 出示证物
   thinking, // 思考选择
+  judgment, // 审问
 }
 
 /**

@@ -40,6 +40,7 @@ export const SCRIPT_CONFIG = [
   { scriptString: 'wait', scriptType: commandType.wait },
   { scriptString: 'manopedia', scriptType: commandType.manopedia },
   { scriptString: 'presentTheEvidence', scriptType: commandType.presentTheEvidence },
+  { scriptString: 'judgment', scriptType: commandType.judgment },
 ];
 export const ADD_NEXT_ARG_LIST = [
   commandType.bgm,
@@ -55,6 +56,7 @@ export const ADD_NEXT_ARG_LIST = [
   commandType.playEffect,
   commandType.setTransition,
   commandType.applyStyle,
+  commandType.judgment,
 ];
 
 export type ConfigMap = Map<string, ConfigItem>;

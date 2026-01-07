@@ -47,6 +47,7 @@ export enum commandType {
   pediaUpdate,
   presentTheEvidence,
   thinking,
+  judgment,
 }
 
 /**

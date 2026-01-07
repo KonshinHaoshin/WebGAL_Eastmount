@@ -244,6 +244,7 @@ export interface IStageState {
 	currentConcatDialogPrev: string;
 	// 测试：电影叙事
 	enableFilm: string;
+	judgment: string;
 	isDisableTextbox: boolean;
 	replacedUIlable: Record<string, string>;
 	figureMetaData: figureMetaData;

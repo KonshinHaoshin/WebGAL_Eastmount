@@ -18,6 +18,7 @@ export const playVideo = (sentence: ISentence): IPerform => {
   const performInitName: string = getRandomPerformName();
 
   let blockingNextFlag = getBooleanArgByKey(sentence, 'skipOff') ?? false;
+  let noSkip = getBooleanArgByKey(sentence, 'noSkip') ?? false;
 
   // eslint-disable-next-line react/no-deprecated
   ReactDOM.render(
@@ -57,7 +58,9 @@ export const playVideo = (sentence: ISentence): IPerform => {
             endPerform();
           };
           // 双击可跳过视频
-          WebGAL.events.fullscreenDbClick.on(skipVideo);
+          if (!noSkip) {
+            WebGAL.events.fullscreenDbClick.on(skipVideo);
+          }
           // 播放并作为一个特别演出加入
           const perform = {
             performName: performInitName,
@@ -65,7 +68,9 @@ export const playVideo = (sentence: ISentence): IPerform => {
             isOver: false,
             isHoldOn: false,
             stopFunction: () => {
-              WebGAL.events.fullscreenDbClick.off(skipVideo);
+              if (!noSkip) {
+                WebGAL.events.fullscreenDbClick.off(skipVideo);
+              }
               /**
                * 恢复音量
                */
