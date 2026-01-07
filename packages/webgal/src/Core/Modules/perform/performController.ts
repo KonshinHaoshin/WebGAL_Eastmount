@@ -76,6 +76,7 @@ export class PerformController {
            */
           this.performList.splice(i, 1);
           i--;
+          this.erasePerformFromState(name);
           if (e.goNextWhenOver) {
             // nextSentence();
             this.goNextWhenOver();

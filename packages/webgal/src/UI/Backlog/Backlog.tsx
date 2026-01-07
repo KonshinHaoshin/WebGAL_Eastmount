@@ -107,7 +107,7 @@ function styleForIndex(i: number, opt: StyleOpts): CharStyle {
 
 export const Backlog = () => {
   const t = useTrans('gaming.');
-  const { playSeEnter, playSeClick } = useSoundEffect();
+  const { playSeEnter, playSeClick, playSeCancel } = useSoundEffect();
   const GUIStore = useSelector((state: RootState) => state.GUI);
   const isBacklogOpen = GUIStore.showBacklog;
   const dispatch = useDispatch();
@@ -306,7 +306,7 @@ export const Backlog = () => {
         <CloseSmall
           className={styles.backlog_top_icon}
           onClick={() => {
-            playSeClick();
+            playSeCancel();
             dispatch(setVisibility({ component: 'showBacklog', visibility: false }));
             dispatch(setVisibility({ component: 'showTextBox', visibility: true }));
           }}

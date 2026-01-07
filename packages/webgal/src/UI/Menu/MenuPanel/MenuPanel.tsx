@@ -18,7 +18,7 @@ export const MenuPanel = () => {
   // 国际化
   const t = useTrans('menu.');
 
-  const { playSeClick, playSeDialogOpen, playSePageChange } = useSoundEffect();
+  const { playSeClick, playSeDialogOpen, playSePageChange, playSeCancel } = useSoundEffect();
   const GUIState = useSelector((state: RootState) => state.GUI);
   const dispatch = useDispatch();
   // 设置Menu按钮的高亮
@@ -105,7 +105,7 @@ export const MenuPanel = () => {
         iconColor="rgba(123,144,169,1)"
         tagColor="rgba(123,144,169,1)"
         clickFunc={() => {
-          playSeClick();
+          playSeCancel();
           dispatch(setVisibility({ component: 'showMenuPanel', visibility: false }));
         }}
         tagName={t('exit.title')}

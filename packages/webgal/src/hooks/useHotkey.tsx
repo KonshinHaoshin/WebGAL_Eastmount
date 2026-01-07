@@ -14,6 +14,7 @@ import throttle from 'lodash/throttle';
 import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import useFullScreen from './useFullScreen';
+import useSoundEffect from './useSoundEffect';
 
 // options备用
 export interface HotKeyType {
@@ -55,6 +56,7 @@ export function useHotkey(opt?: HotKeyType) {
 export function useMouseRightClickHotKey() {
   const GUIStore = useGenSyncRef((state: RootState) => state.GUI);
   const setComponentVisibility = useSetComponentVisibility();
+  const { playSeRightClick } = useSoundEffect();
   const isGameActive = useGameActive<typeof GUIStore>(GUIStore);
   const isInBackLog = useIsInBackLog<typeof GUIStore>(GUIStore);
   const isOpenedDialog = useIsOpenedDialog<typeof GUIStore>(GUIStore);
@@ -62,21 +64,26 @@ export function useMouseRightClickHotKey() {
   const isShowExtra = useIsOpenedExtra<typeof GUIStore>(GUIStore);
   const handleContextMenu = useCallback((ev: MouseEvent) => {
     if (isOpenedDialog()) {
+      playSeRightClick();
       setComponentVisibility('showGlobalDialog', false);
       ev.preventDefault();
       return false;
     }
     if (isShowExtra()) {
+      playSeRightClick();
       setComponentVisibility('showExtra', false);
     }
     if (isGameActive()) {
+      playSeRightClick();
       setComponentVisibility('showTextBox', !GUIStore.current.showTextBox);
     }
     if (isInBackLog()) {
+      playSeRightClick();
       setComponentVisibility('showBacklog', false);
       setComponentVisibility('showTextBox', true);
     }
     if (validMenuPanelTag()) {
+      playSeRightClick();
       setComponentVisibility('showMenuPanel', false);
     }
     ev.preventDefault();

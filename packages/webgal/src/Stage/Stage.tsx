@@ -104,11 +104,6 @@ export const Stage: FC = () => {
 
   useHotkey();
 
-  // 检查是否有 thinking 或 choose perform 在运行
-  const isModalDialogActive = stageState.PerformList.some(
-    (perform) => perform.id === 'thinking' || perform.id === 'choose',
-  );
-
   return (
     <div className={styles.MainStage_main}>
       <FullScreenPerform />
@@ -152,7 +147,7 @@ export const Stage: FC = () => {
           position: 'absolute',
           zIndex: '12',
           top: '0',
-          pointerEvents: GUIState.showPhone || isModalDialogActive ? 'none' : 'auto',
+          pointerEvents: GUIState.showPhone ? 'none' : 'auto',
         }}
         onMouseMove={(e) => !GUIState.showControls && updateControlsVisibility(e, stageState, GUIState, dispatch)}
       />

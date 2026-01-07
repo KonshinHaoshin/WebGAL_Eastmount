@@ -12,7 +12,7 @@ import styles from './itemDisplay.module.scss';
 
 export const ItemDisplay: FC = () => {
     const dispatch = useDispatch();
-    const { playSeClick } = useSoundEffect();
+    const { playSeClick, playSeCancel } = useSoundEffect();
     const [itemDef, setItemDef] = useState<IItemDefinition | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -44,7 +44,7 @@ export const ItemDisplay: FC = () => {
 
     const handleClose = () => {
         dispatch(stageActions.setViewingItemId({ itemId: null }));
-        playSeClick();
+        playSeCancel();
     };
 
     const handleAddToInventory = () => {

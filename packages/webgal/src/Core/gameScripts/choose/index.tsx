@@ -115,12 +115,12 @@ function Choose(props: { chooseOptions: ChooseOption[] }) {
         const onClick = enable
           ? () => {
               playSeClick();
+              WebGAL.gameplay.performController.unmountPerform('choose');
               if (e.jumpToScene) {
                 changeScene(e.jump, e.text);
               } else {
                 jmp(e.jump);
               }
-              WebGAL.gameplay.performController.unmountPerform('choose');
             }
           : () => {};
 

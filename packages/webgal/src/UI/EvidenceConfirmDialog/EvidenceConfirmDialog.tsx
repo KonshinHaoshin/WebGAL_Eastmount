@@ -12,10 +12,10 @@ interface IEvidenceConfirmDialogProps {
 }
 
 export function showEvidenceConfirmDialog(props: IEvidenceConfirmDialogProps) {
-  const { playSeClick, playSeEnter } = useSEByWebgalStore();
+  const { playSeClick, playSeEnter, playSeCancel } = useSEByWebgalStore();
   
   const handleLeft = () => {
-    playSeClick();
+    playSeCancel();
     props.leftFunc();
     hideEvidenceConfirmDialog();
   };

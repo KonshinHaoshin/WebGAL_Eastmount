@@ -122,8 +122,8 @@ function Thinking(props: { thinkingOption: ThinkingOption }) {
                 {props.thinkingOption.options.map((option, index) => {
                     const onClick = () => {
                         playSeClick();
-                        changeScene(option.scene, option.text);
                         WebGAL.gameplay.performController.unmountPerform('thinking');
+                        changeScene(option.scene, option.text);
                     };
 
                     return (

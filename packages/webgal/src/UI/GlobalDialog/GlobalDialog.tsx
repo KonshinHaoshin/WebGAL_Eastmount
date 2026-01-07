@@ -19,10 +19,10 @@ interface IShowGlobalDialogProps {
 }
 
 export function showGlogalDialog(props: IShowGlobalDialogProps) {
-  const { playSeClick, playSeEnter } = useSEByWebgalStore();
+  const { playSeClick, playSeEnter, playSeCancel } = useSEByWebgalStore();
   webgalStore.dispatch(setVisibility({ component: 'showGlobalDialog', visibility: true }));
   const handleLeft = () => {
-    playSeClick();
+    playSeCancel();
     props.leftFunc();
     hideGlobalDialog();
   };

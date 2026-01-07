@@ -11,6 +11,7 @@ import close_pedia from '@/assets/dragonspring/ogg/close_pedia.ogg';
 import close_gearbutton from '@/assets/dragonspring/ogg/close_gearbutton.ogg';
 import choose_se from '@/assets/dragonspring/ogg/choose.ogg';
 import pedia_choose from '@/assets/dragonspring/ogg/pedia_choose.ogg';
+import right_click from '@/assets/dragonspring/ogg/right_click.ogg';
 import { useDispatch } from 'react-redux';
 import { webgalStore } from '@/store/store';
 
@@ -26,6 +27,12 @@ const useSoundEffect = () => {
   };
   const playSeClick = () => {
     dispatch(setStage({ key: 'uiSe', value: choose_se }));
+  };
+  const playSeRightClick = () => {
+    webgalStore.dispatch(setStage({ key: 'uiSe', value: right_click }));
+  };
+  const playSeCancel = () => {
+    webgalStore.dispatch(setStage({ key: 'uiSe', value: right_click }));
   };
   const playSeManopedia = () => {
     webgalStore.dispatch(setStage({ key: 'uiSe', value: open_media }));
@@ -59,6 +66,8 @@ const useSoundEffect = () => {
   return {
     playSeEnter,
     playSeClick,
+    playSeRightClick,
+    playSeCancel,
     playSeManopedia,
     playSeGear,
     playSeCloseGear,
@@ -81,9 +90,17 @@ export const useSEByWebgalStore = () => {
   const playSeClick = () => {
     webgalStore.dispatch(setStage({ key: 'uiSe', value: choose_se }));
   };
+  const playSeRightClick = () => {
+    webgalStore.dispatch(setStage({ key: 'uiSe', value: right_click }));
+  };
+  const playSeCancel = () => {
+    webgalStore.dispatch(setStage({ key: 'uiSe', value: right_click }));
+  };
   return {
     playSeEnter, // 鼠标进入
     playSeClick, // 鼠标点击
+    playSeRightClick, // 鼠标右键
+    playSeCancel, // 取消
   };
 };
 
