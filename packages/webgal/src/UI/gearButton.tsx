@@ -13,6 +13,7 @@ export const GearButton: FC = () => {
   const dispatch = useDispatch();
   const { playSeGear } = useSoundEffect();
   const GUIStore = useSelector((state: RootState) => state.GUI);
+  const stageState = useSelector((state: RootState) => state.stage);
 
   // 标题界面不显示 gear 按钮
   if (GUIStore.showTitle) {
@@ -21,6 +22,11 @@ export const GearButton: FC = () => {
 
   // Phone 显示时不显示 gear 按钮
   if (GUIStore.showPhone) {
+    return null;
+  }
+
+  // Judgment 期间不显示 gear 按钮
+  if (stageState.judgment !== '') {
     return null;
   }
 

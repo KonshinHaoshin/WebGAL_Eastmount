@@ -46,8 +46,9 @@ export enum commandType {
   showItem,
   pediaUpdate,
   presentTheEvidence,
-  thinking,
-  judgment,
+  thinking, // 思考选择
+  refute, // 反驳
+  judgment, // 审问
 }
 
 /**

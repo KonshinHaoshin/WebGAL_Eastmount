@@ -41,6 +41,7 @@ export const SCRIPT_CONFIG = [
   { scriptString: 'manopedia', scriptType: commandType.manopedia },
   { scriptString: 'presentTheEvidence', scriptType: commandType.presentTheEvidence },
   { scriptString: 'judgment', scriptType: commandType.judgment },
+  { scriptString: 'refute', scriptType: commandType.refute },
 ];
 export const ADD_NEXT_ARG_LIST = [
   commandType.bgm,
@@ -57,6 +58,7 @@ export const ADD_NEXT_ARG_LIST = [
   commandType.setTransition,
   commandType.applyStyle,
   commandType.judgment,
+  commandType.refute,
 ];
 
 export type ConfigMap = Map<string, ConfigItem>;

@@ -245,6 +245,9 @@ export interface IStageState {
 	// 测试：电影叙事
 	enableFilm: string;
 	judgment: string;
+	judgmentTimer: number; // 当前审判剩余时间 (ms)
+	judgmentTimeout: string; // 超时跳转目标
+	isJudgmentFastForward: boolean; // 是否处于加速状态
 	isDisableTextbox: boolean;
 	replacedUIlable: Record<string, string>;
 	figureMetaData: figureMetaData;

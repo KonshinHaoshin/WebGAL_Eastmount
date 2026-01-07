@@ -114,6 +114,7 @@ export const Stage: FC = () => {
       <div id="itemContainer" className={styles.itemContainer} />
       <div id="chooseContainer" className={styles.chooseContainer} />
       <div id="thinkingContainer" className={styles.thinkingContainer} />
+      <div id="refuteContainer" className={styles.refuteContainer} />
       {GUIState.showTextBox && stageState.enableFilm === '' && !stageState.isDisableTextbox && <TextBox />}
       {GUIState.showTextBox && stageState.enableFilm !== '' && <TextBoxFilm />}
       <AudioContainer />
@@ -121,6 +122,10 @@ export const Stage: FC = () => {
         onClick={() => {
           // 如果 Phone 显示，则不允许点击
           if (GUIState.showPhone) {
+            return;
+          }
+          // 如果处于审判模式，禁止手动点击进入下一句
+          if (stageState.judgment !== '') {
             return;
           }
           // 如果文本框没有显示，则显示文本框

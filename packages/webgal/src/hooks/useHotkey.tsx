@@ -41,12 +41,13 @@ export const keyboard: Keyboard | undefined = 'keyboard' in navigator && (naviga
 // export const isFastSaveKey = `FastSaveActive`;
 
 export function useHotkey(opt?: HotKeyType) {
+  const stageStore = useGenSyncRef((state: RootState) => state.stage);
   useMouseRightClickHotKey();
-  useMouseWheel();
-  useSkip();
+  useMouseWheel(stageStore);
+  useSkip(stageStore);
   usePanic();
   useFastSaveBeforeUnloadPage();
-  useSpaceAndEnter();
+  useSpaceAndEnter(stageStore);
   useToggleFullScreen();
 }
 
@@ -106,7 +107,7 @@ let wheelTimeout = setTimeout(() => {
  * 滚轮向下关闭历史记录
  * 滚轮向下下一句
  */
-export function useMouseWheel() {
+export function useMouseWheel(stageStore?: { current: any }) {
   const GUIStore = useGenSyncRef((state: RootState) => state.GUI);
   const setComponentVisibility = useSetComponentVisibility();
   const isGameActive = useGameActive(GUIStore);
@@ -114,6 +115,7 @@ export function useMouseWheel() {
   const isPanicOverlayOpen = useIsPanicOverlayOpen(GUIStore);
   const next = useCallback(
     throttle(() => {
+      if (stageStore?.current.judgment !== '') return; // 审判期间禁止滚轮下翻
       nextSentence();
     }, 100),
     [],
@@ -121,39 +123,43 @@ export function useMouseWheel() {
   // 防止一直往下滚的时候顺着滚出历史记录
   // 问就是抄的999
   const prevDownWheelTimeRef = useRef(0);
-  const handleMouseWheel = useCallback((ev) => {
-    if (isPanicOverlayOpen()) return;
-    const direction =
-      (ev.wheelDelta && (ev.wheelDelta > 0 ? 'up' : 'down')) ||
-      (ev.detail && (ev.detail < 0 ? 'up' : 'down')) ||
-      'down';
-    const ctrlKey = ev.ctrlKey;
-    const dom = document.querySelector(`.${styles.backlog_content}`);
-    if (isGameActive() && direction === 'up' && !ctrlKey) {
-      setComponentVisibility('showBacklog', true);
-      setComponentVisibility('showTextBox', false);
-    } else if (isInBackLog() && direction === 'down' && !ctrlKey) {
-      if (dom) {
-        let flag = hasScrollToBottom(dom);
-        let curTime = new Date().getTime();
-        // 滚动到底部 & 非连续滚动
-        if (flag && curTime - prevDownWheelTimeRef.current > 100) {
-          setComponentVisibility('showBacklog', false);
-          setComponentVisibility('showTextBox', true);
+  const handleMouseWheel = useCallback(
+    (ev) => {
+      if (isPanicOverlayOpen()) return;
+      const direction =
+        (ev.wheelDelta && (ev.wheelDelta > 0 ? 'up' : 'down')) ||
+        (ev.detail && (ev.detail < 0 ? 'up' : 'down')) ||
+        'down';
+      const ctrlKey = ev.ctrlKey;
+      const dom = document.querySelector(`.${styles.backlog_content}`);
+      if (isGameActive() && direction === 'up' && !ctrlKey) {
+        setComponentVisibility('showBacklog', true);
+        setComponentVisibility('showTextBox', false);
+      } else if (isInBackLog() && direction === 'down' && !ctrlKey) {
+        if (dom) {
+          let flag = hasScrollToBottom(dom);
+          let curTime = new Date().getTime();
+          // 滚动到底部 & 非连续滚动
+          if (flag && curTime - prevDownWheelTimeRef.current > 100) {
+            setComponentVisibility('showBacklog', false);
+            setComponentVisibility('showTextBox', true);
+          }
+          prevDownWheelTimeRef.current = curTime;
         }
-        prevDownWheelTimeRef.current = curTime;
+        // setComponentVisibility('showBacklog', false);
+      } else if (isGameActive() && direction === 'down' && !ctrlKey) {
+        if (stageStore?.current.judgment !== '') return; // 审判期间禁止滚轮下翻
+        clearTimeout(wheelTimeout);
+        WebGAL.gameplay.isFast = true;
+        // 滚轮视作快进
+        setTimeout(() => {
+          WebGAL.gameplay.isFast = false;
+        }, 150);
+        next();
       }
-      // setComponentVisibility('showBacklog', false);
-    } else if (isGameActive() && direction === 'down' && !ctrlKey) {
-      clearTimeout(wheelTimeout);
-      WebGAL.gameplay.isFast = true;
-      // 滚轮视作快进
-      setTimeout(() => {
-        WebGAL.gameplay.isFast = false;
-      }, 150);
-      next();
-    }
-  }, []);
+    },
+    [isGameActive, isInBackLog, isPanicOverlayOpen, stageStore],
+  );
   useMounted(() => {
     document.addEventListener('wheel', handleMouseWheel);
   });
@@ -195,7 +201,7 @@ export function usePanic() {
 /**
  * ctrl控制快进
  */
-export function useSkip() {
+export function useSkip(stageStore?: { current: any }) {
   // 因为document事件只绑定一次 为了防止之后更新GUIStore时取不到最新值
   // 使用Ref共享GUIStore
   const GUIStore = useGenSyncRef((state: RootState) => state.GUI);
@@ -203,16 +209,23 @@ export function useSkip() {
   const isGameActive = useGameActive(GUIStore);
   // 判断按键是否为ctrl
   const isCtrlKey = useCallback((e) => e.keyCode === 17, []);
-  const handleCtrlKeydown = useCallback((e) => {
-    if (isCtrlKey(e) && isGameActive()) {
-      startFast();
-    }
-  }, []);
-  const handleCtrlKeyup = useCallback((e) => {
-    if (isCtrlKey(e) && isGameActive()) {
-      stopFast();
-    }
-  }, []);
+  const handleCtrlKeydown = useCallback(
+    (e) => {
+      if (isCtrlKey(e) && isGameActive()) {
+        if (stageStore?.current.judgment !== '') return; // 审判期间禁止 Ctrl 快进
+        startFast();
+      }
+    },
+    [isGameActive, isCtrlKey, stageStore],
+  );
+  const handleCtrlKeyup = useCallback(
+    (e) => {
+      if (isCtrlKey(e) && isGameActive()) {
+        stopFast();
+      }
+    },
+    [isGameActive, isCtrlKey],
+  );
   const handleWindowBlur = useCallback((e) => {
     // 停止快进
     stopFast();
@@ -231,7 +244,7 @@ export function useSkip() {
   });
   // updated时验证状态
   useUpdated(() => {
-    if (!isGameActive()) {
+    if (!isGameActive() || (stageStore?.current.judgment !== '' && WebGAL.gameplay.isFast)) {
       stopFast();
     }
   });
@@ -331,7 +344,7 @@ function nextTick(callback: () => void) {
 /**
  * 空格 & 回车 跳转到下一条
  */
-export function useSpaceAndEnter() {
+export function useSpaceAndEnter(stageStore?: { current: any }) {
   const GUIStore = useGenSyncRef((state: RootState) => state.GUI);
   const isGameActive = useGameActive(GUIStore);
   const setComponentVisibility = useSetComponentVisibility();
@@ -341,22 +354,29 @@ export function useSpaceAndEnter() {
   const isSpaceOrEnter = useCallback((e) => {
     return e.keyCode === 32 || e.keyCode === 13;
   }, []);
-  const handleKeydown = useCallback((e) => {
-    if (isSpaceOrEnter(e) && isGameActive() && !lockRef.current) {
-      if (!GUIStore.current.showTextBox) {
-        setComponentVisibility('showTextBox', true);
-        return;
+  const handleKeydown = useCallback(
+    (e) => {
+      if (isSpaceOrEnter(e) && isGameActive() && !lockRef.current) {
+        if (stageStore?.current.judgment !== '') return; // 审判期间禁止空格/回车进入下一句
+        if (!GUIStore.current.showTextBox) {
+          setComponentVisibility('showTextBox', true);
+          return;
+        }
+        stopAll();
+        nextSentence();
+        lockRef.current = true;
       }
-      stopAll();
-      nextSentence();
-      lockRef.current = true;
-    }
-  }, []);
-  const handleKeyup = useCallback((e) => {
-    if (isSpaceOrEnter(e) && isGameActive()) {
-      lockRef.current = false;
-    }
-  }, []);
+    },
+    [isGameActive, isSpaceOrEnter, GUIStore, stageStore],
+  );
+  const handleKeyup = useCallback(
+    (e) => {
+      if (isSpaceOrEnter(e) && isGameActive()) {
+        lockRef.current = false;
+      }
+    },
+    [isGameActive, isSpaceOrEnter],
+  );
   const handleWindowBlur = useCallback((e) => {
     lockRef.current = false;
   }, []);

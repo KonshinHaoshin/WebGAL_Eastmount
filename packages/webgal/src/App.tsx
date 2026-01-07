@@ -6,6 +6,7 @@ import DevPanel from '@/UI/DevPanel/DevPanel';
 import { Extra } from '@/UI/Extra/Extra';
 import { GearButton } from '@/UI/gearButton';
 import { HandboxButton } from '@/UI/Handbook/HandboxButton';
+import { Timer } from '@/UI/judgment/timer';
 import GlobalDialog from '@/UI/GlobalDialog/GlobalDialog';
 import EvidenceConfirmDialog from '@/UI/EvidenceConfirmDialog/EvidenceConfirmDialog';
 import Logo from '@/UI/Logo/Logo';
@@ -53,6 +54,7 @@ function App() {
       <BottomControlPanelFilm />
       <GearButton />
       <HandboxButton />
+      <Timer />
       <Backlog />
       <Title />
       <Logo />

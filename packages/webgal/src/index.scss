@@ -20,6 +20,12 @@
   src: url("assets/fonts/OPPOSans-R.ttf") format("truetype");
 }
 
+@font-face {
+  font-family: "cantebriggia";
+  /*noinspection CssUnknownTarget*/
+  src: url("assets/fonts/cantebriggia.TTF") format("truetype");
+}
+
 .StartButton {
   animation: StartButton_blink 4s infinite;
 }

@@ -48,6 +48,7 @@ export enum commandType {
   presentTheEvidence, // 出示证物
   thinking, // 思考选择
   judgment, // 审问
+  refute, // 反驳
 }
 
 /**
