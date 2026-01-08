@@ -3,11 +3,12 @@
 ;manopedia:on;
 ;pediaUpdate:;
 changeBg:RGB/Background_004_001.png -transform={"position":{"x":0,"y":0},"scale":{"x":1,"y":1}};
-judgment:begins -timer=0:20:000 -timeout=1.txt;
+judgment:begins -timer=13:20:000 -timeout=1.txt;
 ; 典狱长:测试
 ; thinking:ema/ema.png 我反对！:@objection.png|我觉得没问题:;
 manopedia:off;
 label:zhengyan;
+changeFigure:立绘差分/ema/ema_3.png -id=ema -transform={"position":{"x":406.23,"y":1718.3},"rotation":0.15,"scale":{"x":3.25,"y":3.25}};
 testimony:首先，凶手来到房间前的时候。 -left -refutes={"凶手":"label.txt"} -colors={"凶手":"#FF69B4"};
 testimony:房间已经涂满了白色颜料。 -left -refutes={"白色颜料":"1.txt"} -colors={"白色颜料":"#FF69B4"};
 testimony:诺亚自己做的，没错吧。 -left -refutes={"诺亚":"label_noah","没错吧":"label_check"} -colors={"诺亚":"#FF69B4","没错吧":"#FF69B4"};

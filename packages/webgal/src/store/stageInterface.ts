@@ -204,10 +204,10 @@ export interface IModifyInventoryItemPayload {
  * 证言数据接口
  */
 export interface ITestimonyData {
-	content: string;
-	refutes: Record<string, string>;
-	colors: Record<string, string>;
-	pos?: 'left' | 'right' | 'center';
+  content: string;
+  refutes: Record<string, string>;
+  colors: Record<string, string>;
+  pos?: 'left' | 'right' | 'center';
 }
 
 /**
