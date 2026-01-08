@@ -2,7 +2,7 @@ import { ISentence } from '@/Core/controller/scene/sceneInterface';
 import { IPerform } from '@/Core/Modules/perform/performInterface';
 import { webgalStore } from '@/store/store';
 import { setStage } from '@/store/stageReducer';
-import { getObjectArgByKey, getBooleanArgByKey, getStringArgByKey } from '../util/getSentenceArg';
+import { getObjectArgByKey, getBooleanArgByKey, getStringArgByKey, getNumberArgByKey } from '../util/getSentenceArg';
 import { playVocal } from './vocal';
 import { useTextAnimationDuration, useTextDelay } from '@/hooks/useTextOptions';
 import { compileSentence } from '@/Stage/TextBox/TextBox';
@@ -17,6 +17,7 @@ export const testimony = (sentence: ISentence): IPerform => {
   const refutes = (getObjectArgByKey(sentence, 'refutes') as Record<string, string>) || {};
   const colors = (getObjectArgByKey(sentence, 'colors') as Record<string, string>) || {};
   const vocal = getStringArgByKey(sentence, 'vocal');
+  const y = getNumberArgByKey(sentence, 'y') || undefined;
 
   let pos: 'left' | 'right' | 'center' = 'center';
   if (getBooleanArgByKey(sentence, 'left')) pos = 'left';
@@ -35,6 +36,7 @@ export const testimony = (sentence: ISentence): IPerform => {
           refutes,
           colors,
           pos,
+          y,
         },
       ],
     }),

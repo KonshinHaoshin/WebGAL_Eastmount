@@ -66,7 +66,7 @@ interface TestimonyItemProps {
 }
 
 const TestimonyItem: FC<TestimonyItemProps> = ({ data, onKeywordClick }) => {
-  const { content, refutes, colors, pos } = data;
+  const { content, refutes, colors, pos, y } = data;
 
   const renderedContent = useMemo(() => {
     if (!content) return null;
@@ -98,8 +98,13 @@ const TestimonyItem: FC<TestimonyItemProps> = ({ data, onKeywordClick }) => {
 
   const itemClass = `${styles.testimonyItem} ${pos ? styles[pos] : styles.center}`;
 
+  const itemStyle: React.CSSProperties = {
+    position: y !== undefined ? 'absolute' : 'relative',
+    top: y !== undefined ? `${y}px` : undefined,
+  };
+
   return (
-    <div className={itemClass}>
+    <div className={itemClass} style={itemStyle}>
       <div className={styles.textWrapper}>
         <div className={styles.text}>{renderedContent}</div>
       </div>

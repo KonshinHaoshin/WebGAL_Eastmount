@@ -208,6 +208,7 @@ export interface ITestimonyData {
   refutes: Record<string, string>;
   colors: Record<string, string>;
   pos?: 'left' | 'right' | 'center';
+  y?: number; // 新增：控制 Y 轴位置
 }
 
 /**
