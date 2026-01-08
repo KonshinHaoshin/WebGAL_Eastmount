@@ -36,7 +36,15 @@ class ThinkingOption {
         // 解析选项
         const optionParts = optionsPart.split(/(?<!\\)\|/);
         const options = optionParts.map(option => {
-            const optionMatch = option.match(/^(.*?):(.*?)(?:@(.*))?$/);
+            const trimmedOption = option.trim();
+            if (trimmedOption === '@back') {
+                return {
+                    text: '返回',
+                    scene: '@back',
+                    buttonIcon: undefined
+                };
+            }
+            const optionMatch = trimmedOption.match(/^(.*?):(.*?)(?:@(.*))?$/);
             if (!optionMatch) {
                 throw new Error(`Invalid thinking option format: ${option}`);
             }
@@ -120,10 +128,13 @@ function Thinking(props: { thinkingOption: ThinkingOption }) {
             {/* 选项气泡 */}
             <div className={applyStyle('Thinking_Options', styles.Thinking_Options)}>
                 {props.thinkingOption.options.map((option, index) => {
+                    const isBack = option.scene === '@back';
                     const onClick = () => {
                         playSeClick();
                         WebGAL.gameplay.performController.unmountPerform('thinking');
-                        changeScene(option.scene, option.text);
+                        if (!isBack) {
+                            changeScene(option.scene, option.text);
+                        }
                     };
 
                     return (
@@ -143,7 +154,7 @@ function Thinking(props: { thinkingOption: ThinkingOption }) {
 
                             {/* 气泡 */}
                             <div
-                                className={applyStyle('Thinking_Bubble', styles.Thinking_Bubble)}
+                                className={`${applyStyle('Thinking_Bubble', styles.Thinking_Bubble)} ${isBack ? applyStyle('Thinking_Back', styles.Thinking_Back) : ''}`}
                                 onClick={onClick}
                                 onMouseEnter={playSeEnter}
                                 onMouseOver={(e) => {

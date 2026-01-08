@@ -21,6 +21,40 @@ export const TestimonyLayer: FC = () => {
   }
 
   const handleKeywordClick = (target: string) => {
+    const targetStr = target.toString().trim();
+
+    // 检查是否是行内思考模式
+    if (targetStr.startsWith('thinking:')) {
+      const content = targetStr.replace('thinking:', '');
+      const parts = content.split('|');
+      if (parts.length >= 2) {
+        const avatar = parts[0].trim();
+        const options = parts.slice(1).map((opt) => {
+          const trimmedOpt = opt.trim();
+          if (trimmedOpt === '@back') {
+            return { label: '返回', target: '@back' };
+          }
+          // 解析 文本:目标@图标 格式
+          const colonIndex = trimmedOpt.indexOf(':');
+          if (colonIndex === -1) {
+            return { label: trimmedOpt, target: trimmedOpt };
+          }
+          const label = trimmedOpt.substring(0, colonIndex).trim();
+          const rest = trimmedOpt.substring(colonIndex + 1).trim();
+          const atIndex = rest.indexOf('@');
+          const target = atIndex === -1 ? rest.trim() : rest.substring(0, atIndex).trim();
+          const icon = atIndex === -1 ? undefined : rest.substring(atIndex + 1).trim();
+
+          return { label, target, icon };
+        });
+        dispatch(setStage({ key: 'inlineThinking', value: { avatar, options } }));
+        if (WebGAL.gameplay.isAuto) {
+          stopAuto();
+        }
+        return;
+      }
+    }
+
     // 触发反驳逻辑
     dispatch(setStage({ key: 'testimonyData', value: [] })); // 清空所有证言
     dispatch(setStage({ key: 'isJudgmentFastForward', value: false }));
@@ -31,7 +65,6 @@ export const TestimonyLayer: FC = () => {
       stopAuto();
     }
 
-    const targetStr = target.toString().trim();
     const isScene = targetStr.endsWith('.txt');
 
     if (isScene) {
@@ -82,12 +115,7 @@ const TestimonyItem: FC<TestimonyItemProps> = ({ data, onKeywordClick }) => {
       if (refutes[part]) {
         const color = colors[part] || '#FF69B4';
         return (
-          <span
-            key={index}
-            className={styles.keyword}
-            style={{ color }}
-            onClick={() => onKeywordClick(refutes[part])}
-          >
+          <span key={index} className={styles.keyword} style={{ color }} onClick={() => onKeywordClick(refutes[part])}>
             {part}
           </span>
         );

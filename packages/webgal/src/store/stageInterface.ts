@@ -201,6 +201,14 @@ export interface IModifyInventoryItemPayload {
 }
 
 /**
+ * 行内思考菜单数据接口
+ */
+export interface IInlineThinking {
+  avatar: string;
+  options: { label: string; target: string; icon?: string }[];
+}
+
+/**
  * 证言数据接口
  */
 export interface ITestimonyData {
@@ -271,6 +279,7 @@ export interface IStageState {
 	evidenceJumpScenes: string[]; // 证据模式的跳转场景 [成功场景, 失败场景]
 	showManopedia: boolean; // 是否显示图鉴界面
 	testimonyData: ITestimonyData[]; // 证言数据列表
+	inlineThinking: IInlineThinking | null; // 行内思考菜单数据
 }
 
 /**

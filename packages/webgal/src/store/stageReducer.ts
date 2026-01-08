@@ -86,6 +86,7 @@ export const initState: IStageState = {
   evidenceJumpScenes: [],
   showManopedia: false,
   testimonyData: [],
+  inlineThinking: null,
 };
 
 /**

@@ -8,6 +8,7 @@ import { GearButton } from '@/UI/gearButton';
 import { HandboxButton } from '@/UI/Handbook/HandboxButton';
 import { Timer } from '@/UI/judgment/timer';
 import { TestimonyLayer } from '@/UI/judgment/testimonyLayer';
+import { InlineThinkingOverlay } from '@/UI/judgment/inlineThinkingOverlay';
 import GlobalDialog from '@/UI/GlobalDialog/GlobalDialog';
 import EvidenceConfirmDialog from '@/UI/EvidenceConfirmDialog/EvidenceConfirmDialog';
 import Logo from '@/UI/Logo/Logo';
@@ -57,6 +58,7 @@ function App() {
       <HandboxButton />
       <Timer />
       <TestimonyLayer />
+      <InlineThinkingOverlay />
       <Backlog />
       <Title />
       <Logo />
