@@ -3,7 +3,7 @@
 ;manopedia:on;
 ;pediaUpdate:;
 changeBg:RGB/Background_004_001.png -transform={"position":{"x":0,"y":0},"scale":{"x":1,"y":1}};
-thinking:ema/ema.png 我反对！:@objection.png|我觉得没问题: |@back;
+thinking:ema/ema.png 我反对！:concluded@objection.png|我觉得没问题:|@back;
 judgment:begins -timer=13:20:000 -timeout=1.txt;
 ; 典狱长:测试
 ; thinking:ema/ema.png 我反对！:@objection.png|我觉得没问题:;
