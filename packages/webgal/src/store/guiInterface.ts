@@ -48,7 +48,7 @@ export interface IGuiState {
 
 export type componentsVisibility = Pick<
   IGuiState,
-  Exclude<keyof IGuiState, 'currentMenuTag' | 'titleBg' | 'titleBgm' | 'logoImage' | 'theme' | 'manopediaUpdateItem'>
+  Exclude<keyof IGuiState, 'currentMenuTag' | 'titleBg' | 'titleBgm' | 'logoImage' | 'theme' | 'manopediaUpdateItem' | 'showItemInfo'>
 >;
 // 标题资源
 export type GuiAsset = Pick<IGuiState, 'titleBgm' | 'titleBg'>;

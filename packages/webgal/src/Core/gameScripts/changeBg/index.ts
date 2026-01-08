@@ -29,6 +29,8 @@ export const changeBg = (sentence: ISentence): IPerform => {
 	const ease = getStringArgByKey(sentence, 'ease') ?? '';
 	const type = getStringArgByKey(sentence, 'type') ?? 'default';
 
+	let animationObj: AnimationFrame[];
+
 	// 解析 LUT 参数
 	const lutArg = getStringArgByKey(sentence, 'lut');
 	if (lutArg !== null) {
@@ -59,7 +61,6 @@ export const changeBg = (sentence: ISentence): IPerform => {
 		duration = 1333; // 默认总时长约 1.33 秒
 	} else {
 		// 处理 transform 和 默认 transform
-		let animationObj: AnimationFrame[];
 		if (transformString) {
 			try {
 				const frame = JSON.parse(transformString.toString()) as AnimationFrame;

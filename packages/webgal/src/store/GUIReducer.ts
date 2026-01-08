@@ -32,6 +32,8 @@ const initState: IGuiState = {
   showPhone: false,
   showManopediaUpdate: false,
   manopediaUpdateItem: null,
+  showItem: false,
+  showItemInfo: null,
 };
 
 /**
