@@ -106,7 +106,8 @@ export const scriptExecutor = () => {
   let isSaveBacklog = currentScript.command === commandType.say; // 是否在本句保存backlog（一般遇到对话保存）
   // 检查当前对话是否有 notend 参数
   const hasNotEnd = getBooleanArgByKey(currentScript, 'notend') ?? false;
-  isSaveBacklog = isSaveBacklog && !hasNotEnd;
+  const isJudgment = webgalStore.getState().stage.judgment !== '';
+  isSaveBacklog = isSaveBacklog && !hasNotEnd && !isJudgment;
 
   let currentStageState: IStageState;
 

@@ -17,11 +17,12 @@ export const Timer: FC = () => {
   const judgmentTimer = useSelector((state: RootState) => state.stage.judgmentTimer);
   const judgmentTimeout = useSelector((state: RootState) => state.stage.judgmentTimeout);
   const isFastForward = useSelector((state: RootState) => state.stage.isJudgmentFastForward);
+  const isDisableTextbox = useSelector((state: RootState) => state.stage.isDisableTextbox);
 
   const timerRef = useRef<any>(null);
 
   useEffect(() => {
-    if (judgment === 'begins' && judgmentTimer > 0) {
+    if (judgment === 'begins' && judgmentTimer > 0 && isDisableTextbox) {
       let lastUpdate = Date.now();
       const step = 16; // ~60fps update interval for smoothness
       timerRef.current = setInterval(() => {
@@ -68,9 +69,9 @@ export const Timer: FC = () => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [judgment, judgmentTimeout, isFastForward, dispatch]);
+  }, [judgment, judgmentTimeout, isFastForward, isDisableTextbox, dispatch]);
 
-  if (judgment !== 'begins') {
+  if (judgment !== 'begins' || !isDisableTextbox) {
     return null;
   }
 

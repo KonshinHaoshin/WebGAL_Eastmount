@@ -124,8 +124,8 @@ export const Stage: FC = () => {
           if (GUIState.showPhone) {
             return;
           }
-          // 如果处于审判模式，禁止手动点击进入下一句
-          if (stageState.judgment !== '') {
+          // 如果处于审判模式且禁用了文本框，禁止手动点击进入下一句
+          if (stageState.judgment !== '' && stageState.isDisableTextbox) {
             return;
           }
           // 如果文本框没有显示，则显示文本框

@@ -73,8 +73,7 @@ export const TestimonyLayer: FC = () => {
     dispatch(setStage({ key: 'testimonyData', value: [] })); // 清空所有证言
     dispatch(setStage({ key: 'isJudgmentFastForward', value: false }));
 
-    // 退出审判状态并停止自动播放
-    dispatch(setStage({ key: 'judgment', value: '' }));
+    // 停止自动播放，但保持审判状态
     if (WebGAL.gameplay.isAuto) {
       stopAuto();
     }

@@ -1,47 +1,30 @@
-;changeFigure:立绘差分/hiro/hiro_2.png -id=figure1 -transform={"position":{"x":0,"y":300},"scale":{"x":1.2,"y":1.2}};
-;choose:千早爱音:|三角初华:|若叶睦:|要乐奈: @skeleton;
-;manopedia:on;
-;pediaUpdate:;
-changeBg:RGB/Background_004_001.png -transform={"position":{"x":0,"y":0},"scale":{"x":1,"y":1}};
-addItem:key;
-addItem:ansk;
-label:test;
-典狱长:测试
-千早爱音:测试
-presentTheEvidence:|test @key;
-; thinking:ema/ema.png 我反对！:concluded@icon=objection.png@refute=refute/soyo.webm|我觉得没问题:|@back;
-judgment:begins -timer=13:20:000 -timeout=1.txt;
-thinking:ema/ema.png 我反对！:@objection.png|我觉得没问题:;
-manopedia:off;
-label:zhengyan;
-典狱长:测试
-千早爱音:测试
-changeFigure:立绘差分/ema/ema_3.png -id=ema -transform={"position":{"x":406.23,"y":1718.3},"rotation":0.15,"scale":{"x":3.25,"y":3.25}};
-testimony:首先，凶手来到房间前的时候。 -left -refutes={"凶手":"thinking:ema/ema.png 我反对！:concluded|哎哟，爱祥不赖 : |@back"} -colors={"凶手":"#FF69B4"} -y=500;
-testimony:房间已经涂满了白色颜料。 -left -refutes={"白色颜料":"1.txt"} -colors={"白色颜料":"#FF69B4"} -y=700;
-testimony:诺亚自己做的，没错吧。 -left -refutes={"诺亚":"label_noah","没错吧":"label_check"} -colors={"诺亚":"#FF69B4","没错吧":"#FF69B4"} -y=900;
+judgment:begins -timer=12:00:000 -timeout=1.txt;
+setTextbox:hide;
+label:judgment02;
+changeFigure: -id=soyo;
+changeFigure:bettercallsoyo/bcs02.png -id=soyo -transform={"position":{"x":296.86,"y":969.56},"scale":{"x":2.55,"y":2.55},"rotation":0.45} -loop -next;
+testimony:千早爱音，你跟祥子失踪有什么关系吗？ -right -refutes={"千早爱音":"thinking:soyo.png 这货不是爱音，她是樱羽艾玛:wtf@icon=objection.png|@back"} -colors={"千早爱音":"#FFDD88"} -y=400;
+testimony:或者说你知道祥子为什么失踪了吗？  -right -y=800;
 clearTestimony:;
-jumpLabel:zhengyan;
-label:concluded;
-judgment:concluded;
-; refute:refute/soyo.webm -goto=114514;
+changeFigure:anon_mei/anon_thinking.png -loop -next -id=soyo -transform={"position":{"x":296.86,"y":969.56},"scale":{"x":2.55,"y":2.55},"rotation":0.45};
+testimony:啊，算是有点关系吧 -left -y=400;
+testimony:前天我把祥子x晕了 -left -y=600;
+changeFigure:anon_mei/anon_shy.png -loop -next -id=soyo -transform={"position":{"x":296.86,"y":969.56},"scale":{"x":2.55,"y":2.55},"rotation":0.45};
+testimony:让她甚至差点没法去罗德岛出差，怎么了 -left -y=800 -refutes={"罗德岛出差":"thinking:soyo.png|什么叫罗德岛出差？:luodedao@icon=question.png|@back"} -colors={"罗德岛出差":"#FF8899"};
+clearTestimony:;
+jumpLabel:judgment02;
+label:wtf;
+changeFigure: -id=soyo -next;
+setTextbox:on;
+changeFigure:立绘差分/ema/艾玛9.png  -loop -next -id=ema -transform={"position":{"x":-600,"y":600},"scale":{"x":1.6,"y":1.6}};
+樱羽艾玛:素世小姐，你在说什么鬼东西
+changeFigure:prts/avg_4186_tmoris_9$3.png -id=umiri -transform={"bevelGreen":255,"bloomBrightness":1.12,"brightness":0.85,"colorGreen":255,"colorRed":255,"contrast":1.15,"gamma":1,"position":{"x":443.69,"y":800},"saturation":1.24,"scale":{"x":-2.05,"y":2.05}};
+八幡海铃:对啊，小艾玛不是在这里吗？
+changeFigure: -id=umiri -next;
+changeFigure: -id=ema -next;
+changeFigure:bettercallsoyo/bcs02.png -loop -next -id=soyo -transform={"position":{"x":0,"y":600},"scale":{"x":1.8,"y":1.8}};
+长崎素世:搞砸了……|大家对我的印象变差了
 :;
-; 典狱长:测试
-; 千早爱音:测试
-; addItem:ansk;
-; manopedia:off;
-; label:114514;
-; changeFigure:立绘差分/ema/ema_1.png -id=ema -transform={"position":{"x":-497.96,"y":400.78},"scale":{"x":1.2,"y":1.2}} -right;
-; changeFigure:立绘差分/sherry/sherry_2.png -id=sherry -transform={"position":{"x":411.77,"y":400.27},"scale":{"x":1.2,"y":1.2}} -left;
-; 丰川祥子:不懂爱祥的有难了
-; 千早爱音:哦耶！爱爱的祥！
-; addItem:simplespear;
-; 千早爱音:简易长矛是什么东西？
-; 丰川祥子:好奇怪的名
-; addItem:key;
-; changeBg:RGB/Background_001_001.png -transform={"position":{"x":0,"y":0},"scale":{"x":1,"y":1}} -type=blinds;
-; 千早爱音:这是什么？钥匙？
-; ;clearItem:;
-; 丰川祥子:好奇怪的东西哦
-; :请出示爱祥证物;
-; presentTheEvidence:1.txt|2.txt @ansk;
+setTextbox:hide;
+jumpLabel:judgment02;
+label:luodedao;

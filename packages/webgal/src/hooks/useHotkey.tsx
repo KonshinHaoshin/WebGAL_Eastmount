@@ -133,6 +133,7 @@ export function useMouseWheel(stageStore?: { current: any }) {
       const ctrlKey = ev.ctrlKey;
       const dom = document.querySelector(`.${styles.backlog_content}`);
       if (isGameActive() && direction === 'up' && !ctrlKey) {
+        if (stageStore?.current.judgment !== '') return; // 审判期间禁止滚轮上翻打开历史记录
         setComponentVisibility('showBacklog', true);
         setComponentVisibility('showTextBox', false);
       } else if (isInBackLog() && direction === 'down' && !ctrlKey) {
@@ -357,7 +358,7 @@ export function useSpaceAndEnter(stageStore?: { current: any }) {
   const handleKeydown = useCallback(
     (e) => {
       if (isSpaceOrEnter(e) && isGameActive() && !lockRef.current) {
-        if (stageStore?.current.judgment !== '') return; // 审判期间禁止空格/回车进入下一句
+        if (stageStore?.current.judgment !== '' && stageStore?.current.isDisableTextbox) return; // 审判期间且禁用文本框时禁止空格/回车进入下一句
         if (!GUIStore.current.showTextBox) {
           setComponentVisibility('showTextBox', true);
           return;

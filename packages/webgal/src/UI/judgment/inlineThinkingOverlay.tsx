@@ -56,7 +56,6 @@ export const InlineThinkingOverlay: FC = () => {
     // 因为这里决定要执行跳转（如反驳成功），所以我们需要清理证言状态
     dispatch(setStage({ key: 'testimonyData', value: [] }));
     dispatch(setStage({ key: 'isJudgmentFastForward', value: false }));
-    dispatch(setStage({ key: 'judgment', value: '' }));
 
     const isScene = targetStr.endsWith('.txt');
 

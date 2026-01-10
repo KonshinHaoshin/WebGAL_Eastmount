@@ -72,6 +72,23 @@ export const judgment = (sentence: ISentence): IPerform => {
 
     return perform;
   }
+  if (content === 'exit') {
+    webgalStore.dispatch(setStage({ key: 'judgment', value: '' }));
+    webgalStore.dispatch(setStage({ key: 'testimonyData', value: [] }));
+    // 退出时自动解除 auto 模式
+    if (WebGAL.gameplay.isAuto) {
+      stopAuto();
+    }
+    return {
+      performName: 'none',
+      duration: 0,
+      isHoldOn: false,
+      stopFunction: () => {},
+      blockingNext: () => false,
+      blockingAuto: () => true,
+      stopTimeout: undefined,
+    };
+  }
   if (content === 'concluded') {
     webgalStore.dispatch(setStage({ key: 'judgment', value: 'concluded' }));
     const perform = playVideo({
