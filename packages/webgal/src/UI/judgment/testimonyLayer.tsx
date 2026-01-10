@@ -25,11 +25,13 @@ export const TestimonyLayer: FC = () => {
 
     // 检查是否是行内思考模式
     if (targetStr.startsWith('thinking:')) {
-      const content = targetStr.replace('thinking:', '');
-      const parts = content.split('|');
-      if (parts.length >= 2) {
-        const avatar = parts[0].trim();
-        const options = parts.slice(1).map((opt) => {
+      const content = targetStr.replace('thinking:', '').trim();
+      const firstSpaceIndex = content.indexOf(' ');
+      if (firstSpaceIndex !== -1) {
+        const avatar = content.substring(0, firstSpaceIndex).trim();
+        const optionsPart = content.substring(firstSpaceIndex + 1);
+        const parts = optionsPart.split('|');
+        const options = parts.map((opt) => {
           const trimmedOpt = opt.trim();
           if (trimmedOpt === '@back') {
             return { label: '返回', target: '@back' };
@@ -41,11 +43,23 @@ export const TestimonyLayer: FC = () => {
           }
           const label = trimmedOpt.substring(0, colonIndex).trim();
           const rest = trimmedOpt.substring(colonIndex + 1).trim();
-          const atIndex = rest.indexOf('@');
-          const target = atIndex === -1 ? rest.trim() : rest.substring(0, atIndex).trim();
-          const icon = atIndex === -1 ? undefined : rest.substring(atIndex + 1).trim();
+          const args = rest.split('@');
+          const target = args[0].trim();
+          let icon: string | undefined;
+          let refuteVideo: string | undefined;
 
-          return { label, target, icon };
+          args.slice(1).forEach((arg) => {
+            const trimmedArg = arg.trim();
+            if (trimmedArg.startsWith('icon=')) {
+              icon = trimmedArg.substring(5).trim();
+            } else if (trimmedArg.startsWith('refute=')) {
+              refuteVideo = trimmedArg.substring(7).trim();
+            } else if (!icon) {
+              icon = trimmedArg;
+            }
+          });
+
+          return { label, target, icon, refuteVideo };
         });
         dispatch(setStage({ key: 'inlineThinking', value: { avatar, options } }));
         if (WebGAL.gameplay.isAuto) {

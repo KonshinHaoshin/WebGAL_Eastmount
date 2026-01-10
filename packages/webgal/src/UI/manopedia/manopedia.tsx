@@ -33,6 +33,7 @@ import { itemManager } from '@/Core/Modules/item/itemManager';
 import { IItemDefinition } from '@/store/IItemDefinition';
 import { setStage } from '@/store/stageReducer';
 import { WebGAL } from '@/Core/WebGAL';
+import { jmp } from '@/Core/gameScripts/label/jmp';
 import { changeScene } from '@/Core/controller/scene/changeScene';
 
 // 导入证据确认对话框
@@ -175,25 +176,32 @@ export const Manopedia: FC<ManopediaProps> = ({ onClose }) => {
     if (!selectedItemId) return;
 
     const isCorrect = selectedItemId === evidenceTarget;
-    const successScene = evidenceJumpScenes[0];
-    const failScene = evidenceJumpScenes[1];
+    const successTarget = evidenceJumpScenes[0];
+    const failTarget = evidenceJumpScenes[1];
 
-    console.log('Present Evidence:', { selectedItemId, evidenceTarget, isCorrect, successScene, failScene });
+    console.log('Present Evidence:', { selectedItemId, evidenceTarget, isCorrect, successTarget, failTarget });
 
-    // 1. 如果有跳转需求，先执行跳转
-    if (isCorrect && successScene) {
-      console.log('Jumping to success scene:', successScene);
-      changeScene(successScene, successScene);
-    } else if (!isCorrect && failScene) {
-      console.log('Jumping to fail scene:', failScene);
-      changeScene(failScene, failScene);
-    }
-
-    // 2. 无论是否跳转，都关闭图鉴 UI
+    // 1. 首先关闭图鉴 UI 和卸载阻塞演出
     onClose();
-
-    // 3. 最后卸载阻塞演出，使用 force 确保卸载成功
     WebGAL.gameplay.performController.unmountPerform('presentTheEvidence', true);
+
+    const handleJump = (target: string) => {
+      if (!target) return;
+      if (target.endsWith('.txt')) {
+        console.log('Jumping to scene:', target);
+        changeScene(target, target);
+      } else {
+        console.log('Jumping to label:', target);
+        jmp(target);
+      }
+    };
+
+    // 2. 之后再执行跳转逻辑
+    if (isCorrect && successTarget) {
+      handleJump(successTarget);
+    } else if (!isCorrect && failTarget) {
+      handleJump(failTarget);
+    }
   };
 
   const formatDescription = (text: string | undefined) => {
