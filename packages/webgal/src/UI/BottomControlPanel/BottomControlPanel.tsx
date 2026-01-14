@@ -33,7 +33,10 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './bottomControlPanel.module.scss';
 
-export const BottomControlPanel = () => {
+import settingButton from '@/assets/image/setting.png';
+import autoButton from '@/assets/image/arrow.png';
+
+export const TopControlPanel = () => {
   const t = useTrans('gaming.');
   const strokeWidth = 2.5;
   const { i18n } = useTranslation();
@@ -82,7 +85,43 @@ export const BottomControlPanel = () => {
     // <div className={styles.ToCenter}>
     <>
       {GUIStore.showTextBox && stageState.enableFilm === '' && (
-        <div className={styles.main} style={{ visibility: GUIStore.controlsVisibility ? 'visible' : 'hidden' }}>
+        <>
+          {/* 左上角自动阅读按钮 */}
+          <div className={styles.topLeftButton} style={{ visibility: GUIStore.controlsVisibility ? 'visible' : 'hidden' }}>
+            <span
+              id="Button_ControlPanel_auto"
+              className={styles.singleButton}
+              style={{ fontSize }}
+              onClick={() => {
+                switchAuto();
+                playSeClick();
+              }}
+              onMouseEnter={playSeEnter}
+            >
+              <img src={autoButton} className={styles.buttonIcon} alt="auto" />
+              <span className={styles.button_text}>{t('buttons.auto')}</span>
+            </span>
+          </div>
+
+          {/* 右上角设置按钮 */}
+          <div className={styles.topRightButton} style={{ visibility: GUIStore.controlsVisibility ? 'visible' : 'hidden' }}>
+            <span
+              className={styles.singleButton}
+              style={{ fontSize }}
+              onClick={() => {
+                setMenuPanel(MenuPanelTag.Option);
+                setComponentVisibility('showMenuPanel', true);
+                playSeClick();
+              }}
+              onMouseEnter={playSeEnter}
+            >
+              <img src={settingButton} className={styles.buttonIcon} alt="settings" />
+              <span className={styles.button_text}>{t('buttons.options')}</span>
+            </span>
+          </div>
+
+          {/* 顶部中心其他按钮 */}
+          <div className={styles.main} style={{ visibility: GUIStore.controlsVisibility ? 'visible' : 'hidden' }}>
           {GUIStore.showTextBox && (
             <span
               className={styles.singleButton}
@@ -165,20 +204,7 @@ export const BottomControlPanel = () => {
             />
             <span className={styles.button_text}>{t('buttons.replay')}</span>
           </span>
-          <span
-            id="Button_ControlPanel_auto"
-            className={styles.singleButton}
-            style={{ fontSize }}
-            onClick={() => {
-              switchAuto();
-              playSeClick();
-            }}
-            onMouseEnter={playSeEnter}
-          >
-            <PlayOne className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />
-            <span className={styles.button_text}>{t('buttons.auto')}</span>
-          </span>
-          <span
+            <span
             id="Button_ControlPanel_fast"
             className={styles.singleButton}
             style={{ fontSize }}
@@ -264,26 +290,7 @@ export const BottomControlPanel = () => {
           <span
             className={styles.singleButton}
             style={{ fontSize }}
-            onClick={() => {
-              setMenuPanel(MenuPanelTag.Option);
-              setComponentVisibility('showMenuPanel', true);
-              playSeClick();
-            }}
-            onMouseEnter={playSeEnter}
-          >
-            <SettingTwo
-              className={styles.button}
-              theme="outline"
-              size={size}
-              fill="#f5f5f7"
-              strokeWidth={strokeWidth}
-            />
-            <span className={styles.button_text}>{t('buttons.options')}</span>
-          </span>
-          <span
-            className={styles.singleButton}
-            style={{ fontSize }}
-            onClick={() => {
+              onClick={() => {
               playSeDialogOpen();
               showGlogalDialog({
                 title: t('buttons.titleTips'),
@@ -344,6 +351,7 @@ export const BottomControlPanel = () => {
             )}
           </span>
         </div>
+        </>
       )}
     </>
     // </div>

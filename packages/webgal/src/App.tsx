@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { initializeScript } from '@/Core/initializeScript';
 import Translation from '@/UI/Translation/Translation';
 import { Stage } from '@/Stage/Stage';
-import { BottomControlPanel } from '@/UI/BottomControlPanel/BottomControlPanel';
+import { TopControlPanel } from '@/UI/BottomControlPanel/BottomControlPanel';
 import { BottomControlPanelFilm } from '@/UI/BottomControlPanel/BottomControlPanelFilm';
 import { Backlog } from '@/UI/Backlog/Backlog';
 import Title from '@/UI/Title/Title';
@@ -21,7 +21,7 @@ export default function App() {
     <div className="App">
       <Translation />
       <Stage />
-      <BottomControlPanel />
+      <TopControlPanel />
       <BottomControlPanelFilm />
       <Backlog />
       <Title />
