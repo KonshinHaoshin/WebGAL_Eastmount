@@ -87,7 +87,10 @@ export const TopControlPanel = () => {
       {GUIStore.showTextBox && stageState.enableFilm === '' && (
         <>
           {/* 左上角自动阅读按钮 */}
-          <div className={styles.topLeftButton} style={{ visibility: GUIStore.controlsVisibility ? 'visible' : 'hidden' }}>
+          <div
+            className={styles.topLeftButton}
+            style={{ visibility: GUIStore.controlsVisibility ? 'visible' : 'hidden' }}
+          >
             <span
               id="Button_ControlPanel_auto"
               className={styles.singleButton}
@@ -99,12 +102,14 @@ export const TopControlPanel = () => {
               onMouseEnter={playSeEnter}
             >
               <img src={autoButton} className={styles.buttonIcon} alt="auto" />
-              <span className={styles.button_text}>{t('buttons.auto')}</span>
             </span>
           </div>
 
           {/* 右上角设置按钮 */}
-          <div className={styles.topRightButton} style={{ visibility: GUIStore.controlsVisibility ? 'visible' : 'hidden' }}>
+          <div
+            className={styles.topRightButton}
+            style={{ visibility: GUIStore.controlsVisibility ? 'visible' : 'hidden' }}
+          >
             <span
               className={styles.singleButton}
               style={{ fontSize }}
@@ -116,241 +121,241 @@ export const TopControlPanel = () => {
               onMouseEnter={playSeEnter}
             >
               <img src={settingButton} className={styles.buttonIcon} alt="settings" />
-              <span className={styles.button_text}>{t('buttons.options')}</span>
             </span>
           </div>
 
           {/* 顶部中心其他按钮 */}
           <div className={styles.main} style={{ visibility: GUIStore.controlsVisibility ? 'visible' : 'hidden' }}>
-          {GUIStore.showTextBox && (
+            {GUIStore.showTextBox && (
+              <span
+                className={styles.singleButton}
+                style={{ fontSize }}
+                onClick={() => {
+                  setComponentVisibility('showTextBox', false);
+                  playSeClick();
+                }}
+                onMouseEnter={playSeEnter}
+              >
+                <PreviewCloseOne
+                  className={styles.button}
+                  theme="outline"
+                  size={size}
+                  fill="#f5f5f7"
+                  strokeWidth={strokeWidth}
+                />
+              </span>
+            )}
+            {!GUIStore.showTextBox && (
+              <span
+                className={styles.singleButton}
+                style={{ fontSize }}
+                onClick={() => {
+                  setComponentVisibility('showTextBox', true);
+                  playSeClick();
+                }}
+                onMouseEnter={playSeEnter}
+              >
+                <PreviewOpen
+                  className={styles.button}
+                  theme="outline"
+                  size={size}
+                  fill="#f5f5f7"
+                  strokeWidth={strokeWidth}
+                />
+              </span>
+            )}
             <span
               className={styles.singleButton}
               style={{ fontSize }}
               onClick={() => {
+                setComponentVisibility('showBacklog', true);
                 setComponentVisibility('showTextBox', false);
                 playSeClick();
               }}
               onMouseEnter={playSeEnter}
             >
-              <PreviewCloseOne
+              <AlignTextLeftOne
                 className={styles.button}
                 theme="outline"
                 size={size}
                 fill="#f5f5f7"
                 strokeWidth={strokeWidth}
               />
-              <span className={styles.button_text}>{t('buttons.hide')}</span>
             </span>
-          )}
-          {!GUIStore.showTextBox && (
             <span
               className={styles.singleButton}
               style={{ fontSize }}
               onClick={() => {
-                setComponentVisibility('showTextBox', true);
+                let VocalControl: any = document.getElementById('currentVocal');
+                if (VocalControl !== null) {
+                  VocalControl.currentTime = 0;
+                  VocalControl.pause();
+                  VocalControl?.play();
+                }
                 playSeClick();
               }}
               onMouseEnter={playSeEnter}
             >
-              <PreviewOpen
+              <ReplayMusic
                 className={styles.button}
                 theme="outline"
                 size={size}
                 fill="#f5f5f7"
                 strokeWidth={strokeWidth}
               />
-              <span className={styles.button_text}>{t('buttons.show')}</span>
             </span>
-          )}
-          <span
-            className={styles.singleButton}
-            style={{ fontSize }}
-            onClick={() => {
-              setComponentVisibility('showBacklog', true);
-              setComponentVisibility('showTextBox', false);
-              playSeClick();
-            }}
-            onMouseEnter={playSeEnter}
-          >
-            <AlignTextLeftOne
-              className={styles.button}
-              theme="outline"
-              size={size}
-              fill="#f5f5f7"
-              strokeWidth={strokeWidth}
-            />
-            <span className={styles.button_text}>{t('buttons.backlog')}</span>
-          </span>
-          <span
-            className={styles.singleButton}
-            style={{ fontSize }}
-            onClick={() => {
-              let VocalControl: any = document.getElementById('currentVocal');
-              if (VocalControl !== null) {
-                VocalControl.currentTime = 0;
-                VocalControl.pause();
-                VocalControl?.play();
-              }
-              playSeClick();
-            }}
-            onMouseEnter={playSeEnter}
-          >
-            <ReplayMusic
-              className={styles.button}
-              theme="outline"
-              size={size}
-              fill="#f5f5f7"
-              strokeWidth={strokeWidth}
-            />
-            <span className={styles.button_text}>{t('buttons.replay')}</span>
-          </span>
             <span
-            id="Button_ControlPanel_fast"
-            className={styles.singleButton}
-            style={{ fontSize }}
-            onClick={() => {
-              switchFast();
-              playSeClick();
-            }}
-            onMouseEnter={playSeEnter}
-          >
-            <DoubleRight
-              className={styles.button}
-              theme="outline"
-              size={size}
-              fill="#f5f5f7"
-              strokeWidth={strokeWidth}
-            />
-            <span className={styles.button_text}>{t('buttons.forward')}</span>
-          </span>
-          <span
-            className={styles.singleButton + ' ' + styles.fastsave}
-            style={{ fontSize }}
-            onClick={() => {
-              saveGame(0);
-              playSeClick();
-            }}
-            onMouseEnter={playSeEnter}
-          >
-            <DoubleDown
-              className={styles.button}
-              theme="outline"
-              size={size}
-              fill="#f5f5f7"
-              strokeWidth={strokeWidth}
-            />
-            <span className={styles.button_text}>{t('buttons.quicklySave')}</span>
-            <div className={styles.fastSlPreview + ' ' + styles.fastSPreview}>{fastSlPreview}</div>
-          </span>
-          <span
-            className={styles.singleButton + ' ' + styles.fastload}
-            style={{ fontSize }}
-            onClick={() => {
-              loadGame(0);
-              playSeClick();
-            }}
-            onMouseEnter={playSeEnter}
-          >
-            <DoubleUp className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />
-            <span className={styles.button_text}>{t('buttons.quicklyLoad')}</span>
-            <div className={styles.fastSlPreview + ' ' + styles.fastLPreview}>{fastSlPreview}</div>
-          </span>
-          <span
-            className={styles.singleButton}
-            style={{ fontSize }}
-            onClick={() => {
-              setMenuPanel(MenuPanelTag.Save);
-              setComponentVisibility('showMenuPanel', true);
-              playSeClick();
-            }}
-            onMouseEnter={playSeEnter}
-          >
-            <Save className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />
-            <span className={styles.button_text}>{t('buttons.save')}</span>
-          </span>
-          <span
-            className={styles.singleButton}
-            style={{ fontSize }}
-            onClick={() => {
-              setMenuPanel(MenuPanelTag.Load);
-              setComponentVisibility('showMenuPanel', true);
-              playSeClick();
-            }}
-            onMouseEnter={playSeEnter}
-          >
-            <FolderOpen
-              className={styles.button}
-              theme="outline"
-              size={size}
-              fill="#f5f5f7"
-              strokeWidth={strokeWidth}
-            />
-            <span className={styles.button_text}>{t('buttons.load')}</span>
-          </span>
-          <span
-            className={styles.singleButton}
-            style={{ fontSize }}
-              onClick={() => {
-              playSeDialogOpen();
-              showGlogalDialog({
-                title: t('buttons.titleTips'),
-                leftText: t('$common.yes'),
-                rightText: t('$common.no'),
-                leftFunc: () => {
-                  backToTitle();
-                },
-                rightFunc: () => {},
-              });
-            }}
-            onMouseEnter={playSeEnter}
-          >
-            <Home className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />
-            <span className={styles.button_text}>{t('buttons.title')}</span>
-          </span>
-          {isFullscreenSupport && (
-            <span
-              className={`${styles.singleButton}`}
+              id="Button_ControlPanel_fast"
+              className={styles.singleButton}
               style={{ fontSize }}
-              onClick={toggleFullscreen}
+              onClick={() => {
+                switchFast();
+                playSeClick();
+              }}
               onMouseEnter={playSeEnter}
             >
-              {!isFullScreen && (
-                <FullScreen
-                  className={styles.button}
-                  theme="outline"
-                  size={size}
-                  fill="#f5f5f7"
-                  strokeWidth={strokeWidth}
-                />
-              )}
-              {isFullScreen && (
-                <OffScreen
-                  className={styles.button}
-                  theme="outline"
-                  size={size}
-                  fill="#f5f5f7"
-                  strokeWidth={strokeWidth}
-                />
-              )}
-              <span className={styles.button_text}>{t('buttons.fullscreen')}</span>
+              <DoubleRight
+                className={styles.button}
+                theme="outline"
+                size={size}
+                fill="#f5f5f7"
+                strokeWidth={strokeWidth}
+              />
             </span>
-          )}
-          <span
-            className={styles.singleButton}
-            style={{ fontSize }}
-            onClick={() => {
-              switchControls();
-              playSeClick();
-            }}
-            onMouseEnter={playSeEnter}
-          >
-            {GUIStore.showControls ? (
-              <Lock className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />
-            ) : (
-              <Unlock className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />
+            <span
+              className={styles.singleButton + ' ' + styles.fastsave}
+              style={{ fontSize }}
+              onClick={() => {
+                saveGame(0);
+                playSeClick();
+              }}
+              onMouseEnter={playSeEnter}
+            >
+              <DoubleDown
+                className={styles.button}
+                theme="outline"
+                size={size}
+                fill="#f5f5f7"
+                strokeWidth={strokeWidth}
+              />
+              <div className={styles.fastSlPreview + ' ' + styles.fastSPreview}>{fastSlPreview}</div>
+            </span>
+            <span
+              className={styles.singleButton + ' ' + styles.fastload}
+              style={{ fontSize }}
+              onClick={() => {
+                loadGame(0);
+                playSeClick();
+              }}
+              onMouseEnter={playSeEnter}
+            >
+              <DoubleUp
+                className={styles.button}
+                theme="outline"
+                size={size}
+                fill="#f5f5f7"
+                strokeWidth={strokeWidth}
+              />
+              <div className={styles.fastSlPreview + ' ' + styles.fastLPreview}>{fastSlPreview}</div>
+            </span>
+            <span
+              className={styles.singleButton}
+              style={{ fontSize }}
+              onClick={() => {
+                setMenuPanel(MenuPanelTag.Save);
+                setComponentVisibility('showMenuPanel', true);
+                playSeClick();
+              }}
+              onMouseEnter={playSeEnter}
+            >
+              <Save className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />
+            </span>
+            <span
+              className={styles.singleButton}
+              style={{ fontSize }}
+              onClick={() => {
+                setMenuPanel(MenuPanelTag.Load);
+                setComponentVisibility('showMenuPanel', true);
+                playSeClick();
+              }}
+              onMouseEnter={playSeEnter}
+            >
+              <FolderOpen
+                className={styles.button}
+                theme="outline"
+                size={size}
+                fill="#f5f5f7"
+                strokeWidth={strokeWidth}
+              />
+            </span>
+            <span
+              className={styles.singleButton}
+              style={{ fontSize }}
+              onClick={() => {
+                playSeDialogOpen();
+                showGlogalDialog({
+                  title: t('buttons.titleTips'),
+                  leftText: t('$common.yes'),
+                  rightText: t('$common.no'),
+                  leftFunc: () => {
+                    backToTitle();
+                  },
+                  rightFunc: () => { },
+                });
+              }}
+              onMouseEnter={playSeEnter}
+            >
+              <Home className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />
+            </span>
+            {isFullscreenSupport && (
+              <span
+                className={`${styles.singleButton}`}
+                style={{ fontSize }}
+                onClick={toggleFullscreen}
+                onMouseEnter={playSeEnter}
+              >
+                {!isFullScreen && (
+                  <FullScreen
+                    className={styles.button}
+                    theme="outline"
+                    size={size}
+                    fill="#f5f5f7"
+                    strokeWidth={strokeWidth}
+                  />
+                )}
+                {isFullScreen && (
+                  <OffScreen
+                    className={styles.button}
+                    theme="outline"
+                    size={size}
+                    fill="#f5f5f7"
+                    strokeWidth={strokeWidth}
+                  />
+                )}
+              </span>
             )}
-          </span>
-        </div>
+            <span
+              className={styles.singleButton}
+              style={{ fontSize }}
+              onClick={() => {
+                switchControls();
+                playSeClick();
+              }}
+              onMouseEnter={playSeEnter}
+            >
+              {GUIStore.showControls ? (
+                <Lock className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />
+              ) : (
+                <Unlock
+                  className={styles.button}
+                  theme="outline"
+                  size={size}
+                  fill="#f5f5f7"
+                  strokeWidth={strokeWidth}
+                />
+              )}
+            </span>
+          </div>
         </>
       )}
     </>

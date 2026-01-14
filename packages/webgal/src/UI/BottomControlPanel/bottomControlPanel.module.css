@@ -9,9 +9,12 @@
   flex-flow: row;
   justify-content: center;
   align-items: center;
-  height: 70px;
-  border-radius: 35px;
-  padding: 0.15em 1.75em 0.15em 1.75em;
+  height: 50px;
+  /* 减少高度 */
+  border-radius: 25px;
+  /* 减少圆角 */
+  padding: 0.15em 1em 0.15em 1em;
+  /* 减少内边距 */
   font-size: 80%;
 }
 
@@ -24,9 +27,12 @@
   flex-flow: row;
   justify-content: flex-start;
   align-items: center;
-  height: 70px;
-  border-radius: 35px;
-  padding: 0.15em 1.75em 0.15em 1.75em;
+  height: 50px;
+  /* 减少高度 */
+  border-radius: 25px;
+  /* 减少圆角 */
+  padding: 0.15em 1em 0.15em 1em;
+  /* 减少内边距 */
   font-size: 80%;
 }
 
@@ -39,9 +45,12 @@
   flex-flow: row;
   justify-content: flex-end;
   align-items: center;
-  height: 70px;
-  border-radius: 35px;
-  padding: 0.15em 1.75em 0.15em 1.75em;
+  height: 50px;
+  /* 减少高度 */
+  border-radius: 25px;
+  /* 减少圆角 */
+  padding: 0.15em 1em 0.15em 1em;
+  /* 减少内边距 */
   font-size: 80%;
 }
 
@@ -82,22 +91,20 @@
 .singleButton {
   height: 100%;
   display: inline-flex;
-  /* 改为 flex */
   align-items: center;
-  /* 垂直居中 */
-  white-space: nowrap;
-  /* 禁止换行 */
+  justify-content: center;
   color: white;
   font-size: 150%;
-  padding: 0.3em 0.5em;
-  /* 调整内边距 */
+  padding: 0.3em 0.4em;
+  /* 减少内边距，因为只有图标 */
   transition: background-color 0.5s;
   cursor: pointer;
   border-radius: 4px;
-  margin: 0 0.1em;
+  margin: 0 0.05em;
+  /* 减少按钮间距 */
   position: relative;
-  min-width: max-content;
-  /* 最小宽度适应内容 */
+  min-width: 40px;
+  /* 固定最小宽度 */
 }
 
 .singleButton:hover,
