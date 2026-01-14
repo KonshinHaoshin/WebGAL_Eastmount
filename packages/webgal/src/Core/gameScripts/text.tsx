@@ -8,6 +8,7 @@ import { PerformController } from '@/Core/Modules/perform/performController';
 import { logger } from '@/Core/util/logger';
 import { WebGAL } from '@/Core/WebGAL';
 import { get, replace } from 'lodash';
+import { webgalStore } from '@/store/store';
 import useEscape from '@/hooks/useEscape';
 import { getBooleanArgByKey, getNumberArgByKey, getStringArgByKey } from '../util/getSentenceArg';
 /**
@@ -60,9 +61,9 @@ export const text = (sentence: ISentence): IPerform => {
     let isHold = getBooleanArgByKey(sentence, 'hold') ?? false;
     let isUserForward = getBooleanArgByKey(sentence, 'userForward') ?? true;
     // 设置一个很大的延迟，这样自然就看起来不自动继续了
-    delayTime = isUserForward ? 99999999 : delayTime;
+    const animationDelayValue = 99999999;
     // 用户手动控制向前步进，所以必须是 hold
-    isHold = isUserForward ? true : isHold;
+    isHold = true;
 
     const textContainerStyle = {
         background: backgroundImage,
@@ -74,79 +75,55 @@ export const text = (sentence: ISentence): IPerform => {
     };
     const textArray: Array<string> = sentence.content.split(/(?<!\\)\|/).map((val: string) => useEscape(val));
 
-    let endWait = 1000;
-    let baseDuration = endWait + delayTime * textArray.length;
-    const duration = isHold ? 1000 * 60 * 60 * 24 : 1000 + delayTime * textArray.length;
     let isBlocking = true;
-    let setBlockingStateTimeout = setTimeout(() => {
-        isBlocking = false;
-    }, baseDuration);
 
-    let timeout = setTimeout(() => { });
     const toNextTextElement = () => {
         const textContainer = document.getElementById('textContainer');
-        // 由于用户操作，相当于时间向前推进，这时候更新这个演出的预计完成时间
-        baseDuration -= delayTime;
-        clearTimeout(setBlockingStateTimeout);
-        setBlockingStateTimeout = setTimeout(() => {
-            isBlocking = false;
-        }, baseDuration);
         if (textContainer) {
             const children = textContainer.childNodes[0].childNodes[0].childNodes as any;
             const len = children.length;
-            if (isUserForward) {
-                let isEnd = true;
-                for (const node of children) {
-                    // 当前语句的延迟显示时间
-                    const currentDelay = Number(node.style.animationDelay.split('ms')[0]);
-                    // 当前语句还没有显示，降低显示延迟，因为现在时间因为用户操作，相当于向前推进了
-                    if (currentDelay > 0) {
-                        isEnd = false;
-                        // 用 Animation API 操作，浏览器版本太低就无办法了
-                        const nodeAnimations = node.getAnimations();
-                        node.style.animationDelay = '0ms ';
-                        for (const ani of nodeAnimations) {
-                            ani.currentTime = 0;
-                            ani.play();
-                        }
-                    }
-                }
-                if (isEnd) {
-                    clearTimeout(timeout);
-                    clearTimeout(setBlockingStateTimeout);
-                    WebGAL.gameplay.performController.unmountPerform(performName);
-                }
-                return;
-            }
-            children.forEach((node: HTMLDivElement, index: number) => {
+            let isEnd = true;
+            for (const node of children) {
                 // 当前语句的延迟显示时间
                 const currentDelay = Number(node.style.animationDelay.split('ms')[0]);
                 // 当前语句还没有显示，降低显示延迟，因为现在时间因为用户操作，相当于向前推进了
                 if (currentDelay > 0) {
-                    node.style.animationDelay = `${currentDelay - delayTime}ms`;
-                }
-                // 最后一个元素了
-                if (index === len - 1) {
-                    // 并且已经完全显示了，这时候进行下一步
-                    if (currentDelay === 0) {
-                        clearTimeout(timeout);
-                        WebGAL.gameplay.performController.unmountPerform(performName);
-                        // 卸载函数发生在 nextSentence 生效前，所以不需要做下一行的操作。
-                        // setTimeout(nextSentence, 0);
-                    } else {
-                        // 还没有完全显示，但是因为时间的推进，要提前完成演出，更新用于结束演出的计时器
-                        clearTimeout(timeout);
-                        // 如果 Hold 了，自然不要自动结束
-                        if (!isHold) {
-                            timeout = setTimeout(() => {
-                                WebGAL.gameplay.performController.unmountPerform(performName);
-                            }, baseDuration);
-                        }
+                    isEnd = false;
+                    // 用 Animation API 操作，浏览器版本太低就无办法了
+                    const nodeAnimations = node.getAnimations();
+                    node.style.animationDelay = '0ms ';
+                    for (const ani of nodeAnimations) {
+                        ani.currentTime = 0;
+                        ani.play();
                     }
+                    // 只显示一行
+                    break;
                 }
-            });
+            }
+            if (isEnd) {
+                isBlocking = false;
+                WebGAL.gameplay.performController.unmountPerform(performName);
+            }
         }
     };
+
+    // 实时监控 auto 状态的计时器
+    let accumulatedTime = 0;
+    const autoControlTimer = setInterval(() => {
+        if (WebGAL.gameplay.isAuto) {
+            const autoSpeed = webgalStore.getState().userData.optionData.autoSpeed;
+            // 计算自动播放延迟 (与 autoPlay.ts 逻辑保持一致)
+            const autoPlayDelay = 250 + (100 - autoSpeed) * 15;
+
+            accumulatedTime += 100;
+            if (accumulatedTime >= autoPlayDelay) {
+                accumulatedTime = 0;
+                toNextTextElement();
+            }
+        } else {
+            accumulatedTime = 0; // 非 auto 模式重置累积时间
+        }
+    }, 100);
 
     /**
      * 接受 next 事件
@@ -156,7 +133,7 @@ export const text = (sentence: ISentence): IPerform => {
     const showText = textArray.map((e, i) => (
         <div
             key={'texttext' + i + Math.random().toString()}
-            style={{ animationDelay: `${delayTime * i}ms` }}
+            style={{ animationDelay: `${animationDelayValue}ms` }}
             className={chosenAnimationClass}
         >
             {e}
@@ -178,13 +155,14 @@ export const text = (sentence: ISentence): IPerform => {
 
     return {
         performName,
-        duration,
+        duration: 1000 * 60 * 60 * 24,
         isHoldOn: false,
         stopFunction: () => {
             const textContainer = document.getElementById('textContainer');
             if (textContainer) {
                 textContainer.style.display = 'none';
             }
+            clearInterval(autoControlTimer);
             WebGAL.events.userInteractNext.off(toNextTextElement);
         },
         blockingNext: () => isBlocking,

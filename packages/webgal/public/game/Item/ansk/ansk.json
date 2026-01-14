@@ -1,0 +1,12 @@
+{
+    "id": "ansk",
+    "name": "爱祥荣誉徽章",
+    "description": "表彰你为爱祥做出的杰出贡献",
+    "icon": "32x32.png",
+    "image": "128x128.png",
+    "category": "badge",
+    "allowMultipleInCategory": false,
+    "effects": ["say:感谢您为爱祥做出的卓越贡献"],
+    "maxStack": 1,
+    "consumable": false
+}

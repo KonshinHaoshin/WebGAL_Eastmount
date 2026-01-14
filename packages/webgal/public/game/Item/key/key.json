@@ -1,0 +1,16 @@
+{
+    "id": "key",
+    "name": "一把老式黄铜钥匙",
+    "description": "钥匙约一指长，齿纹已被岁月磨得圆钝，在冷白灯光下泛着暗淡的铜色。柄端缠着几圈褪色的红线，线头松散，露出内部发黑的棉芯。钥匙表面覆着一层薄而均匀的氧化层，唯齿槽深处残留着零星铜亮，像是曾被人反复摩挲。靠近嗅闻，能辨出金属的微腥、陈年汗渍的酸气，还有一丝极淡的、几乎消散的檀木香。",
+    "icon": "key.png",
+    "image": "key.png",
+    "category": "weapon",
+    "allowMultipleInCategory": false,
+    "effects": [
+        "setVar:attack=(attack||0)+10;",
+        "say:你当前的攻击力是{attack};",
+        "say:这把长矛看起来很普通，但是它很实用;"
+    ],
+    "maxStack": 1,
+    "consumable": false
+}

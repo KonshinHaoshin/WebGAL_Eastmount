@@ -1,0 +1,14 @@
+{
+    "id": "simplespear",
+    "name": "简易长矛",
+    "description": "一把简单但实用的长矛，适合新手使用",
+    "icon": "simplespear.png",
+    "image": "simplespear.png",
+    "category": "weapon",
+    "allowMultipleInCategory": false,
+    "effects": ["setVar:attack=(attack||0)+10;",
+        "say:你当前的攻击力是{attack};", "say:这把长矛看起来很普通，但是它很实用;"
+    ],
+    "maxStack": 1,
+    "consumable": false
+}

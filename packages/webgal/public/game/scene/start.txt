@@ -1,4 +1,6 @@
 setVar:heroine=WebGAL;
 setVar:egine=WebGAL;
 introtext:你好|这是intro测试;
-choose:简体中文:demo_zh_cn.txt|日本語:demo_ja.txt|English:demo_en.txt|Test:function_test.txt;
+:什么鬼
+;choose:简体中文:demo_zh_cn.txt|日本語:demo_ja.txt|English:demo_en.txt|Test:function_test.txt;
+introtext:你好|这是intro测试;
