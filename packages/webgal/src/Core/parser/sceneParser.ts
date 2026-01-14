@@ -13,6 +13,7 @@ import { comment } from '@/Core/gameScripts/comment';
 import { filmMode } from '@/Core/gameScripts/filmMode';
 import { getUserInput } from '@/Core/gameScripts/getUserInput';
 import { intro } from '@/Core/gameScripts/intro';
+import { text } from '@/Core/gameScripts/text';
 import { label } from '@/Core/gameScripts/label';
 import { miniAvatar } from '@/Core/gameScripts/miniAvatar';
 import { pixi } from '@/Core/gameScripts/pixi';
@@ -47,6 +48,7 @@ export const SCRIPT_TAG_MAP = defineScripts({
   pixiPerform: ScriptConfig(commandType.pixi, pixi, { next: true }),
   pixiInit: ScriptConfig(commandType.pixiInit, pixiInit, { next: true }),
   intro: ScriptConfig(commandType.intro, intro),
+  introtext: ScriptConfig(commandType.introtext, text),
   miniAvatar: ScriptConfig(commandType.miniAvatar, miniAvatar, { next: true }),
   changeScene: ScriptConfig(commandType.changeScene, changeSceneScript),
   choose: ScriptConfig(commandType.choose, choose),

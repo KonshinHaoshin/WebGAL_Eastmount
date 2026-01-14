@@ -13,6 +13,7 @@ export enum commandType {
   pixi, // pixi演出
   pixiInit, // pixi初始化
   intro, // 黑屏文字演示
+  introtext, // 文本演示
   miniAvatar, // 小头像
   changeScene, // 切换场景
   choose, // 分支选择
