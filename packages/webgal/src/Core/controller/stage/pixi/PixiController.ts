@@ -15,6 +15,7 @@ import { logger } from '@/Core/util/logger';
 import { isIOS } from '@/Core/initializeScript';
 import { WebGALPixiContainer } from '@/Core/controller/stage/pixi/WebGALPixiContainer';
 import { Live2D, WebGAL } from '@/Core/WebGAL';
+import { CharacterPlayer } from 'webgal_mano';
 import { SCREEN_CONSTANTS } from '@/Core/util/constants';
 import { addSpineBgImpl, addSpineFigureImpl } from '@/Core/controller/stage/pixi/spine';
 import { AnimatedGIF } from '@pixi/gif';
@@ -50,7 +51,7 @@ export interface IStageObject {
   // 相关的源 url
   sourceUrl: string;
   sourceExt: string;
-  sourceType: 'img' | 'live2d' | 'spine' | 'gif' | 'video' | 'stage';
+  sourceType: 'img' | 'live2d' | 'spine' | 'gif' | 'video' | 'stage' | 'webgal_mano';
   spineAnimation?: string;
   isExiting?: boolean;
 }
@@ -977,6 +978,185 @@ export default class PixiStage {
   /* eslint-enable complexity */ /* eslint-disable complexity */
 
   /**
+   * WebGAL Mano 立绘（更稳的实现）
+   * - 强制用 layer.id 作为 TextureCache key
+   * - 使用 URL() 拼接资源路径
+   * - 兼容你当前 loader 的 key 行为（name/url 都可能）
+   * - 等纹理 ready 后再创建 CharacterPlayer
+   */
+  public async addManoFigure(key: string, jsonPath: string, pos: 'left' | 'center' | 'right' = 'center') {
+    const stageWidth = this.stageWidth;
+    const stageHeight = this.stageHeight;
+
+    /** ---------------------------
+     * 0. 清理同 key 旧对象
+     * --------------------------- */
+    const existIdx = this.figureObjects.findIndex((e) => e.key === key);
+    if (existIdx >= 0) this.removeStageObjectByKey(key);
+
+    const container = new WebGALPixiContainer();
+    this.figureContainer.addChild(container);
+
+    const figureUuid = uuid();
+    this.figureObjects.push({
+      uuid: figureUuid,
+      key,
+      pixiContainer: container,
+      sourceUrl: jsonPath,
+      sourceType: 'webgal_mano',
+      sourceExt: 'json',
+    });
+
+    try {
+      /** ---------------------------
+       * 1. 加载 model.char.json
+       * --------------------------- */
+      const resp = await fetch(jsonPath);
+      if (!resp.ok) {
+        throw new Error(`Failed to fetch mano json: ${resp.status}`);
+      }
+      const modelData = await resp.json();
+      logger.debug('[webgal_mano] model loaded', {
+        name: modelData?.metadata?.name,
+        basePath: modelData?.settings?.basePath,
+        layers: modelData?.assets?.layers?.length ?? 0,
+        baseLayers: modelData?.controller?.baseLayers ?? [],
+        defaultPoses: modelData?.controller?.defaultPoses ?? [],
+      });
+
+      /** ---------------------------
+       * 2. 计算 basePath（绝对 URL）
+       * --------------------------- */
+      const cleanJsonUrl = jsonPath.split('?')[0];
+      const baseDir = cleanJsonUrl.slice(0, cleanJsonUrl.lastIndexOf('/') + 1);
+      const basePathFromModel = modelData.settings?.basePath;
+      const basePathAbs = new URL(
+        basePathFromModel && basePathFromModel !== './' ? basePathFromModel : baseDir,
+        window.location.href,
+      ).href;
+
+      modelData.settings = modelData.settings ?? {};
+      modelData.settings.basePath = basePathAbs;
+      logger.debug('[webgal_mano] resolved basePath', { basePathAbs });
+
+      /** ---------------------------
+       * 3. 预加载所有 layer 纹理
+       *    关键：URL 加载 + id 注册
+       * --------------------------- */
+      const layers: any[] = modelData.assets?.layers ?? [];
+      if (!layers.length) throw new Error('mano layers empty');
+
+      const waitForTextureReady = (texture: PIXI.Texture) =>
+        new Promise<void>((resolve) => {
+          if (texture.baseTexture.valid) {
+            resolve();
+            return;
+          }
+          texture.baseTexture.once('loaded', () => resolve());
+          texture.baseTexture.once('error', () => resolve());
+        });
+      const textures: Record<string, PIXI.Texture> = {};
+      const loadLayerTexture = async (id: string, url: string) => {
+        if (textures[id]) return;
+        // PIXI.Texture.fromURL 会在资源就绪后返回纹理，但仍等待 baseTexture.valid 确保可用
+        // @ts-ignore
+        const texture = await PIXI.Texture.fromURL(url);
+        await waitForTextureReady(texture);
+        textures[id] = texture;
+        textures[url] = texture;
+      };
+
+      await Promise.all(
+        layers.map((layer: any) => {
+          const id = String(layer.id);
+          const url = new URL(String(layer.path), basePathAbs).href;
+          return loadLayerTexture(id, url);
+        }),
+      );
+      logger.debug('[webgal_mano] textures ready', {
+        total: layers.length,
+        cached: Object.keys(textures).length,
+      });
+
+      /** ---------------------------
+       * 4. 防止对象已被移除
+       * --------------------------- */
+      if (!this.getStageObjByUuid(figureUuid)) return;
+
+      /** ---------------------------
+       * 5. 创建 CharacterPlayer
+       * --------------------------- */
+      const player = new CharacterPlayer(modelData, textures);
+
+      player.resetToDefault();
+      logger.debug('[webgal_mano] player size', { width: player.width, height: player.height });
+      const layerSprites = (player as any).layerSprites as Map<string, PIXI.Sprite> | undefined;
+      if (layerSprites) {
+        let visibleCount = 0;
+        let sample: {
+          id: string;
+          width: number;
+          height: number;
+          valid: boolean | undefined;
+          url: string | undefined;
+        } | null = null;
+        layerSprites.forEach((sprite, id) => {
+          if (sprite.visible) visibleCount += 1;
+          if (!sample && sprite.texture) {
+            sample = {
+              id,
+              width: sprite.texture.width,
+              height: sprite.texture.height,
+              valid: sprite.texture.baseTexture?.valid,
+              url: (sprite.texture.baseTexture as any)?.resource?.url,
+            };
+          }
+        });
+        logger.debug('[webgal_mano] sprite visibility', {
+          visibleCount,
+          total: layerSprites.size,
+          sample,
+        });
+      }
+
+      // pivot：底部中心
+      player.pivot.set(player.width / 2, player.height);
+      // 以容器原点放置，交给容器定位
+      player.position.set(0, 0);
+
+      // 缩放适配舞台
+      const scaleX = stageWidth / player.width;
+      const scaleY = stageHeight / player.height;
+      const scale = Math.min(scaleX, scaleY) * 0.9;
+      player.scale.set(scale);
+
+      const targetWidth = player.width * scale;
+
+      // 容器定位
+      container.setBaseY(stageHeight);
+      if (pos === 'center') container.setBaseX(stageWidth / 2);
+      if (pos === 'left') container.setBaseX(targetWidth / 2);
+      if (pos === 'right') container.setBaseX(stageWidth - targetWidth / 2);
+
+      container.addChild(player);
+
+      /** ---------------------------
+       * 6. 应用当前状态 pose
+       * --------------------------- */
+      const state = webgalStore.getState().stage;
+
+      const motion = state.live2dMotion.find((m) => m.target === key)?.motion;
+      if (motion) player.setPose(motion);
+
+      const expression = state.live2dExpression.find((e) => e.target === key)?.expression;
+      if (expression) player.setPose(expression);
+    } catch (err) {
+      console.error('[WebGAL Mano] load error:', err);
+      this.removeStageObjectByKey(key);
+    }
+  }
+
+  /**
    * Live2d立绘，如果要使用 Live2D，取消这里的注释
    * @param jsonPath
    */
@@ -1273,6 +1453,16 @@ export default class PixiStage {
     } else if (target?.sourceType === 'spine') {
       // 处理 Spine 动画切换
       this.changeSpineAnimationByKey(key, motion);
+    } else if (target?.sourceType === 'webgal_mano') {
+      const player = target.pixiContainer.children[0] as any; // CharacterPlayer
+      if (player && typeof player.setPose === 'function') {
+        const poseList = motion
+          .split(',')
+          .map((pose) => pose.trim())
+          .filter(Boolean);
+        if (poseList.length === 0) return;
+        poseList.forEach((pose) => player.setPose(pose));
+      }
     }
   }
 
@@ -1303,16 +1493,22 @@ export default class PixiStage {
   public changeModelExpressionByKey(key: string, expression: string) {
     // logger.debug(`Applying expression ${expression} to ${key}`);
     const target = this.figureObjects.find((e) => e.key === key && !e.isExiting);
-    if (target?.sourceType !== 'live2d') return;
-    const figureRecordTarget = this.live2dFigureRecorder.find((e) => e.target === key);
-    if (target && figureRecordTarget?.expression !== expression) {
-      const container = target.pixiContainer;
-      const children = container.children;
-      for (const model of children) {
-        // @ts-ignore
-        model.expression(expression);
+    if (target?.sourceType === 'live2d') {
+      const figureRecordTarget = this.live2dFigureRecorder.find((e) => e.target === key);
+      if (target && figureRecordTarget?.expression !== expression) {
+        const container = target.pixiContainer;
+        const children = container.children;
+        for (const model of children) {
+          // @ts-ignore
+          model.expression(expression);
+        }
+        this.updateL2dExpressionByKey(key, expression);
       }
-      this.updateL2dExpressionByKey(key, expression);
+    } else if (target?.sourceType === 'webgal_mano') {
+      const player = target.pixiContainer.children[0] as any; // CharacterPlayer
+      if (player && typeof player.setPose === 'function') {
+        player.setPose(expression);
+      }
     }
   }
 

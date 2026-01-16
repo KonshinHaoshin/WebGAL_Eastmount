@@ -53,6 +53,28 @@ export function changeFigure(sentence: ISentence): IPerform {
   // live2d 或 spine 相关
   let motion = getStringArgByKey(sentence, 'motion') ?? '';
   let expression = getStringArgByKey(sentence, 'expression') ?? '';
+
+  // WebGAL Mano 特殊处理：将未命名的布尔参数视为 pose
+  if (content.includes('type=webgal_mano')) {
+    const poseArg = getStringArgByKey(sentence, 'pose');
+    if (poseArg) {
+      const poseList = poseArg
+        .replace(/^\{|\}$/g, '')
+        .split(',')
+        .map((pose) => pose.trim())
+        .filter(Boolean);
+      if (poseList.length > 0) {
+        motion = poseList.join(',');
+        if (!expression) expression = '';
+      }
+    }
+    const poses = sentence.args
+      .filter((arg) => arg.value === true && !['left', 'right', 'next', 'clear', 'center', 'id'].includes(arg.key))
+      .map((arg) => arg.key);
+    if (poses.length > 0 && !motion) motion = poses[0];
+    if (poses.length > 1 && !expression) expression = poses[1];
+  }
+
   const boundsFromArgs = getStringArgByKey(sentence, 'bounds') ?? '';
   let bounds = getOverrideBoundsArr(boundsFromArgs);
 

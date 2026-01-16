@@ -292,12 +292,15 @@ function removeFig(figObj: IStageObject, enterTikerKey: string, effects: IEffect
 	}, duration);
 }
 
-function addFigure(type?: 'image' | 'live2D' | 'spine' | 'video', ...args: any[]) {
+function addFigure(type?: 'image' | 'live2D' | 'spine' | 'video' | 'webgal_mano', ...args: any[]) {
 	const url = args[1];
 	const baseUrl = window.location.origin;
 	const urlObject = new URL(url, baseUrl);
-	const _type = urlObject.searchParams.get('type') as 'image' | 'live2D' | 'spine' | 'video' | null;
+	const _type = urlObject.searchParams.get('type') as 'image' | 'live2D' | 'spine' | 'video' | 'webgal_mano' | null;
 
+	if (_type === 'webgal_mano') {
+		return addManoFigure(...args);
+	}
 	if (url.endsWith('.jsonl')) {
 		return addJsonlFigure(...args);
 	} else if (url.endsWith('.json')) {
@@ -337,4 +340,10 @@ function addGifFigure(...args: any[]) {
 function addVideoFigure(...args: any[]) {
 	// @ts-ignore
 	return WebGAL.gameplay.pixiStage?.addVideoFigure(...args);
+}
+
+// WebGAL Mano
+function addManoFigure(...args: any[]) {
+	// @ts-ignore
+	return WebGAL.gameplay.pixiStage?.addManoFigure(...args);
 }

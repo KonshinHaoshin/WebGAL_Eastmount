@@ -6183,6 +6183,11 @@ void-elements@3.1.0:
   resolved "https://registry.yarnpkg.com/void-elements/-/void-elements-3.1.0.tgz#614f7fbf8d801f0bb5f0661f5b2f5785750e4f09"
   integrity sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==
 
+webgal_mano@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/webgal_mano/-/webgal_mano-1.0.1.tgz#1ca5cc9d2cd7ca6cd01a26859edc3543353479fb"
+  integrity sha512-yIZ1v0TVUkXYEK1nOmEzcopcOcTcVk17BwrnKVqRmrQCjFCASoCWzRYGHBi1sSBphHRhIJi5aWvYot9A9Rlmbg==
+
 webidl-conversions@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-3.0.1.tgz#24534275e2a7bc6be7bc86611cc16ae0a5654871"
