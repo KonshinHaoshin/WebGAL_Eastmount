@@ -14,7 +14,7 @@ import cloneDeep from 'lodash/cloneDeep';
 let syncFastTimeout: ReturnType<typeof setTimeout> | undefined;
 
 export const syncWithOrigine = (sceneName: string, sentenceId: number, expermental = false) => {
-  logger.warn('æ­£åœ¨è·³è½¬åˆ? + sceneName + ':' + sentenceId);
+  logger.warn(`Sync jump to ${sceneName}:${sentenceId}`);
   const dispatch = webgalStore.dispatch;
   dispatch(setVisibility({ component: 'showTitle', visibility: false }));
   dispatch(setVisibility({ component: 'showMenuPanel', visibility: false }));

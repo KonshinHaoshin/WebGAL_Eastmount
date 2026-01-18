@@ -78,6 +78,8 @@
   flex-wrap: wrap;
   gap: 0.5em;
   margin-top: 0.5em;
+}
+
 .Save_Load_top_buttonList {
   height: 100%;
   display: flex;
@@ -122,6 +124,8 @@
   color: #B28FCE;
   font-weight: bold;
   border-bottom: 2px solid #B28FCE;
+}
+
 .Save_Load_top_button_on {
   font-weight: bold;
   border-bottom: 4px solid #77428D;
@@ -284,10 +288,6 @@
 .Load_content_speaker {
   color: #ffffff;
 }
-
-  color: #005caf;
-}
-
 
 .Load_content_text {
   background-color: rgba(0, 92, 175, 0.75);

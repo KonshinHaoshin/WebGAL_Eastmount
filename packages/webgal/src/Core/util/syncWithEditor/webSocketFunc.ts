@@ -31,10 +31,10 @@ export const webSocketFunc = () => {
   if (protocol === 'https:') {
     wsUrl = `wss://${loc}${defaultPort}/api/webgalsync`;
   }
-  logger.info('æ­£åœ¨å¯åŠ¨socketè¿žæŽ¥ä½äºŽï¼? + wsUrl);
+  logger.info(`Starting WebSocket connection at ${wsUrl}`);
   const socket = new WebSocket(wsUrl);
   socket.onopen = () => {
-    logger.info('socketå·²è¿žæŽ?);
+    logger.info('WebSocket connected');
     function sendStageSyncMessage() {
       const message: IDebugMessage = {
         event: 'message',
@@ -121,12 +121,12 @@ export const webSocketFunc = () => {
         };
         webgalStore.dispatch(stageActions.updateEffect({ target: effect.target, transform: newTransform }));
       } catch (e) {
-        logger.error(`æ— æ³•è®¾ç½®æ•ˆæžœ ${message.message}, ${e}`);
+        logger.error(`Failed to set effect ${message.message}, ${e}`);
         return;
       }
     }
   };
   socket.onerror = () => {
-    logger.info('å½“å‰æ²¡æœ‰è¿žæŽ¥åˆ?Terre ç¼–è¾‘å™?);
+    logger.info('No active editor connection');
   };
 };

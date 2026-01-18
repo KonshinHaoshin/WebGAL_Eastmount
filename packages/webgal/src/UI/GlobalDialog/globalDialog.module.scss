@@ -105,20 +105,6 @@
         opacity: 1;
     }
 }
-  height: 100%;
-  width: 100%;
-  position: absolute;
-  z-index: 20;
-  background: rgba(15, 37, 64, 0.39);
-  color: white;
-  opacity: 0.5;
-  animation: showGlobalDialog 0.33s forwards;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  //font-family: "WebgalUI", -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  font-family: "思源宋体", serif;
-}
 
 .glabalDialog_container_inner {
   width: 100%;
