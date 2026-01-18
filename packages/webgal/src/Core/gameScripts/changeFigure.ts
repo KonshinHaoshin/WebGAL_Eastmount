@@ -54,25 +54,29 @@ export function changeFigure(sentence: ISentence): IPerform {
   let motion = getStringArgByKey(sentence, 'motion') ?? '';
   let expression = getStringArgByKey(sentence, 'expression') ?? '';
 
-  // WebGAL Mano 特殊处理：将未命名的布尔参数视为 pose
-  if (content.includes('type=webgal_mano')) {
+  // WebGAL Mano 特殊处理：pose
+  const isWebgalMano = content.includes('type=webgal_mano');
+  if (isWebgalMano) {
+    motion = '';
+    expression = '';
+  }
+  let manoPoses: string[] = [];
+  if (isWebgalMano) {
     const poseArg = getStringArgByKey(sentence, 'pose');
     if (poseArg) {
-      const poseList = poseArg
-        .replace(/^\{|\}$/g, '')
-        .split(',')
-        .map((pose) => pose.trim())
-        .filter(Boolean);
-      if (poseList.length > 0) {
-        motion = poseList.join(',');
-        if (!expression) expression = '';
-      }
+      manoPoses = parseManoPoseArg(poseArg);
     }
     const poses = sentence.args
-      .filter((arg) => arg.value === true && !['left', 'right', 'next', 'clear', 'center', 'id'].includes(arg.key))
+      .filter(
+        (arg) => arg.value === true && !['left', 'right', 'next', 'clear', 'center', 'id', 'pose'].includes(arg.key),
+      )
       .map((arg) => arg.key);
-    if (poses.length > 0 && !motion) motion = poses[0];
-    if (poses.length > 1 && !expression) expression = poses[1];
+    manoPoses = manoPoses.concat(poses).filter(Boolean);
+
+    if (manoPoses.length > 0) {
+      motion = manoPoses.join(',');
+      expression = '';
+    }
   }
 
   const boundsFromArgs = getStringArgByKey(sentence, 'bounds') ?? '';
@@ -302,6 +306,14 @@ export function changeFigure(sentence: ISentence): IPerform {
     blockingAuto: () => true,
     stopTimeout: undefined, // 暂时不用，后面会交给自动清除
   };
+}
+
+function parseManoPoseArg(arg: string): string[] {
+  return arg
+    .replace(/^\{|\}$/g, '')
+    .split(',')
+    .map((pose) => pose.trim())
+    .filter(Boolean);
 }
 
 function getOverrideBoundsArr(boundsFromArgs: string | undefined | null): [number, number, number, number] | undefined {

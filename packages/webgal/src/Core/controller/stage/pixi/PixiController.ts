@@ -15,7 +15,7 @@ import { logger } from '@/Core/util/logger';
 import { isIOS } from '@/Core/initializeScript';
 import { WebGALPixiContainer } from '@/Core/controller/stage/pixi/WebGALPixiContainer';
 import { Live2D, WebGAL } from '@/Core/WebGAL';
-import { CharacterPlayer } from 'webgal_mano';
+import { calculateStates, CharacterPlayer } from 'webgal_mano';
 import { SCREEN_CONSTANTS } from '@/Core/util/constants';
 import { addSpineBgImpl, addSpineFigureImpl } from '@/Core/controller/stage/pixi/spine';
 import { AnimatedGIF } from '@pixi/gif';
@@ -1461,7 +1461,25 @@ export default class PixiStage {
           .map((pose) => pose.trim())
           .filter(Boolean);
         if (poseList.length === 0) return;
-        poseList.forEach((pose) => player.setPose(pose));
+        const poseCommands: string[] = [];
+        const layerCommands: string[] = [];
+        poseList.forEach((pose) => {
+          if (pose.includes('/') || pose.includes('>') || pose.endsWith('-')) {
+            layerCommands.push(pose);
+          } else {
+            poseCommands.push(pose);
+          }
+        });
+        poseCommands.forEach((pose) => player.setPose(pose));
+        if (layerCommands.length > 0) {
+          const currentStates = player.manualOverrides ?? {};
+          const nextStates = calculateStates(layerCommands, player.model.assets.layers, currentStates);
+          Object.entries(nextStates).forEach(([id, visible]) => {
+            if (visible !== undefined) {
+              player.setLayerVisible(id, Boolean(visible));
+            }
+          });
+        }
       }
     }
   }

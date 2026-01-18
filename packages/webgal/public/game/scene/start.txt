@@ -1,4 +1,4 @@
 changeBg:Background_001_001.png;
-changeFigure:Ema/model.char.json?type=webgal_mano -id=Ema -left;
-changeFigure:Sherry/model.char.json?type=webgal_mano -pose={ArmL1,Cry} -id=Sherry;
+changeFigure:Sherry/model.char.json?type=webgal_mano -pose={Cry,ArmR16,Angle01/Facial/Cheeks>Cheeks_Flushed} -id=Sherry;
 橘雪莉:测试
+二阶堂希罗:测试
