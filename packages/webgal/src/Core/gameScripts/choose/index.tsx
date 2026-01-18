@@ -6,7 +6,6 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import styles from './choose.module.scss';
 import { webgalStore } from '@/store/store';
-import { textFont } from '@/store/userDataInterface';
 import { PerformController } from '@/Core/Modules/perform/performController';
 import { useSEByWebgalStore } from '@/hooks/useSoundEffect';
 import { WebGAL } from '@/Core/WebGAL';
@@ -17,13 +16,12 @@ import { Provider } from 'react-redux';
 import choose01 from '@/assets/dragonspring/choose01.png';
 import choose02 from '@/assets/dragonspring/choose02.png';
 import skeleton from '@/assets/dragonspring/skeleton.png';
+import { useFontFamily } from '@/hooks/useFontFamily';
 
 class ChooseOption {
   /**
    * 格式：
    * (showConditionVar>1)[enableConditionVar>2]->text:jump@skeleton
-   * 或
-   * text:jump@skeleton
    */
   public static parse(script: string): ChooseOption {
     const parts = script.split('->');
@@ -34,9 +32,8 @@ class ChooseOption {
     let jump = mainPartNodes[1] || '';
     let showSkeleton = false;
 
-    // 检查 jump 末尾是否有 @skeleton 标记
     if (jump.endsWith('@skeleton')) {
-      jump = jump.slice(0, -9); // 移除 '@skeleton' (9个字符)
+      jump = jump.slice(0, -9);
       showSkeleton = true;
     }
 
@@ -69,7 +66,7 @@ class ChooseOption {
 }
 
 /**
- * 显示选择枝
+ * 显示选择栏
  * @param sentence
  */
 export const choose = (sentence: ISentence): IPerform => {
@@ -93,17 +90,14 @@ export const choose = (sentence: ISentence): IPerform => {
     },
     blockingNext: () => true,
     blockingAuto: () => true,
-    stopTimeout: undefined, // 暂时不用，后面会交给自动清除
+    stopTimeout: undefined, // 暂时不用，后面会交给自动清理
   };
 };
 
 function Choose(props: { chooseOptions: ChooseOption[] }) {
-  const fontFamily = webgalStore.getState().userData.optionData.textboxFont;
-  const font = fontFamily === textFont.song ? '"思源宋体", serif' : '"WebgalUI", serif';
+  const font = useFontFamily();
   const { playSeEnter, playSeClick } = useSEByWebgalStore();
   const applyStyle = useApplyStyle('Stage/Choose/choose.scss');
-
-  // 运行时计算JSX.Element[]
   const runtimeBuildList = (chooseListFull: ChooseOption[]) => {
     return chooseListFull
       .filter((e, i) => whenChecker(e.showCondition))
@@ -133,22 +127,20 @@ function Choose(props: { chooseOptions: ChooseOption[] }) {
               className={className}
               style={{
                 fontFamily: font,
-                backgroundImage: `url(${choose01})`, // 默认使用 choose01
+                backgroundImage: `url(${choose01})`,
                 color: '#8E354A',
                 margin: '6px 0',
                 padding: '100px 140px',
               }}
               onClick={onClick}
-              // onMouseEnter={playSeEnter}
-              onMouseOver={(e) => {
-                // 鼠标悬浮时切换到 choose02 并改变文字颜色
-                e.currentTarget.style.backgroundImage = `url(${choose02})`;
-                e.currentTarget.style.color = '#FFFFFF'; // 变为白色
+              onMouseEnter={playSeEnter}
+              onMouseOver={(event) => {
+                event.currentTarget.style.backgroundImage = `url(${choose02})`;
+                event.currentTarget.style.color = '#FFFFFF';
               }}
-              onMouseOut={(e) => {
-                // 鼠标离开时切换回 choose01 并恢复文字颜色
-                e.currentTarget.style.backgroundImage = `url(${choose01})`;
-                e.currentTarget.style.color = '#8E354A'; // 恢复默认颜色
+              onMouseOut={(event) => {
+                event.currentTarget.style.backgroundImage = `url(${choose01})`;
+                event.currentTarget.style.color = '#8E354A';
               }}
             >
               {e.text}

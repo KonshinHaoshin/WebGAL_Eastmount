@@ -32,6 +32,7 @@ import { setTransform } from '@/Core/gameScripts/setTransform';
 import { setTransition } from '@/Core/gameScripts/setTransition';
 import { unlockBgm } from '@/Core/gameScripts/unlockBgm';
 import { unlockCg } from '@/Core/gameScripts/unlockCg';
+import { callSteam } from '@/Core/gameScripts/callSteam';
 import { end } from '../gameScripts/end';
 import { jumpLabel } from '../gameScripts/jumpLabel';
 import { pixiInit } from '../gameScripts/pixi/pixiInit';
@@ -67,9 +68,7 @@ export const SCRIPT_TAG_MAP = defineScripts({
   setFilter: ScriptConfig(commandType.setFilter, setFilter),
   label: ScriptConfig(commandType.label, label, { next: true }),
   jumpLabel: ScriptConfig(commandType.jumpLabel, jumpLabel),
-  // chooseLabel: ScriptConfig(commandType.chooseLabel, undefined),
   setVar: ScriptConfig(commandType.setVar, setVar, { next: true }),
-  // if: ScriptConfig(commandType.if, undefined, { next: true }),
   callScene: ScriptConfig(commandType.callScene, callSceneScript),
   showVars: ScriptConfig(commandType.showVars, showVars),
   unlockCg: ScriptConfig(commandType.unlockCg, unlockCg, { next: true }),
@@ -97,6 +96,7 @@ export const SCRIPT_TAG_MAP = defineScripts({
   pediaUpdate: ScriptConfig(commandType.pediaUpdate, pediaUpdate, { next: true }),
   presentTheEvidence: ScriptConfig(commandType.presentTheEvidence, presentTheEvidence),
   thinking: ScriptConfig(commandType.thinking, thinking),
+  callSteam: ScriptConfig(commandType.callSteam, callSteam, { next: true }),
 });
 
 export const SCRIPT_CONFIG: IConfigInterface[] = Object.values(SCRIPT_TAG_MAP);
@@ -104,17 +104,17 @@ export const SCRIPT_CONFIG: IConfigInterface[] = Object.values(SCRIPT_TAG_MAP);
 export const ADD_NEXT_ARG_LIST = SCRIPT_CONFIG.filter((config) => config.next).map((config) => config.scriptType);
 
 /**
- * åœºæ™¯è§£æå™¨
- * @param rawScene åŸå§‹åœºæ™¯
- * @param sceneName åœºæ™¯åç§°
- * @param sceneUrl åœºæ™¯url
- * @return {IScene} è§£æåçš„åœºæ™¯
+ * ³¡¾°½âÎöº¯Êı
+ * @param rawScene Ô­Ê¼³¡¾°
+ * @param sceneName ³¡¾°Ãû³Æ
+ * @param sceneUrl ³¡¾°url
+ * @return {IScene} ½âÎöºóµÄ³¡¾°
  */
 export const WebgalParser = new SceneParser(assetsPrefetcher, assetSetter, ADD_NEXT_ARG_LIST, SCRIPT_CONFIG);
 
 export const sceneParser = (rawScene: string, sceneName: string, sceneUrl: string): IScene => {
   const parsedScene = WebgalParser.parse(rawScene, sceneName, sceneUrl);
-  logger.info(`è§£æåœºæ™¯ï¼š${sceneName}ï¼Œæ•°æ®ä¸ºï¼š`, parsedScene);
+  logger.info(`½âÎö³¡¾°£º${sceneName}£¬Êı¾İÎª£º`, parsedScene);
   return parsedScene;
 };
 

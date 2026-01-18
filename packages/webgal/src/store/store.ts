@@ -5,7 +5,7 @@ import userDataReducer from '@/store/userDataReducer';
 import savesReducer from '@/store/savesReducer';
 
 /**
- * WebGAL å…¨å±€çŠ¶æ€ç®¡ç†
+ * WebGAL È«¾Ö×´Ì¬¹ÜÀí
  */
 export const webgalStore = configureStore({
   reducer: {
@@ -17,7 +17,8 @@ export const webgalStore = configureStore({
   middleware: getDefaultMiddleware({
     serializableCheck: false,
   }),
+  devTools: process.env.NODE_ENV !== 'production',
 });
 
-// åœ¨ TS ä¸­çš„ç±»å‹å£°æ˜
+// ÔÚTSÖĞµÄÀàĞÍÉùÃ÷
 export type RootState = ReturnType<typeof webgalStore.getState>;

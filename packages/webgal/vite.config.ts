@@ -20,7 +20,7 @@ console.log(env);
   let lastFiles: string[] = [];
 
   function setInitFile() {
-    console.log('姝ｅ湪鑷姩缂栧啓pixi鐗规晥渚濊禆娉ㄥ叆');
+    console.log('正在自动编写pixi特效依赖注入');
     writeFileSync(
       resolve(pixiPerformManagerDirPath, 'initRegister.ts'),
       lastFiles

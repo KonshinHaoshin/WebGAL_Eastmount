@@ -3,18 +3,26 @@ import { WebGAL } from '@/Core/WebGAL';
 export function generateUniversalSoftOffAnimationObj(targetKey: string, duration: number) {
   const target = WebGAL.gameplay.pixiStage!.getStageObjByKey(targetKey);
 
-  // 先设置一个通用的初态
+  let elapsedTime = 0;
+  let startAlpha = 1;
 
   /**
-   * 在此书写为动画设置初态的操作
+   * 在此书写为动画设置初始的操作
    */
-  function setStartState() {}
+  function setStartState() {
+    elapsedTime = 0;
+    if (target?.pixiContainer) {
+      startAlpha = target.pixiContainer.alpha;
+    }
+  }
 
   /**
    * 在此书写为动画设置终态的操作
    */
   function setEndState() {
-    if (target) target.pixiContainer.alpha = 0;
+    if (target?.pixiContainer) {
+      target.pixiContainer.alpha = 0;
+    }
   }
 
   /**
@@ -25,11 +33,12 @@ export function generateUniversalSoftOffAnimationObj(targetKey: string, duration
     if (target) {
       const targetContainer = target.pixiContainer;
       const baseDuration = WebGAL.gameplay.pixiStage!.frameDuration;
-      const currentAddOplityDelta = (duration / baseDuration) * delta;
-      const decreasement = 1 / currentAddOplityDelta;
-      if (targetContainer.alpha > 0) {
-        targetContainer.alpha -= decreasement;
-      }
+
+      elapsedTime += baseDuration;
+      const realElapsedTime = Math.min(elapsedTime, duration);
+      const progress = realElapsedTime / duration;
+      const easedProgress = Math.pow(progress, 3);
+      if (targetContainer) targetContainer.alpha = startAlpha * (1 - easedProgress);
     }
   }
 

@@ -1,13 +1,10 @@
-// import {logger} from '../../util/logger';
 import styles from '@/UI/BottomControlPanel/bottomControlPanel.module.scss';
 import { webgalStore } from '@/store/store';
 import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
-
 import { WebGAL } from '@/Core/WebGAL';
 
 /**
- * 设置 autoplay 按钮的激活与否
- * @param on
+ * ���� autoplay ��ť�ļ������
  */
 const setButton = (on: boolean) => {
   const autoIcon = document.getElementById('Button_ControlPanel_auto');
@@ -19,7 +16,7 @@ const setButton = (on: boolean) => {
 };
 
 /**
- * 停止自动播放
+ * ֹͣ�Զ�����
  */
 export const stopAuto = () => {
   WebGAL.gameplay.isAuto = false;
@@ -35,14 +32,12 @@ export const stopAuto = () => {
 };
 
 /**
- * 切换自动播放状态
+ * �л��Զ�����״̬
  */
 export const switchAuto = () => {
-  // 现在正在自动播放
   if (WebGAL.gameplay.isAuto) {
     stopAuto();
   } else {
-    // 当前不在自动播放
     WebGAL.gameplay.isAuto = true;
     setButton(true);
     WebGAL.gameplay.autoInterval = setInterval(autoPlay, 100);
@@ -55,32 +50,26 @@ export const autoNextSentence = () => {
 };
 
 /**
- * 自动播放的执行函数
+ * �Զ����ŵ�ִ�к���
  */
 const autoPlay = () => {
   const data = webgalStore.getState().userData.optionData.autoSpeed;
   const stageState = webgalStore.getState().stage;
-  
-  // 范围为 [100, 1600]
-  // 一堆人反馈太慢了
+
+  // ��ΧԼ [100, 1600]
   let autoPlayDelay = 100 + (100 - data) * 15;
-  
-  // 如果处于审判模式的加速状态，大幅缩减延迟
+
   if (stageState.judgment === 'begins' && stageState.isJudgmentFastForward) {
-    autoPlayDelay = 200; // 加速到极快
+    autoPlayDelay = 200;
   }
 
   let isBlockingAuto = false;
   WebGAL.gameplay.performController.performList.forEach((e) => {
-    if (e.blockingAuto())
-      // 阻塞且没有结束的演出
-      isBlockingAuto = true;
+    if (e.blockingAuto()) isBlockingAuto = true;
   });
   if (isBlockingAuto) {
-    // 有阻塞，提前结束
     return;
   }
-  // nextSentence();
   if (WebGAL.gameplay.autoTimeout === null) {
     WebGAL.gameplay.autoTimeout = setTimeout(autoNextSentence, autoPlayDelay);
   }

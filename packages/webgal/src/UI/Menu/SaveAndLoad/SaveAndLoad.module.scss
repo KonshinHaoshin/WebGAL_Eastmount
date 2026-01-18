@@ -12,6 +12,10 @@
   width: 100%;
   display: flex;
   animation: Elements_in ease-out 1s forwards;
+  //background-color: rgba(255, 255, 255, 1);
+  //box-shadow: 0 0 1.5em 0.1em rgba(0, 0, 0, 0.05);
+  animation: Elements_in ease-out 1s forwards;
+  //border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   justify-content: center;
 }
 
@@ -22,6 +26,10 @@
   font-size: 500%;
   min-width: 350px;
   box-sizing: border-box;
+  //margin: 0 0 0 0.8em;
+  //padding: 0 0.8em 0 0.8em;
+  box-sizing: border-box;
+  //border-bottom: 4px solid #77428D;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -31,6 +39,10 @@
   z-index: 1;                        // ✅ 改为顶层，避免被遮住
   opacity: 0.6;                      // ✅ 显示更明显
   transform: translateY(0);         // ✅ 原来向上偏移过多
+  top:0;
+  z-index: -1;
+  opacity: 0.2;
+  transform: translateY(-10px);
 }
 
 .Save_title_text {
@@ -40,6 +52,7 @@
   text-shadow: 2px 2px 15px rgba(255, 255, 255, 0.5);
   -webkit-background-clip: text;
 }
+
 
 .Load_title_text {
   font-weight: bold;
@@ -65,6 +78,10 @@
   flex-wrap: wrap;
   gap: 0.5em;
   margin-top: 0.5em;
+.Save_Load_top_buttonList {
+  height: 100%;
+  display: flex;
+  //padding: 0 0 0 2em;
 }
 
 .Save_Load_top_button {
@@ -78,6 +95,15 @@
   color: rgba(200, 200, 255, 0.6);
   transition: all 0.3s ease;
   user-select: none;
+  font-size: 200%;
+  width: 2.05em;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  border-bottom: 4px solid rgba(0, 0, 0, 0);
+  transition: background-color 0.7s, border-bottom-width 0.7s;
 }
 
 .Save_Load_top_button_text {
@@ -96,6 +122,11 @@
   color: #B28FCE;
   font-weight: bold;
   border-bottom: 2px solid #B28FCE;
+.Save_Load_top_button_on {
+  font-weight: bold;
+  border-bottom: 4px solid #77428D;
+  color: #77428D;
+  background-color: rgba(119, 66, 141, 0.05);
 }
 
 .Save_Load_top_button:hover {
@@ -144,6 +175,36 @@
   transform: scale(1.05, 1.05) translate(-0.2em, -0.2em);
 }
 
+.Save_Load_content {
+  height: 90%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.Save_Load_content_element {
+  //background: linear-gradient(-45deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.5) 100%);
+  background: linear-gradient(-45deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.075));
+  overflow: hidden;
+  //border: 1px solid rgba(255, 255, 255, 1);
+  width: 17.5%;
+  height: 45%;
+  //box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  animation: Elements_in 1s ease-out forwards, Elements_in_transform 1s ease-out;
+  opacity: 0;
+  border-radius: 4px;
+  transition: transform 0.25s, box-shadow 0.25s;
+  cursor: pointer;
+}
+
+.Save_Load_content_element:hover {
+  //box-shadow: 0 0 25px 8px rgba(0, 0, 0, 0.1);
+  transform: scale(1.05, 1.05) translate(-0.2em, -0.2em);
+}
+
+
 .Save_Load_content_element_top {
   font-family: "思源宋体", serif;
   width: 100%;
@@ -187,6 +248,13 @@
   font-size: 120%;
   height: 40%;
   width: 100%;
+  color: #373C38;
+  background: linear-gradient(-45deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 1) 100%);
+  //background: rgba(255,255,255,1);
+  font-size: 120%;
+  height: 40%;
+  width: 100%;
+  //box-sizing: border-box;
   display: flex;
   flex-flow: column;
   justify-content: flex-start;
@@ -202,12 +270,24 @@
   color: #ffffff; // ✅ 白色文字可读性强
   padding: 0.35em 0.8em 0.25em 0.8em;
   width: 100%;
+  box-sizing: border-box;
+  //margin: 0.35em 0 0 0;
+  //background: rgba(0, 0, 0, 0.04);
+  font-weight: bold;
+  color: #77428D;
+  padding: 0.35em 0.8em 0.25em 0.8em;
+  width: 100%;
+  //border-radius: 4px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .Load_content_speaker {
   color: #ffffff;
 }
+
+  color: #005caf;
+}
+
 
 .Load_content_text {
   background-color: rgba(0, 92, 175, 0.75);

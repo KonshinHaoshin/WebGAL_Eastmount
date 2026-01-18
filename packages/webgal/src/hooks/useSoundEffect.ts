@@ -16,17 +16,16 @@ import { useDispatch } from 'react-redux';
 import { webgalStore } from '@/store/store';
 
 /**
- * 调用音效
+ * ������Ч
  */
 const useSoundEffect = () => {
   const dispatch = useDispatch();
 
   const playSeEnter = () => {
-    // 禁用鼠标悬停音效
-    // dispatch(setStage({ key: 'uiSe', value: mouse_enter }));
+    dispatch(setStage({ key: 'uiSe', value: mouse_enter }));
   };
   const playSeClick = () => {
-    dispatch(setStage({ key: 'uiSe', value: choose_se }));
+    dispatch(setStage({ key: 'uiSe', value: choose_se ?? click_se }));
   };
   const playSeRightClick = () => {
     webgalStore.dispatch(setStage({ key: 'uiSe', value: right_click }));
@@ -50,17 +49,14 @@ const useSoundEffect = () => {
     webgalStore.dispatch(setStage({ key: 'uiSe', value: pedia_choose }));
   };
   const playSeSwitch = () => {
-    // 禁用开关/切换音效
-    // dispatch(setStage({ key: 'uiSe', value: switch_1 }));
+    dispatch(setStage({ key: 'uiSe', value: switch_1 }));
   };
   const playSePageChange = () => {
-    // 禁用翻页音效
-    // dispatch(setStage({ key: 'uiSe', value: page_flip_1 }));
+    dispatch(setStage({ key: 'uiSe', value: page_flip_1 }));
   };
 
   const playSeDialogOpen = () => {
-    // 禁用对话框打开音效
-    // dispatch(setStage({ key: 'uiSe', value: dialog_se }));
+    dispatch(setStage({ key: 'uiSe', value: dialog_se }));
   };
 
   return {
@@ -80,15 +76,14 @@ const useSoundEffect = () => {
 };
 
 /**
- * 调用音效（只供 choose.tsx 使用）
+ * ������Ч��ֻ�� choose.tsx ʹ�ã�
  */
 export const useSEByWebgalStore = () => {
   const playSeEnter = () => {
-    // 禁用鼠标悬停音效
-    // webgalStore.dispatch(setStage({ key: 'uiSe', value: mouse_enter }));
+    webgalStore.dispatch(setStage({ key: 'uiSe', value: mouse_enter }));
   };
   const playSeClick = () => {
-    webgalStore.dispatch(setStage({ key: 'uiSe', value: choose_se }));
+    webgalStore.dispatch(setStage({ key: 'uiSe', value: choose_se ?? click_se }));
   };
   const playSeRightClick = () => {
     webgalStore.dispatch(setStage({ key: 'uiSe', value: right_click }));
@@ -97,10 +92,10 @@ export const useSEByWebgalStore = () => {
     webgalStore.dispatch(setStage({ key: 'uiSe', value: right_click }));
   };
   return {
-    playSeEnter, // 鼠标进入
-    playSeClick, // 鼠标点击
-    playSeRightClick, // 鼠标右键
-    playSeCancel, // 取消
+    playSeEnter, // ������
+    playSeClick, // �����
+    playSeRightClick, // ����Ҽ�
+    playSeCancel, // ȡ��
   };
 };
 

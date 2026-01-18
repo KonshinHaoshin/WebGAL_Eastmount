@@ -34,11 +34,22 @@ export const TextBox = () => {
     size = getTextSize(stageState.showTextSize) + '%';
     textSizeState = stageState.showTextSize;
   }
-  const lineLimit = match(textSizeState)
-    .with(textSize.small, () => 3)
-    .with(textSize.medium, () => 2)
-    .with(textSize.large, () => 2)
-    .default(() => 2);
+  const maxTextLine = Number(userDataState.globalGameVar.Max_line);
+  const lineLimit = Number.isNaN(maxTextLine)
+    ? match(textSizeState)
+        .with(textSize.small, () => 3)
+        .with(textSize.medium, () => 2)
+        .with(textSize.large, () => 2)
+        .default(() => 2)
+    : maxTextLine;
+  const MaxTextLine = Number(userDataState.globalGameVar.Max_line); // congfig定义字体行数
+  const lineLimit = Number.isNaN(MaxTextLine)
+    ? match(textSizeState)
+        .with(textSize.small, () => 3)
+        .with(textSize.medium, () => 2)
+        .with(textSize.large, () => 2)
+        .default(() => 2)
+    : MaxTextLine;
   // 拆字
   const textArray = compileSentence(stageState.showText, lineLimit);
   const isHasName = stageState.showName !== '';

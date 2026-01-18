@@ -1,4 +1,4 @@
-Game_name:DragonSpring引擎;
+Game_name:DragonSpring??;
 Game_key:0f87dstRg;
 Title_img:Dragonspring.png;
 Title_bgm:s_Title.mp3;

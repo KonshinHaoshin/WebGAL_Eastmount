@@ -42,7 +42,7 @@ export const Options: FC = () => {
               playSeSwitch();
             }}
             className={getClassName(optionPage.System)}
-            // onMouseEnter={playSeEnter}
+            onMouseEnter={playSeEnter}
           >
             {t('pages.system.title')}
           </div>
@@ -52,7 +52,7 @@ export const Options: FC = () => {
               playSeSwitch();
             }}
             className={getClassName(optionPage.Display)}
-            // onMouseEnter={playSeEnter}
+            onMouseEnter={playSeEnter}
           >
             {t('pages.display.title')}
           </div>
@@ -62,7 +62,7 @@ export const Options: FC = () => {
               playSeSwitch();
             }}
             className={getClassName(optionPage.Sound)}
-            // onMouseEnter={playSeEnter}
+            onMouseEnter={playSeEnter}
           >
             {t('pages.sound.title')}
           </div>

@@ -16,14 +16,13 @@ import { isIOS } from '@/Core/initializeScript';
 import { WebGAL } from '@/Core/WebGAL';
 import { IGuiState } from '@/store/guiInterface';
 import { IStageState } from '@/store/stageInterface';
-// import OldStage from '@/Components/Stage/OldStage/OldStage';
 
 function inTextBox(event: React.MouseEvent) {
   const tb = document.getElementById('textBoxMain');
   if (!tb) {
     return false;
   }
-  let bounds = tb.getBoundingClientRect();
+  const bounds = tb.getBoundingClientRect();
   return (
     event.clientX > bounds.left &&
     event.clientX < bounds.right &&
@@ -64,37 +63,47 @@ function isTextboxHidden(stageState: IStageState, GUIState: IGuiState) {
 }
 
 let timeoutEventHandle: ReturnType<typeof setTimeout> | null = null;
+const MOVE_THRESHOLD_SQ = 16;
+let lastMouseX = 0;
+let lastMouseY = 0;
+let hasLastMousePos = false;
 
-/**
- * 检查并更新控制可见性
- * @param event 鼠标移动事件
- * @param stageState 场景状态
- * @param GUIState GUI状态
- * @param dispatch Redux dispatch函数
- */
-// eslint-disable-next-line max-params
 function updateControlsVisibility(
   event: React.MouseEvent,
   stageState: IStageState,
   GUIState: IGuiState,
   dispatch: ReturnType<typeof useDispatch>,
 ) {
-  if (isTextboxHidden(stageState, GUIState)) {
-    // 当文本框被隐藏时
-    // 逻辑：鼠标移动时显示，一段时间（默认：1秒）后隐藏
-    if (timeoutEventHandle) {
-      clearTimeout(timeoutEventHandle);
-    }
+  const { clientX, clientY } = event;
+  let movedEnough = false;
+  if (!hasLastMousePos) {
+    movedEnough = true;
+    hasLastMousePos = true;
+  } else {
+    const dx = clientX - lastMouseX;
+    const dy = clientY - lastMouseY;
+    movedEnough = dx * dx + dy * dy >= MOVE_THRESHOLD_SQ;
+  }
+  lastMouseX = clientX;
+  lastMouseY = clientY;
 
+  if (!movedEnough) {
+    return;
+  }
+
+  if (timeoutEventHandle) {
+    clearTimeout(timeoutEventHandle);
+  }
+
+  if (isTextboxHidden(stageState, GUIState)) {
     dispatch(setVisibility({ component: 'controlsVisibility', visibility: true }));
     timeoutEventHandle = setTimeout(() => {
       dispatch(setVisibility({ component: 'controlsVisibility', visibility: false }));
     }, 1000);
-  } else {
-    // 当文本框正常显示时
-    // 逻辑：鼠标位置在文本框内时显示
-    checkMousePosition(event, GUIState, dispatch);
+    return;
   }
+
+  checkMousePosition(event, GUIState, dispatch);
 }
 
 export const Stage: FC = () => {
@@ -107,8 +116,6 @@ export const Stage: FC = () => {
   return (
     <div className={styles.MainStage_main}>
       <FullScreenPerform />
-      {/* 已弃用旧的立绘与背景舞台 */}
-      {/* <OldStage /> */}
       <MainStage />
       <div id="pixiContianer" className={styles.pixiContainer} style={{ zIndex: isIOS ? '-5' : undefined }} />
       <div id="itemContainer" className={styles.itemContainer} />
@@ -120,15 +127,12 @@ export const Stage: FC = () => {
       <AudioContainer />
       <div
         onClick={() => {
-          // 如果 Phone 显示，则不允许点击
           if (GUIState.showPhone) {
             return;
           }
-          // 如果处于审判模式且禁用了文本框，禁止手动点击进入下一句
           if (stageState.judgment !== '' && stageState.isDisableTextbox) {
             return;
           }
-          // 如果文本框没有显示，则显示文本框
           if (!GUIState.showTextBox) {
             dispatch(setVisibility({ component: 'showTextBox', visibility: true }));
             return;
@@ -137,14 +141,12 @@ export const Stage: FC = () => {
           nextSentence();
         }}
         onDoubleClick={() => {
-          // 如果 Phone 显示，则不允许双击
           if (GUIState.showPhone) {
             return;
           }
           WebGAL.events.fullscreenDbClick.emit();
         }}
         id="FullScreenClick"
-        // 我们将点击全屏的判定网上抬了点，这样不会挡着自动按钮
         style={{
           left: '40',
           width: '100%',

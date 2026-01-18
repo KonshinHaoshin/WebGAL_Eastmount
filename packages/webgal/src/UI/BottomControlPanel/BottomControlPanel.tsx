@@ -286,13 +286,13 @@ export const BottomControlPanel = () => {
             onClick={() => {
               playSeDialogOpen();
               showGlogalDialog({
-                title: '即将返回标题界面。',
-                leftText: '取消',
-                rightText: '<span style="color: red">前</span>往标题界面',
-                leftFunc: () => { },
-                rightFunc: () => {
+                title: t('buttons.titleTips'),
+                leftText: t('$common.yes'),
+                rightText: t('$common.no'),
+                leftFunc: () => {
                   backToTitle();
                 },
+                rightFunc: () => {},
               });
             }}
             onMouseEnter={playSeEnter}

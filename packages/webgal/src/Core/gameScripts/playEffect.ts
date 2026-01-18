@@ -13,14 +13,14 @@ import { WEBGAL_NONE } from '@/Core/constants';
  */
 export const playEffect = (sentence: ISentence): IPerform => {
   logger.debug('play SE');
-  // 如果有ID，这里被覆写，一般用于循环的情况
-  // 有循环参数且有 ID，就循环
+  // 如果有ID，这里被覆盖，一般用于循环的情况
+  // 有循环参数且有ID，就循环
   let performInitName = 'effect-sound';
   // 清除先前的效果音
   WebGAL.gameplay.performController.unmountPerform(performInitName, true);
   let url = sentence.content;
   let isLoop = false;
-  // 清除带 id 的效果音
+  // 清除带id的效果音
   const id = getStringArgByKey(sentence, 'id') ?? '';
   if (id) {
     performInitName = `effect-sound-${id}`;
@@ -59,8 +59,8 @@ export const playEffect = (sentence: ISentence): IPerform => {
     arrangePerformPromise: new Promise((resolve) => {
       // 播放效果音
       setTimeout(() => {
-        let volume = getNumberArgByKey(sentence, 'volume') ?? 100; // 获取音量比
-        volume = Math.max(0, Math.min(volume, 100)); // 限制音量在 0-100 之间
+        let volume = getNumberArgByKey(sentence, 'volume') ?? 100; // 获取音量%
+        volume = Math.max(0, Math.min(volume, 100));
         let seElement = document.createElement('audio');
         seElement.src = url;
         if (isLoop) {
@@ -77,21 +77,19 @@ export const playEffect = (sentence: ISentence): IPerform => {
           isHoldOn: isLoop,
           skipNextCollect: true,
           stopFunction: () => {
-            // 演出已经结束了，所以不用播放效果音了
             seElement.pause();
             seElement.remove();
           },
           blockingNext: () => false,
           blockingAuto: () => {
-            // loop 的话就不 block auto
             if (isLoop) return false;
             return !isOver;
           },
-          stopTimeout: undefined, // 暂时不用，后面会交给自动清除
+          stopTimeout: undefined, // 暂时不用，后面会交给自动清理
         };
         resolve(perform);
         seElement?.play();
-        seElement.onended = () => {
+        const endFunc = () => {
           for (const e of WebGAL.gameplay.performController.performList) {
             if (e.performName === performInitName) {
               isOver = true;
@@ -100,6 +98,11 @@ export const playEffect = (sentence: ISentence): IPerform => {
             }
           }
         };
+        seElement.onended = endFunc;
+        seElement.addEventListener('error', () => {
+          logger.error(`播放效果音失败 ${url}`);
+          endFunc();
+        });
       }, 1);
     }),
   };

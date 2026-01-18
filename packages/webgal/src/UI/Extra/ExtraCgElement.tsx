@@ -80,7 +80,7 @@ export function ExtraCgElement(props: IProps) {
             playSeClick();
           }}
           className={styles.showFullContainer}
-          // onMouseEnter={playSeEnter}
+          onMouseEnter={playSeEnter}
         >
           <div className={styles.showFullCgMain}>{renderMedia(true)}</div>
         </div>
@@ -90,7 +90,7 @@ export function ExtraCgElement(props: IProps) {
           showFull.set(!showFull.value);
           playSeClick();
         }}
-        // onMouseEnter={playSeEnter}
+        onMouseEnter={playSeEnter}
         style={{
           animation: `cg_softIn_${props.transformDeg} 1.5s ease-out ${100 + props.index * 100}ms forwards`,
         }}

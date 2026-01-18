@@ -1,5 +1,5 @@
-import styles from './panicYoozle.module.scss';
 import { useEffect } from 'react';
+import styles from './panicYoozle.module.scss';
 
 export const PanicYoozle = () => {
   useEffect(() => {

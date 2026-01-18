@@ -1,6 +1,4 @@
-/**
- * 眨眼参数，毫秒
- */
+/** 眨眼参数，毫秒 */
 export interface BlinkParam {
   blinkInterval: number; // 眨眼间隔
   blinkIntervalRandom: number; // 眨眼间隔随机范围
@@ -36,11 +34,57 @@ export class Live2DCore {
   public SoundManager: any;
   public Config: any;
 
+  // 临时记录未初始化前的数据
+  // 旧版表情混合模式
+  private _legacyExpressionBlendMode = false;
+  public get legacyExpressionBlendMode() {
+    return this._legacyExpressionBlendMode;
+  }
+  public set legacyExpressionBlendMode(value: boolean) {
+    this._legacyExpressionBlendMode = value;
+    if (this.isAvailable) {
+      this.Config.legacyExpressionBlendMode = value;
+    }
+  }
+
   public constructor() {
     this.initLive2D();
   }
 
-  private async initLive2D() {
+  public initLive2D() {
+    // @ts-expect-error live2dPromise is a global variable
+    const live2dPromise = window.live2dPromise as Promise<[boolean, boolean]> | undefined;
+    if (!live2dPromise) {
+      this.loadLive2DDirect();
+      return;
+    }
+
+    live2dPromise
+      .then(async ([live2d2dAvailable, live2d4Available]) => {
+        const _isAvailable = live2d2dAvailable && live2d4Available;
+        if (!_isAvailable) {
+          console.warn('live2d plugin load failed');
+          return;
+        }
+        const { Live2DModel, SoundManager, config } = await import('pixi-live2d-display-webgal');
+        this.Live2DModel = Live2DModel;
+        this.SoundManager = SoundManager;
+        this.Config = config;
+        this.isAvailable = true;
+        console.log('live2d plugin load success');
+        this.initConfig();
+      })
+      .catch((error) => {
+        this.isAvailable = false;
+        console.warn('live2d plugin load failed', error);
+      })
+      .finally(() => {
+        // @ts-expect-error live2dPromise is a global variable
+        delete window.live2dPromise;
+      });
+  }
+
+  private async loadLive2DDirect() {
     try {
       const { Live2DModel, SoundManager, config } = await import('pixi-live2d-display-webgal');
       this.Live2DModel = Live2DModel;
@@ -48,9 +92,15 @@ export class Live2DCore {
       this.Config = config;
       this.isAvailable = true;
       console.info('live2d lib load success');
+      this.initConfig();
     } catch (error) {
       this.isAvailable = false;
       console.info('live2d lib load failed', error);
     }
+  }
+
+  /** 初始化配置 */
+  private initConfig() {
+    this.Config.legacyExpressionBlendMode = this._legacyExpressionBlendMode;
   }
 }

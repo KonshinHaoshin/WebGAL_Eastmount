@@ -43,7 +43,8 @@ export const scriptExecutor = () => {
     WebGAL.sceneManager.sceneData.currentSentenceId >
     WebGAL.sceneManager.sceneData.currentScene.sentenceList.length - 1
   ) {
-    if (WebGAL.sceneManager.sceneData.sceneStack.length !== 0) {
+    if (WebGAL.sceneManager.sceneData.sceneStack.length !== 0 && !WebGAL.sceneManager.lockSceneWrite) {
+    if (WebGAL.sceneManager.sceneData.sceneStack.length !== 0 && !WebGAL.sceneManager.lockSceneWrite) {
       const sceneToRestore: ISceneEntry | undefined = WebGAL.sceneManager.sceneData.sceneStack.pop();
       if (sceneToRestore !== undefined) {
         restoreScene(sceneToRestore);
@@ -108,6 +109,7 @@ export const scriptExecutor = () => {
   const hasNotEnd = getBooleanArgByKey(currentScript, 'notend') ?? false;
   const isJudgment = webgalStore.getState().stage.judgment !== '';
   isSaveBacklog = isSaveBacklog && !hasNotEnd && !isJudgment;
+  isSaveBacklog = isSaveBacklog && !hasNotEnd;
 
   let currentStageState: IStageState;
 

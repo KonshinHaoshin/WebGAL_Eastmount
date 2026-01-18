@@ -37,10 +37,10 @@ export function showGlogalDialog(props: IShowGlobalDialogProps) {
         <div className={styles.glabalDialog_container_inner}>
           <div className={styles.title}>{props.title}</div>
           <div className={styles.button_list}>
-            <div className={styles.button} onClick={handleLeft}>
+            <div className={styles.button} onClick={handleLeft} onMouseEnter={playSeEnter}>
               <span>{props.leftText}</span>
             </div>
-            <div className={styles.button} onClick={handleRight}>
+            <div className={styles.button} onClick={handleRight} onMouseEnter={playSeEnter}>
               <span dangerouslySetInnerHTML={{ __html: props.rightText }} />
             </div>
           </div>

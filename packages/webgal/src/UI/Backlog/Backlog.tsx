@@ -56,7 +56,7 @@ function resolveCanonicalNameAndColor(
   const rawNorm = normalizeSpaces(inputName);
   const rawComp = compact(inputName);
 
-  // a) 紧凑匹配（“千早爱音”≈“千早 爱音”）
+  // a) 紧凑匹配（“千早爱音”≈“千 早爱音”）
   for (const k of Object.keys(dict)) {
     if (compact(k) === rawComp) {
       const ck = normalizeSpaces(k);
@@ -74,7 +74,7 @@ function resolveCanonicalNameAndColor(
   return { canonicalKey: rawNorm };
 }
 
-/* ====== 不同下标的字符使用不同尺寸/样式 ====== */
+/* ====== 不同下标的字符使用不同尺寸样式 ====== */
 interface CharStyle {
   fontSize: string;
   color?: string;
@@ -137,9 +137,7 @@ export const Backlog = () => {
   const timeRef = useRef<ReturnType<typeof setTimeout>>();
 
   // === 渲染列表 ===
-  // eslint-disable-next-line no-undef
   const backlogList = useMemo<JSX.Element[]>(() => {
-    // eslint-disable-next-line no-undef
     const backlogs: JSX.Element[] = [];
     const current_backlog_len = WebGAL.backlogManager.getBacklog().length;
 
@@ -163,21 +161,20 @@ export const Backlog = () => {
       // 检查是否有名字内容（去除空白字符后）
       const hasName = canonicalKey.trim() !== '';
 
-      // 拆分"姓 名"（若没有空格，则将整个名字视为"姓"，名为空）
+      // 拆分"姓 名（若没有空格，则将整个名字视为姓，名为空）
       const tokens = canonicalKey.split(' ');
       const hasSurnameGiven = tokens.length >= 2;
-      const surname = hasSurnameGiven ? tokens[0] : canonicalKey; // 有空格时取第一部分作为姓，无空格时整个名字作为"姓"
-      const given = hasSurnameGiven ? tokens.slice(1).join('') : ''; // 有空格时取剩余部分作为名，无空格时名为空
+      const surname = hasSurnameGiven ? tokens[0] : canonicalKey;
+      const given = hasSurnameGiven ? tokens.slice(1).join('') : '';
 
-      // 显示文本（如果有名，显示姓+名；如果无名，只显示姓）
+      // 显示文本（如有名，显示姓名；如无名，只显示姓）
       const display = hasSurnameGiven && given.length > 0 ? surname + given : surname;
       const chars = Array.from(display);
-      const givenStartIndex = hasSurnameGiven && given.length > 0 ? surname.length : -1; // 有名时从姓氏后开始，无名时为-1
+      const givenStartIndex = hasSurnameGiven && given.length > 0 ? surname.length : -1;
 
       const nameCharSpans = chars.map((origCh, idx) => {
-        const isSurnameFirst = idx === 0; // 第一个字符总是姓首字
-        const isGivenFirst = hasSurnameGiven && given.length > 0 && idx === givenStartIndex; // 有名且是名首字位置
-
+        const isSurnameFirst = idx === 0;
+        const isGivenFirst = hasSurnameGiven && given.length > 0 && idx === givenStartIndex;
         const ch = isSurnameFirst || isGivenFirst ? upperFirstLatin(origCh) : origCh;
 
         const s = styleForIndex(idx, {
@@ -194,7 +191,6 @@ export const Backlog = () => {
           marginRight: 0,
         };
 
-        // 姓首字有颜色：纯色实心（这种情况不会发生，因为姓是空的）
         if (isSurnameFirst && surnameColor) {
           return (
             <span key={`${ch}-${idx}`} className={styles.name_char} style={baseStyle}>
@@ -235,7 +231,6 @@ export const Backlog = () => {
           style={{ animationDelay: `${20 * ((i - 1) % 20)}ms` }}
           key={'backlogItem' + backlogItem.currentStageState.showText + backlogItem.saveScene.currentSentenceId}
         >
-          {/* 左：按钮 | 名字底板+文字 */}
           <div className={styles.backlog_func_area}>
             <div className={styles.backlog_item_button_list}>
               <div
@@ -250,8 +245,27 @@ export const Backlog = () => {
               >
                 <img src={backlog_item_button} alt="return" className={styles.backlog_item_button_img} />
               </div>
-
-              {/* 语音播放按钮已屏蔽 */}
+              {backlogItem.currentStageState.vocal ? (
+                <div
+                  onClick={() => {
+                    playSeClick();
+                    const backlog_audio_element: HTMLAudioElement | null = document.getElementById(
+                      'backlog_audio_play_element_' + indexOfBacklog,
+                    ) as HTMLAudioElement | null;
+                    if (backlog_audio_element) {
+                      backlog_audio_element.currentTime = 0;
+                      const userDataStore = webgalStore.getState().userData;
+                      const mainVol = userDataStore.optionData.volumeMain;
+                      backlog_audio_element.volume = mainVol * 0.01 * userDataStore.optionData.vocalVolume * 0.01;
+                      backlog_audio_element?.play();
+                    }
+                  }}
+                  onMouseEnter={playSeEnter}
+                  className={styles.backlog_item_button_element}
+                >
+                  <VolumeNotice theme="outline" size={iconSize} fill="#ffffff" strokeWidth={3} />
+                </div>
+              ) : null}
             </div>
 
             {hasName && (
@@ -262,12 +276,10 @@ export const Backlog = () => {
             )}
           </div>
 
-          {/* 右：正文 */}
           <div className={styles.backlog_item_content}>
             <span className={styles.backlog_item_content_text}>{showTextElementList}</span>
           </div>
 
-          {/* 语音元素（如有） */}
           <audio id={'backlog_audio_play_element_' + indexOfBacklog} src={backlogItem.currentStageState.vocal ?? ''} />
         </div>,
       );

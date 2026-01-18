@@ -12,7 +12,7 @@ import { logger } from '@/Core/util/logger';
 import { getAnimateDuration } from '@/Core/Modules/animationFunctions';
 import { WebGAL } from '@/Core/WebGAL';
 import { baseBlinkParam, baseFocusParam, BlinkParam, FocusParam } from '@/Core/live2DCore';
-import { WEBGAL_NONE } from '../constants';
+import { DEFAULT_FIG_IN_DURATION, DEFAULT_FIG_OUT_DURATION, WEBGAL_NONE } from '../constants';
 /**
  * 更改立绘
  * @param sentence 语句
@@ -45,7 +45,7 @@ export function changeFigure(sentence: ISentence): IPerform {
     eyesAnimationKey = 'blinkAnimationRight';
   }
 
-  // id 与 自由立绘
+  // id 与自由立绘
   let key = getStringArgByKey(sentence, 'id') ?? '';
   const isFreeFigure = key ? true : false;
   const id = key ? key : `fig-${pos}`;
@@ -113,31 +113,27 @@ export function changeFigure(sentence: ISentence): IPerform {
   // 其他参数
   const transformString = getStringArgByKey(sentence, 'transform');
   const ease = getStringArgByKey(sentence, 'ease') ?? '';
-  let duration = getNumberArgByKey(sentence, 'duration') ?? 50;
+  const durationArg = getNumberArgByKey(sentence, 'duration');
+  let duration = durationArg ?? DEFAULT_FIG_IN_DURATION;
   const enterAnimation = getStringArgByKey(sentence, 'enter');
   const exitAnimation = getStringArgByKey(sentence, 'exit');
   let zIndex = getNumberArgByKey(sentence, 'zIndex') ?? -1;
+  const enterDuration = getNumberArgByKey(sentence, 'enterDuration') ?? duration;
+  duration = enterDuration;
+  const exitDuration = getNumberArgByKey(sentence, 'exitDuration') ?? DEFAULT_FIG_OUT_DURATION;
 
   // 视频形式立绘，允许 'true' | 'false' | 'disappear'
   const loopArg = getStringArgByKey(sentence, 'loop') ?? 'true';
 
   // LUT 参数
   const lutArg = getStringArgByKey(sentence, 'lut');
-  console.log('[LUT Debug] changeFigure LUT arg:', { lutArg, lutArgType: typeof lutArg, lutArgLength: lutArg?.length });
   if (lutArg !== null) {
     if (lutArg === '') {
-      // 明确传入空字符串，清除 LUT
-      console.log('[LUT Debug] Setting lut to empty string to clear LUT');
       webgalStore.dispatch(stageActions.setFigureMetaData([id, 'lut', '', false]));
     } else {
-      // 传入具体的 LUT 文件路径
-      console.log('[LUT Debug] Setting lut to file path:', lutArg);
       webgalStore.dispatch(stageActions.setFigureMetaData([id, 'lut', assetSetter(lutArg, fileType.lut), false]));
     }
-  } else {
-    console.log('[LUT Debug] No lut parameter, keeping existing LUT');
   }
-  // 如果没有 -lut 参数，保持现有 LUT 不变
 
   const dispatch = webgalStore.dispatch;
 
@@ -192,26 +188,29 @@ export function changeFigure(sentence: ISentence): IPerform {
    */
   if (isUrlChanged) {
     webgalStore.dispatch(stageActions.removeEffectByTargetId(id));
+    webgalStore.dispatch(stageActions.removeAnimationSettingsByTarget(id));
     const oldStageObject = WebGAL.gameplay.pixiStage?.getStageObjByKey(id);
     if (oldStageObject) {
       oldStageObject.isExiting = true;
     }
   }
   const setAnimationNames = (key: string, sentence: ISentence) => {
-    // 处理 transform 和 默认 transform
     let animationObj: AnimationFrame[];
     if (transformString) {
-      console.log(transformString);
       try {
         const frame = JSON.parse(transformString) as AnimationFrame;
         animationObj = generateTransformAnimationObj(key, frame, duration, ease);
+        animationObj[0].alpha = 0;
         const animationName = (Math.random() * 10).toString(16);
         const newAnimation: IUserAnimation = { name: animationName, effects: animationObj };
         WebGAL.animationManager.addAnimation(newAnimation);
         duration = getAnimateDuration(animationName);
         WebGAL.animationManager.nextEnterAnimationName.set(key, animationName);
+        WebGAL.animationManager.nextEnterAnimationDuration.set(key, duration);
+        webgalStore.dispatch(
+          stageActions.updateAnimationSettings({ target: key, key: 'enterAnimationName', value: animationName }),
+        );
       } catch (e) {
-        // 解析都错误了，歇逼吧
         applyDefaultTransform();
       }
     } else {
@@ -219,30 +218,48 @@ export function changeFigure(sentence: ISentence): IPerform {
     }
 
     function applyDefaultTransform() {
-      // 应用默认的
       const frame = {};
       animationObj = generateTransformAnimationObj(key, frame as AnimationFrame, duration, ease);
+      animationObj[0].alpha = 0;
       const animationName = (Math.random() * 10).toString(16);
       const newAnimation: IUserAnimation = { name: animationName, effects: animationObj };
       WebGAL.animationManager.addAnimation(newAnimation);
       duration = getAnimateDuration(animationName);
       WebGAL.animationManager.nextEnterAnimationName.set(key, animationName);
+      WebGAL.animationManager.nextEnterAnimationDuration.set(key, duration);
+      webgalStore.dispatch(
+        stageActions.updateAnimationSettings({ target: key, key: 'enterAnimationName', value: animationName }),
+      );
     }
 
     if (enterAnimation) {
       WebGAL.animationManager.nextEnterAnimationName.set(key, enterAnimation);
       duration = getAnimateDuration(enterAnimation);
+      webgalStore.dispatch(
+        stageActions.updateAnimationSettings({ target: key, key: 'enterAnimationName', value: enterAnimation }),
+      );
     }
     if (exitAnimation) {
       WebGAL.animationManager.nextExitAnimationName.set(key + '-off', exitAnimation);
       duration = getAnimateDuration(exitAnimation);
+      webgalStore.dispatch(
+        stageActions.updateAnimationSettings({ target: key, key: 'exitAnimationName', value: exitAnimation }),
+      );
+    }
+    if (enterDuration >= 0) {
+      webgalStore.dispatch(
+        stageActions.updateAnimationSettings({ target: key, key: 'enterDuration', value: enterDuration }),
+      );
+    }
+    if (exitDuration >= 0) {
+      webgalStore.dispatch(
+        stageActions.updateAnimationSettings({ target: key, key: 'exitDuration', value: exitDuration }),
+      );
     }
   };
 
-  function setFigureData() {
+  function postFigureStateSet() {
     if (isUrlChanged) {
-      // 当 url 发生变化时，即发生新立绘替换
-      // 应当赋予一些参数以默认值，防止从旧立绘的状态获取数据
       bounds = bounds ?? [0, 0, 0, 0];
       blink = blink ?? cloneDeep(baseBlinkParam);
       focus = focus ?? cloneDeep(baseFocusParam);
@@ -253,58 +270,60 @@ export function changeFigure(sentence: ISentence): IPerform {
       dispatch(stageActions.setLive2dFocus({ target: key, focus }));
       dispatch(stageActions.setFigureMetaData([key, 'zIndex', zIndex, false]));
       dispatch(stageActions.setFigureMetaData([key, 'loop', loopArg, false]));
+      WebGAL.gameplay.performController.unmountPerform(`animation-${key}`, true);
     } else {
-      // 当 url 没有发生变化时，即没有新立绘替换
-      // 应当保留旧立绘的状态，仅在需要时更新
       if (motion || bounds) {
         dispatch(stageActions.setLive2dMotion({ target: key, motion, overrideBounds: bounds }));
       }
       if (expression) {
         dispatch(stageActions.setLive2dExpression({ target: key, expression }));
       }
+      if (blink) {
+        dispatch(stageActions.setLive2dBlink({ target: key, blink }));
+      }
+      if (focus) {
+        dispatch(stageActions.setLive2dFocus({ target: key, focus }));
+      }
+      if (zIndex >= 0) {
+        dispatch(stageActions.setFigureMetaData([key, 'zIndex', zIndex, false]));
+      }
+      dispatch(stageActions.setFigureMetaData([key, 'loop', loopArg, false]));
     }
   }
 
   if (isFreeFigure) {
-    // 在这里设置自由立绘
-    const freeFigure = webgalStore.getState().stage.freeFigure;
-    const currentFigureCount = freeFigure.filter((e) => e.key === id).length;
-
-    let figPos: 'center' | 'left' | 'right' = 'center';
-    if (pos === 'center') figPos = 'center';
-    if (pos === 'left') figPos = 'left';
-    if (pos === 'right') figPos = 'right';
-    if (currentFigureCount === 0) {
-      dispatch(stageActions.setFreeFigureByKey({ basePosition: figPos, key: id, name: content } satisfies IFreeFigure));
-    } else {
-      dispatch(stageActions.setFreeFigureByKey({ basePosition: figPos, key: id, name: content } satisfies IFreeFigure));
-    }
+    const freeFigureItem: IFreeFigure = { key: id, name: content, basePosition: pos };
     setAnimationNames(id, sentence);
-    setFigureData();
+    postFigureStateSet();
+    dispatch(stageActions.setFreeFigureByKey(freeFigureItem));
   } else {
-    if (pos === 'center') {
-      dispatch(setStage({ key: 'figName', value: content }));
-      setAnimationNames('fig-center', sentence);
-    } else if (pos === 'left') {
-      dispatch(setStage({ key: 'figNameLeft', value: content }));
-      setAnimationNames('fig-left', sentence);
-    } else if (pos === 'right') {
-      dispatch(setStage({ key: 'figNameRight', value: content }));
-      setAnimationNames('fig-right', sentence);
-    }
-    setFigureData();
+    const positionMap = {
+      center: 'fig-center',
+      left: 'fig-left',
+      right: 'fig-right',
+    };
+    const dispatchMap: Record<string, keyof IStageState> = {
+      center: 'figName',
+      left: 'figNameLeft',
+      right: 'figNameRight',
+    };
+
+    key = positionMap[pos];
+    setAnimationNames(key, sentence);
+    postFigureStateSet();
+    dispatch(setStage({ key: dispatchMap[pos], value: content }));
   }
 
   return {
-    performName: `changeFigure-${sentence.content}`,
+    performName: `enter-${key}`,
     duration,
     isHoldOn: false,
     stopFunction: () => {
-      WebGAL.gameplay.pixiStage?.stopPresetAnimationOnTarget(id);
+      WebGAL.gameplay.pixiStage?.stopPresetAnimationOnTarget(key);
     },
     blockingNext: () => false,
     blockingAuto: () => true,
-    stopTimeout: undefined, // 暂时不用，后面会交给自动清除
+    stopTimeout: undefined, // 暂时不用，后面会交给自动清理
   };
 }
 
@@ -318,7 +337,6 @@ function parseManoPoseArg(arg: string): string[] {
 
 function getOverrideBoundsArr(boundsFromArgs: string | undefined | null): [number, number, number, number] | undefined {
   if (!boundsFromArgs) return undefined;
-  // Try JSON array first
   try {
     const arr = JSON.parse(boundsFromArgs) as [number, number, number, number];
     if (Array.isArray(arr) && arr.length === 4 && arr.every((v) => typeof v === 'number')) {

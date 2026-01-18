@@ -17,7 +17,7 @@ export const NormalButton = (props: INormalButton) => {
             playSeSwitch();
             props.functionList[i]();
           }}
-          // onMouseEnter={playSeEnter}
+          onMouseEnter={playSeEnter}
         >
           {props.textList[i]}
         </div>
@@ -32,7 +32,7 @@ export const NormalButton = (props: INormalButton) => {
             playSeSwitch();
             props.functionList[i]();
           }}
-          // onMouseEnter={playSeEnter}
+          onMouseEnter={playSeEnter}
         >
           {props.textList[i]}
         </div>

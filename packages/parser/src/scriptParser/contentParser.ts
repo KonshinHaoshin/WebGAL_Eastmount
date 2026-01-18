@@ -62,7 +62,6 @@ function getPresentTheEvidenceContent(contentRaw: string, assetSetter: any): str
 
   return parsedScenes.join('|') + (tagPart ? ` ${tagPart}` : '');
 }
-
 function getChooseContent(contentRaw: string, assetSetter: any): string {
   const chooseList = contentRaw.split(/(?<!\\)\|/);
   const chooseKeyList: Array<string> = [];

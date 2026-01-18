@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import { INSTALLED } from 'pixi.js';
 import { v4 as uuid } from 'uuid';
 import { webgalStore } from '@/store/store';
 import { setStage, stageActions } from '@/store/stageReducer';
@@ -19,6 +20,7 @@ import { calculateStates, CharacterPlayer } from 'webgal_mano';
 import { SCREEN_CONSTANTS } from '@/Core/util/constants';
 import { addSpineBgImpl, addSpineFigureImpl } from '@/Core/controller/stage/pixi/spine';
 import { AnimatedGIF } from '@pixi/gif';
+import { GifResource } from './GifResource';
 import { setFreeFigure } from '@/store/stageReducer';
 import { baseBlinkParam, baseFocusParam, BlinkParam, FocusParam } from '@/Core/live2DCore';
 import { isEqual } from 'lodash';
@@ -30,6 +32,7 @@ export interface IAnimationObject {
   setEndState: Function;
   tickerFunc: PIXI.TickerCallback<number>;
   getEndStateEffect?: Function;
+  forceStopWithoutSetEndState?: Function;
 }
 
 interface IStageAnimationObject {
@@ -73,6 +76,8 @@ export interface ILive2DRecord {
 
 // @ts-ignore
 window.PIXI = PIXI;
+
+INSTALLED.push(GifResource);
 
 export default class PixiStage {
   public static assignTransform<T extends ITransform>(target: T, source?: ITransform) {
@@ -288,7 +293,7 @@ export default class PixiStage {
       const targetPixiContainer = this.getStageObjByKey(target);
       if (targetPixiContainer) {
         const container = targetPixiContainer.pixiContainer;
-        PixiStage.assignTransform(container, effect.transform);
+        if (container) PixiStage.assignTransform(container, effect.transform);
       }
       return;
     }
@@ -315,6 +320,19 @@ export default class PixiStage {
       const thisTickerFunc = this.stageAnimations[index];
       this.currentApp?.ticker.remove(thisTickerFunc.animationObject.tickerFunc);
       thisTickerFunc.animationObject.setEndState();
+      this.unlockStageObject(thisTickerFunc.targetKey ?? 'default');
+      this.stageAnimations.splice(index, 1);
+    }
+  }
+
+  public removeAnimationWithoutSetEndState(key: string) {
+    const index = this.stageAnimations.findIndex((e) => e.key === key);
+    if (index >= 0) {
+      const thisTickerFunc = this.stageAnimations[index];
+      this.currentApp?.ticker.remove(thisTickerFunc.animationObject.tickerFunc);
+      if (thisTickerFunc.animationObject.forceStopWithoutSetEndState) {
+        thisTickerFunc.animationObject.forceStopWithoutSetEndState();
+      }
       this.unlockStageObject(thisTickerFunc.targetKey ?? 'default');
       this.stageAnimations.splice(index, 1);
     }
@@ -1515,6 +1533,7 @@ export default class PixiStage {
       const figureRecordTarget = this.live2dFigureRecorder.find((e) => e.target === key);
       if (target && figureRecordTarget?.expression !== expression) {
         const container = target.pixiContainer;
+        if (!container) return;
         const children = container.children;
         for (const model of children) {
           // @ts-ignore
@@ -1536,6 +1555,7 @@ export default class PixiStage {
     const figureRecordTarget = this.live2dFigureRecorder.find((e) => e.target === key);
     if (target && !isEqual(figureRecordTarget?.blink, blinkParam)) {
       const container = target.pixiContainer;
+      if (!container) return;
       const children = container.children;
       let newBlinkParam: BlinkParam = { ...baseBlinkParam, ...blinkParam };
       // 继承现有 BlinkParam
@@ -1556,6 +1576,7 @@ export default class PixiStage {
     const figureRecordTarget = this.live2dFigureRecorder.find((e) => e.target === key);
     if (target && !isEqual(figureRecordTarget?.focus, focusParam)) {
       const container = target.pixiContainer;
+      if (!container) return;
       const children = container.children;
       let newFocusParam: FocusParam = { ...baseFocusParam, ...focusParam };
       // 继承现有 FocusParam
@@ -1579,6 +1600,7 @@ export default class PixiStage {
     const target = this.figureObjects.find((e) => e.key === key);
     if (target && target.sourceType === 'live2d') {
       const container = target.pixiContainer;
+      if (!container) return;
       const children = container.children;
       for (const model of children) {
         // @ts-ignore

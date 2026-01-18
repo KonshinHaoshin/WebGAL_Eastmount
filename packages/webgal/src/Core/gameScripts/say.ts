@@ -94,8 +94,10 @@ export const say = (sentence: ISentence): IPerform => {
   let pos: 'center' | 'left' | 'right' = 'center';
   const leftFromArgs = getBooleanArgByKey(sentence, 'left') ?? false;
   const rightFromArgs = getBooleanArgByKey(sentence, 'right') ?? false;
+  const centerFromArgs = getBooleanArgByKey(sentence, 'center') ?? false;
   if (leftFromArgs) pos = 'left';
   if (rightFromArgs) pos = 'right';
+  if (centerFromArgs) pos = 'center';
 
   let key = getStringArgByKey(sentence, 'figureId') ?? '';
 

@@ -56,7 +56,7 @@ export function ExtraBgm() {
         style={{
           animationDelay: `${i * 150}ms`,
         }}
-        // onMouseEnter={playSeEnter}
+        onMouseEnter={playSeEnter}
       >
         {e.name}
       </div>
@@ -72,65 +72,65 @@ export function ExtraBgm() {
     <div className={styles.bgmContainer} style={{ maxHeight: bgmPlayerHeight }}>
       <div className={styles.bgmPlayerMain}>
         <div
-          onClick={() => {
-            playSeClick();
-            if (foundCurrentBgmIndex <= 0) {
-              setBgmByIndex(bgmListLen - 1);
-            } else {
-              setBgmByIndex(foundCurrentBgmIndex - 1);
-            }
-          }}
-          // onMouseEnter={playSeEnter}
-          className={styles.bgmControlButton}
-        >
+        onClick={() => {
+          playSeClick();
+          if (foundCurrentBgmIndex <= 0) {
+            setBgmByIndex(bgmListLen - 1);
+          } else {
+            setBgmByIndex(foundCurrentBgmIndex - 1);
+          }
+        }}
+        onMouseEnter={playSeEnter}
+        className={styles.bgmControlButton}
+      >
           <GoStart theme="filled" size={iconSize} fill="#fff" strokeWidth={3} strokeLinejoin="miter" />
         </div>
         <div
-          onClick={() => {
-            playSeClick();
-            const bgmControl: HTMLAudioElement = document.getElementById('currentBgm') as HTMLAudioElement;
-            bgmControl?.play().then();
-          }}
-          // onMouseEnter={playSeEnter}
-          className={styles.bgmControlButton}
-        >
+        onClick={() => {
+          playSeClick();
+          const bgmControl: HTMLAudioElement = document.getElementById('currentBgm') as HTMLAudioElement;
+          bgmControl?.play().then();
+        }}
+        onMouseEnter={playSeEnter}
+        className={styles.bgmControlButton}
+      >
           <PlayOne theme="filled" size={iconSize} fill="#fff" strokeWidth={3} strokeLinejoin="miter" />
         </div>
         <div
-          onClick={() => {
-            playSeClick();
-            if (foundCurrentBgmIndex >= bgmListLen - 1) {
-              setBgmByIndex(0);
-            } else {
-              setBgmByIndex(foundCurrentBgmIndex + 1);
-            }
-          }}
-          // onMouseEnter={playSeEnter}
-          className={styles.bgmControlButton}
-        >
+        onClick={() => {
+          playSeClick();
+          if (foundCurrentBgmIndex >= bgmListLen - 1) {
+            setBgmByIndex(0);
+          } else {
+            setBgmByIndex(foundCurrentBgmIndex + 1);
+          }
+        }}
+        onMouseEnter={playSeEnter}
+        className={styles.bgmControlButton}
+      >
           <GoEnd theme="filled" size={iconSize} fill="#fff" strokeWidth={3} strokeLinejoin="miter" />
         </div>
         <div
-          onClick={() => {
-            playSeClick();
-            const bgmControl: HTMLAudioElement = document.getElementById('currentBgm') as HTMLAudioElement;
-            bgmControl.pause();
-          }}
-          // onMouseEnter={playSeEnter}
-          className={styles.bgmControlButton}
-        >
+        onClick={() => {
+          playSeClick();
+          const bgmControl: HTMLAudioElement = document.getElementById('currentBgm') as HTMLAudioElement;
+          bgmControl.pause();
+        }}
+        onMouseEnter={playSeEnter}
+        className={styles.bgmControlButton}
+      >
           <SquareSmall theme="filled" size={iconSize} fill="#fff" strokeWidth={3} strokeLinejoin="miter" />
         </div>
         <div className={styles.bgmName}>{foundCurrentBgmName}</div>
         <div
-          onClick={() => {
-            playSeClick();
-            isShowBgmList.set(!isShowBgmList.value);
-          }}
-          // onMouseEnter={playSeEnter}
-          className={styles.bgmControlButton}
-          style={{ marginLeft: 'auto' }}
-        >
+        onClick={() => {
+          playSeClick();
+          isShowBgmList.set(!isShowBgmList.value);
+        }}
+        onMouseEnter={playSeEnter}
+        className={styles.bgmControlButton}
+        style={{ marginLeft: 'auto' }}
+      >
           <MusicList theme="filled" size={iconSize} fill="#fff" strokeWidth={3} strokeLinejoin="miter" />
         </div>
       </div>

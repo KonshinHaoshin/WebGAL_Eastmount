@@ -44,6 +44,7 @@ export const SCRIPT_CONFIG = [
   { scriptString: 'testimony', scriptType: commandType.testimony },
   { scriptString: 'clearTestimony', scriptType: commandType.clearTestimony },
   { scriptString: 'refute', scriptType: commandType.refute },
+  { scriptString: 'callSteam', scriptType: commandType.callSteam },
 ];
 export const ADD_NEXT_ARG_LIST = [
   commandType.bgm,
@@ -63,6 +64,7 @@ export const ADD_NEXT_ARG_LIST = [
   commandType.testimony,
   commandType.clearTestimony,
   commandType.refute,
+  commandType.callSteam,
 ];
 
 export type ConfigMap = Map<string, ConfigItem>;

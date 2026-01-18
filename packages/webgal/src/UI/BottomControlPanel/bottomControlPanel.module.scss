@@ -72,6 +72,7 @@
 
 .singleButton:hover,
 .singleButton_active {
+.singleButton:hover, .singleButton_active {
   background-color: rgba(255, 255, 255, 0.3);
 }
 
@@ -127,4 +128,5 @@
 .textContainer {
   overflow: hidden;
   padding: 0 0 0 0.5em;
+}
 }

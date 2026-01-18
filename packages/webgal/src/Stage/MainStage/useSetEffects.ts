@@ -46,4 +46,5 @@ function convertTransform(transform: ITransform | undefined) {
     return { ...rest, x: position.x, y: position.y };
   }
   return { ...rest };
+  return { ...rest, x: position.x, y: position.y };
 }

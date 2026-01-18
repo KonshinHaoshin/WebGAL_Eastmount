@@ -30,7 +30,7 @@ export const Load: FC = () => {
           setStorage();
           playSePageChange();
         }}
-        // onMouseEnter={playSeEnter}
+        onMouseEnter={playSeEnter}
         key={'Load_element_page' + i}
         className={classNameOfElement}
       >
@@ -41,9 +41,9 @@ export const Load: FC = () => {
   }
 
   const showSaves = [];
-  // 现在尝试设置10个存档每页
-  const start = (userDataState.optionData.slPage - 1) * 5 + 1;
-  const end = start + 4;
+  // 邇ｰ蝨ｨ蟆晁ｯ戊ｮｾ鄂ｮ10荳ｪ蟄俶｡｣豈城｡?
+  const start = (userDataState.optionData.slPage - 1) * 10 + 1;
+  const end = start + 9;
 
   useEffect(() => {
     getSavesFromStorage(start, end);
@@ -58,33 +58,32 @@ export const Load: FC = () => {
       const speaker = saveData.nowStageState.showName === '' ? '\u00A0' : `${saveData.nowStageState.showName}`;
       const speakerView = easyCompile(speaker);
       saveElementContent = (
-        <div className={styles.Save_Load_content_element}>
+        <>
           <div className={styles.Save_Load_content_element_top}>
-            <div className={styles.Save_Load_content_element_top_index}>No.{i}</div>
-            <div className={styles.Save_Load_content_element_top_date}>{saveData.saveTime}</div>
-          </div>
-          <div className={styles.Save_Load_content_miniRen}>
-            <img className={styles.Save_Load_content_miniRen_bg} src={saveData.previewImage} />
-          </div>
-          <div className={styles.Save_Load_content_text}>
-            <div className={styles.Save_Load_content_speaker}>{speakerView}</div>
-            <div className={styles.Save_Load_content_text_padding}>
-              {easyCompile(saveData.nowStageState.showText)}
+            <div className={styles.Save_Load_content_element_top_index + ' ' + styles.Load_content_elememt_top_index}>
+              {saveData.index}
+            </div>
+            <div className={styles.Save_Load_content_element_top_date + ' ' + styles.Load_content_element_top_date}>
+              {saveData.saveTime}
             </div>
           </div>
-        </div>
+          <div className={styles.Save_Load_content_miniRen}>
+            <img className={styles.Save_Load_content_miniRen_bg} alt="Save_img_preview" src={saveData.previewImage} />
+          </div>
+          <div className={styles.Save_Load_content_text}>
+            <div className={styles.Save_Load_content_speaker + ' ' + styles.Load_content_speaker}>{speakerView}</div>
+            <div className={styles.Save_Load_content_text_padding}>{easyCompile(saveData.nowStageState.showText)}</div>
+          </div>
+        </>
       );
     }
-    // else {
-
-    // }
     const saveElement = (
       <div
         onClick={() => {
           loadGame(i);
           playSeClick();
         }}
-        // onMouseEnter={playSeEnter}
+        onMouseEnter={playSeEnter}
         key={'loadElement_' + i}
         className={styles.Save_Load_content_element}
         style={{ animationDelay: `${animationIndex * 30}ms` }}

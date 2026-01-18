@@ -46,6 +46,21 @@
   100% {
     text-shadow: 0 0 15px rgba(0, 0, 0, 0.65);
   }
+@import 'Core/util/constants';
+
+@font-face {
+  font-family: '思源宋体';
+  src: url('assets/fonts/SourceHanSerifCN-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'LXGW';
+  src: url('assets/fonts/LXGWWenKai-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'WebgalUI';
+  src: url('assets/fonts/OPPOSans-R.ttf') format('truetype');
 }
 
 a {
@@ -75,6 +90,8 @@ body {
   font-family: "WebgalUI", -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
   'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
   sans-serif;
+  font-family: 'WebgalUI', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+    'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
@@ -84,6 +101,7 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
   monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
 #root {
@@ -186,4 +204,7 @@ code {
 
 #root{
   /*will-change: transform;*/
+}
+#pixiCanvas {
+  z-index: 5;
 }

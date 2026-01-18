@@ -11,28 +11,28 @@ import useSoundEffect from '@/hooks/useSoundEffect';
 import { showGlogalDialog } from '@/UI/GlobalDialog/GlobalDialog';
 
 /**
- * Menu页的底栏
+ * Menué¡µçš„åº•æ 
  * @constructor
  */
 export const MenuPanel = () => {
-  // 国际化
+  // å›½é™…åŒ?
   const t = useTrans('menu.');
 
   const { playSeClick, playSeDialogOpen, playSePageChange, playSeCancel } = useSoundEffect();
   const GUIState = useSelector((state: RootState) => state.GUI);
   const dispatch = useDispatch();
-  // 设置Menu按钮的高亮
+  // è®¾ç½®MenuæŒ‰é’®çš„é«˜äº®
   const SaveTagOn = GUIState.currentMenuTag === MenuPanelTag.Save ? ` ${styles.MenuPanel_button_hl}` : ``;
   const LoadTagOn = GUIState.currentMenuTag === MenuPanelTag.Load ? ` ${styles.MenuPanel_button_hl}` : ``;
   const OptionTagOn = GUIState.currentMenuTag === MenuPanelTag.Option ? ` ${styles.MenuPanel_button_hl}` : ``;
 
-  // 设置Menu按钮的颜色
+  // è®¾ç½®MenuæŒ‰é’®çš„é¢œè‰?
   const SaveTagColor = GUIState.currentMenuTag === MenuPanelTag.Save ? `rgba(74, 34, 93, 0.9)` : `rgba(123,144,169,1)`;
   const LoadTagColor = GUIState.currentMenuTag === MenuPanelTag.Load ? `rgba(11, 52, 110, 0.9)` : `rgba(123,144,169,1)`;
   const OptionTagColor =
     GUIState.currentMenuTag === MenuPanelTag.Option ? `rgba(81, 110, 65, 0.9)` : `rgba(123,144,169,1)`;
 
-  // 设置Menu图标的颜色
+  // è®¾ç½®Menuå›¾æ ‡çš„é¢œè‰?
   const SaveIconColor = GUIState.currentMenuTag === MenuPanelTag.Save ? `rgba(74, 34, 93, 0.9)` : `rgba(123,144,169,1)`;
   const LoadIconColor =
     GUIState.currentMenuTag === MenuPanelTag.Load ? `rgba(11, 52, 110, 0.9)` : `rgba(123,144,169,1)`;
@@ -73,14 +73,14 @@ export const MenuPanel = () => {
         clickFunc={() => {
           playSeDialogOpen();
           showGlogalDialog({
-            title: '即将返回标题界面。',
-            leftText: '取消',
-            rightText: '<span style="color: red">前</span>往标题界面',
-            leftFunc: () => { },
-            rightFunc: () => {
+            title: t('$gaming.buttons.titleTips'),
+            leftText: t('$common.yes'),
+            rightText: t('$common.no'),
+            leftFunc: () => {
               backToTitle();
               dispatch(setVisibility({ component: 'showMenuPanel', visibility: false }));
             },
+            rightFunc: () => {},
           });
         }}
         tagName={t('title.title')}

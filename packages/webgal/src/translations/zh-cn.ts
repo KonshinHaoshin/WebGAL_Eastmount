@@ -186,7 +186,7 @@ const zhCn = {
       fullscreen: '全屏',
       options: '选项',
       title: '标题',
-      titleTips: '即将返回标题界面。',
+      titleTips: '确定要返回标题界面吗？',
     },
   },
 

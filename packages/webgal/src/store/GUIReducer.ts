@@ -1,22 +1,26 @@
-/**
- * @file 记录当前GUI的状态信息，引擎初始化时会重置。
- * @author Mahiru
- */
 import { getStorage } from '@/Core/controller/storage/storageController';
-import { GuiAsset, IGuiState, MenuPanelTag, setAssetPayload, setVisibilityPayload } from '@/store/guiInterface';
+import {
+  FontOption,
+  GuiAsset,
+  IGuiState,
+  MenuPanelTag,
+  setAssetPayload,
+  setVisibilityPayload,
+} from '@/store/guiInterface';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { key } from 'localforage';
+import { DEFAULT_FONT_OPTIONS } from '@/Core/util/fonts/fontOptions';
 
 /**
- * 初始GUI状态表
+ * ��ʼGUI״̬��
  */
 const initState: IGuiState = {
+  fontOptions: [...DEFAULT_FONT_OPTIONS],
   showBacklog: false,
   showStarter: true,
   showTitle: true,
   showMenuPanel: false,
   showTextBox: true,
-  showControls: false,
+  showControls: true,
   controlsVisibility: true,
   currentMenuTag: MenuPanelTag.Option,
   titleBg: '',
@@ -27,7 +31,7 @@ const initState: IGuiState = {
   showPanicOverlay: false,
   isEnterGame: false,
   isShowLogo: true,
-  enableAppreciationMode: false, // Paf87
+  enableAppreciationMode: false,
   fontOptimization: false,
   showPhone: false,
   showManopediaUpdate: false,
@@ -37,51 +41,43 @@ const initState: IGuiState = {
 };
 
 /**
- * GUI状态的Reducer
+ * GUI״̬��Reducer
  */
 const GUISlice = createSlice({
   name: 'gui',
   initialState: initState,
   reducers: {
     /**
-     * 设置GUI的各组件的显示状态
-     * @param state 当前GUI状态
-     * @param action 改变显示状态的Action
+     * ����GUI�ĸ��������ʾ״̬
+     * @param state ��ǰGUI״̬
+     * @param action �ı���ʾ״̬��Action
      */
     setVisibility: (state, action: PayloadAction<setVisibilityPayload>) => {
       getStorage();
       const { component, visibility, itemInfo } = action.payload;
       state[component] = visibility;
-      
-      // 如果是显示魔女图鉴更新提示，并且有物品信息，则存储物品信息
+
       if (component === 'showManopediaUpdate' && itemInfo) {
         state.manopediaUpdateItem = itemInfo;
       } else if (component === 'showManopediaUpdate' && !visibility) {
-        // 隐藏提示时清空物品信息
         state.manopediaUpdateItem = null;
       }
-      
-      // 如果是显示物品提示，并且有物品信息，则存储物品信息
+
       if (component === 'showItem' && itemInfo) {
         state.showItemInfo = itemInfo;
       } else if (component === 'showItem' && !visibility) {
-        // 隐藏提示时清空物品信息
         state.showItemInfo = null;
       }
     },
     /**
-     * 设置MenuPanel的当前选中项
-     * @param state 当前GUI状态
-     * @param action 改变当前选中项的Action
+     * ����MenuPanel�ĵ�ǰѡ����
      */
     setMenuPanelTag: (state, action: PayloadAction<MenuPanelTag>) => {
       getStorage();
       state.currentMenuTag = action.payload;
     },
     /**
-     * 设置GUI资源的值
-     * @param state 当前GUI状态
-     * @param action 改变资源的Action
+     * ����GUI��Դ��ֵ
      */
     setGuiAsset: (state, action: PayloadAction<setAssetPayload>) => {
       const { asset, value } = action.payload;
@@ -91,15 +87,16 @@ const GUISlice = createSlice({
       state.logoImage = [...action.payload];
     },
     /**
-     * 设置 enableAppreciationMode 属性
-     * @param state 当前GUI状态
-     * @param action 改变 enableAppreciationMode 属性的Action
+     * ���� enableAppreciationMode ����
      */
     setEnableAppreciationMode: (state, action: PayloadAction<boolean>) => {
       state.enableAppreciationMode = action.payload;
     },
     setFontOptimization: (state, action: PayloadAction<boolean>) => {
       state.fontOptimization = action.payload;
+    },
+    setFontOptions: (state, action: PayloadAction<FontOption[]>) => {
+      state.fontOptions = [...action.payload];
     },
   },
 });
@@ -111,61 +108,6 @@ export const {
   setLogoImage,
   setEnableAppreciationMode,
   setFontOptimization,
+  setFontOptions,
 } = GUISlice.actions;
 export default GUISlice.reducer;
-
-// export function GuiStateStore(): GuiStore {
-//     const [GuiState, setGuiState] = useState(initState);
-//     /**
-//      * 设置各组件的可见性
-//      * @param key 设置的组件
-//      * @param value 可见性，true or false
-//      */
-//     const setVisibility = <K extends keyof componentsVisibility>(key: K, value: boolean) => {
-//
-//         setGuiState(state => {
-//             getStorage();
-//             state[key] = value;
-//             if (key === 'showMenuPanel' || key === 'showBacklog') {
-//                 state['showTextBox'] = !value;
-//             }
-//             return {...state};
-//         });
-//
-//     };
-//
-//     /**
-//      * 设置Menu组件显示的标签页
-//      * @param value 标签页
-//      */
-//     const setMenuPanelTag = (value: MenuPanelTag) => {
-//
-//         setGuiState(state => {
-//             getStorage();
-//             state.currentMenuTag = value;
-//             return {...state};
-//         });
-//
-//     };
-//
-//     /**
-//      * 设置标题页的资源路径
-//      * @param key 资源名
-//      * @param value 资源路径
-//      */
-//     const setGuiAsset = <K extends keyof GuiAsset>(key: K, value: string) => {
-//
-//         setGuiState(state => {
-//             state[key] = value;
-//             return {...state};
-//         });
-//
-//     };
-//
-//     return {
-//         GuiState,
-//         setGuiAsset,
-//         setVisibility,
-//         setMenuPanelTag,
-//     };
-// }

@@ -1,37 +1,39 @@
-import axios from 'axios';
-import { logger } from '../logger';
-import { getStorage, getStorageAsync, setStorage } from '../../controller/storage/storageController';
 import { webgalStore } from '@/store/store';
-import { initKey } from '@/Core/controller/storage/fastSaveLoad';
-import { WebgalParser } from '@/Core/parser/sceneParser';
-import { WebGAL } from '@/Core/WebGAL';
-import { getFastSaveFromStorage, getSavesFromStorage } from '@/Core/controller/storage/savesController';
 import { setGlobalVar } from '@/store/userDataReducer';
-import { setEnableAppreciationMode, setVisibility } from '@/store/GUIReducer';
+import { setEnableAppreciationMode } from '@/store/GUIReducer';
+import { Live2D, WebGAL } from '@/Core/WebGAL';
+import { WebgalParser } from '@/Core/parser/sceneParser';
+import { getStorageAsync, setStorage } from '@/Core/controller/storage/storageController';
+import { initKey } from '@/Core/controller/storage/fastSaveLoad';
+import { getFastSaveFromStorage, getSavesFromStorage } from '@/Core/controller/storage/savesController';
+import { logger } from '@/Core/util/logger';
+import axios from 'axios';
 
 declare global {
   interface Window {
     renderPromise?: Function;
+    renderPromiseResolve?: Function;
   }
 }
+
 /**
- * 获取游戏信息
- * @param url 游戏信息路径
+ * ��ȡ��Ϸ��Ϣ
+ * @param url ��Ϸ��Ϣ·��
  */
 export const infoFetcher = (url: string) => {
   const dispatch = webgalStore.dispatch;
   axios.get(url).then(async (r) => {
-    let gameConfigRaw: string = r.data;
-    let gameConfig = WebgalParser.parseConfig(gameConfigRaw);
-    logger.info('获取到游戏信息', gameConfig);
-    // 先把 key 找到并设置了
+    const gameConfigRaw: string = r.data;
+    const gameConfig = WebgalParser.parseConfig(gameConfigRaw);
+    logger.info('��ȡ����Ϸ��Ϣ', gameConfig);
+
     const keyItem = gameConfig.find((e) => e.command === 'Game_key');
     WebGAL.gameKey = (keyItem?.args?.[0] as string) ?? '';
     initKey();
     await getStorageAsync();
     getFastSaveFromStorage();
     getSavesFromStorage(0, 0);
-    // 按照游戏的配置开始设置对应的状态
+
     gameConfig.forEach((e) => {
       const { command, args } = e;
       if (args.length > 0) {
@@ -60,12 +62,24 @@ export const infoFetcher = (url: string) => {
           if (command === 'Enable_Appreciation') {
             dispatch(setEnableAppreciationMode(res));
           }
+          if (command === 'Legacy_Expression_Blend_Mode') {
+            Live2D.legacyExpressionBlendMode = res === true;
+          }
+          if (command === 'Steam_AppID') {
+            const appId = String(res);
+            WebGAL.steam.initialize(appId);
+          }
         }
       }
     });
 
-    window?.renderPromise?.();
-    delete window.renderPromise;
+    if (window.renderPromiseResolve) {
+      window.renderPromiseResolve();
+    } else if (window.renderPromise) {
+      window.renderPromise();
+      delete window.renderPromise;
+    }
+
     setStorage();
   });
 };

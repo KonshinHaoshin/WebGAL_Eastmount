@@ -8,6 +8,12 @@ import { generateTimelineObj } from '@/Core/controller/stage/pixi/animations/tim
 import { WebGAL } from '@/Core/WebGAL';
 import PixiStage, { IAnimationObject } from '@/Core/controller/stage/pixi/PixiController';
 import { webgalAnimations } from '@/Core/controller/stage/pixi/animations';
+import {
+  DEFAULT_BG_IN_DURATION,
+  DEFAULT_BG_OUT_DURATION,
+  DEFAULT_FIG_IN_DURATION,
+  DEFAULT_FIG_OUT_DURATION,
+} from '../constants';
 
 // eslint-disable-next-line max-params
 export function getAnimationObject(animationName: string, target: string, duration: number, writeDefault: boolean) {
@@ -46,7 +52,6 @@ export function getAnimateDuration(animationName: string) {
   if (presetAnimation) {
     return 1000; // 预设动画的默认持续时间
   }
-
   const effect = WebGAL.animationManager.getAnimations().find((ani) => ani.name === animationName);
   if (effect) {
     let duration = 0;
@@ -69,11 +74,10 @@ export function getEnterExitAnimation(
   animation: IAnimationObject | null;
 } {
   if (type === 'enter') {
-    let duration = 500;
-    if (isBg) {
-      duration = 1500;
-    }
-    // 走默认动画
+    let duration = isBg ? DEFAULT_BG_IN_DURATION : DEFAULT_FIG_IN_DURATION;
+    duration =
+      webgalStore.getState().stage.animationSettings.find((setting) => setting.target === target)?.enterDuration ??
+      duration;
     let animation: IAnimationObject | null = generateUniversalSoftInAnimationObj(realTarget ?? target, duration);
 
     const transformState = webgalStore.getState().stage.effects;
@@ -84,27 +88,46 @@ export function getEnterExitAnimation(
       logger.debug('取代默认进入动画', target);
       duration = WebGAL.animationManager.nextEnterAnimationDuration.get(target) ?? getAnimateDuration(animarionName);
       animation = getAnimationObject(animarionName, realTarget ?? target, duration, false);
-      // 用后重置
       WebGAL.animationManager.nextEnterAnimationName.delete(target);
       WebGAL.animationManager.nextEnterAnimationDuration.delete(target);
+      return { duration, animation };
     }
-    return { duration, animation };
-  } else {
-    let duration = 750;
-    if (isBg) {
-      duration = 1500;
-    }
-    // 走默认动画
-    let animation: IAnimationObject | null = generateUniversalSoftOffAnimationObj(realTarget ?? target, duration);
-    const animarionName = WebGAL.animationManager.nextExitAnimationName.get(target);
-    if (animarionName) {
-      logger.debug('取代默认退出动画', target);
-      duration = WebGAL.animationManager.nextExitAnimationDuration.get(target) ?? getAnimateDuration(animarionName);
-      animation = getAnimationObject(animarionName, realTarget ?? target, duration, false);
-      // 用后重置
-      WebGAL.animationManager.nextExitAnimationName.delete(target);
-      WebGAL.animationManager.nextExitAnimationDuration.delete(target);
+
+    const animationName = webgalStore
+      .getState()
+      .stage.animationSettings.find((setting) => setting.target === target)?.enterAnimationName;
+    if (animationName && !targetEffect) {
+      logger.debug('取代默认进入动画', target);
+      const animDuration = getAnimateDuration(animationName);
+      if (animDuration > 0) duration = animDuration;
+      animation = getAnimationObject(animationName, realTarget ?? target, duration, false);
     }
     return { duration, animation };
   }
+
+  // exit
+  let duration = isBg ? DEFAULT_BG_OUT_DURATION : DEFAULT_FIG_OUT_DURATION;
+  duration =
+    webgalStore.getState().stage.animationSettings.find((setting) => setting.target + '-off' === target)?.exitDuration ??
+    duration;
+  let animation: IAnimationObject | null = generateUniversalSoftOffAnimationObj(realTarget ?? target, duration);
+  const animarionName = WebGAL.animationManager.nextExitAnimationName.get(target);
+  if (animarionName) {
+    logger.debug('取代默认退出动画', target);
+    duration = WebGAL.animationManager.nextExitAnimationDuration.get(target) ?? getAnimateDuration(animarionName);
+    animation = getAnimationObject(animarionName, realTarget ?? target, duration, false);
+    WebGAL.animationManager.nextExitAnimationName.delete(target);
+    WebGAL.animationManager.nextExitAnimationDuration.delete(target);
+    return { duration, animation };
+  }
+  const animationName = webgalStore
+    .getState()
+    .stage.animationSettings.find((setting) => setting.target + '-off' === target)?.exitAnimationName;
+  if (animationName) {
+    logger.debug('取代默认退出动画', target);
+    const animDuration = getAnimateDuration(animationName);
+    if (animDuration > 0) duration = animDuration;
+    animation = getAnimationObject(animationName, realTarget ?? target, duration, false);
+  }
+  return { duration, animation };
 }

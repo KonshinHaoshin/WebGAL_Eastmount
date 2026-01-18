@@ -5,7 +5,8 @@
     "dev": "vite --host --port 3000",
     "build": "cross-env NODE_ENV=production tsc && vite build --base=./",
     "preview": "vite preview",
-    "lint": "eslint src/** --fix"
+    "lint": "eslint src/** --fix",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@emotion/css": "^11.11.2",
@@ -15,15 +16,16 @@
     "@reduxjs/toolkit": "^1.8.1",
     "angular-expressions": "^1.4.3",
     "aos": "^2.3.4",
-    "axios": "^0.28.0",
+    "axios": "^0.30.2",
     "cloudlogjs": "^1.0.9",
+    "gifuct-js": "^2.1.2",
     "i18next": "^22.4.15",
     "localforage": "^1.10.0",
     "lodash": "^4.17.21",
     "mitt": "^3.0.0",
     "modern-css-reset": "^1.4.0",
     "pixi-filters": "^4.2.0",
-    "pixi-live2d-display-webgal": "^0.5.11",
+    "pixi-live2d-display-webgal": "^0.5.12",
     "pixi-spine": "3.1.2",
     "pixi.js": "^6.3.0",
     "popmotion": "^11.0.5",

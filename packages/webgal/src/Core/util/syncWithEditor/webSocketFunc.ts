@@ -1,39 +1,40 @@
-import { logger } from '../logger';
-import { syncWithOrigine } from '@/Core/util/syncWithEditor/syncWithOrigine';
 import { DebugCommand, IComponentVisibilityCommand, IDebugMessage } from '@/types/debugProtocol';
-import { WebGAL } from '@/Core/WebGAL';
 import { webgalStore } from '@/store/store';
+import { setFontOptimization, setVisibility } from '@/store/GUIReducer';
+import { WebGAL } from '@/Core/WebGAL';
 import { sceneParser, WebgalParser } from '@/Core/parser/sceneParser';
+import { ISentence } from '@/Core/controller/scene/sceneInterface';
 import { runScript } from '@/Core/controller/gamePlay/runScript';
 import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
-import { setFontOptimization, setVisibility } from '@/store/GUIReducer';
 import { resetStage } from '@/Core/controller/stage/resetStage';
-import { ISentence } from '@/Core/controller/scene/sceneInterface';
+import { logger } from '@/Core/util/logger';
+import { syncWithOrigine } from './syncWithOrigine';
+import { stageActions } from '@/store/stageReducer';
+import { baseTransform, IEffect } from '@/store/stageInterface';
 
 export const webSocketFunc = () => {
   const loc: string = window.location.hostname;
   const protocol: string = window.location.protocol;
-  const port: string = window.location.port; // 获取端口号
-
-  // 默认情况下，不需要在URL中明确指定标准HTTP(80)和HTTPS(443)端口
+  const port: string = window.location.port; // èŽ·å–ç«¯å£å?
+  // é»˜è®¤æƒ…å†µä¸‹ï¼Œä¸éœ€è¦åœ¨URLä¸­æ˜Žç¡®æŒ‡å®šæ ‡å‡†HTTP(80)å’ŒHTTPS(443)ç«¯å£
   let defaultPort = '';
   if (port && port !== '80' && port !== '443') {
-    // 如果存在非标准端口号，将其包含在URL中
+    // å¦‚æžœå­˜åœ¨éžæ ‡å‡†ç«¯å£å·ï¼Œå°†å…¶åŒ…å«åœ¨URLä¸­
     defaultPort = `:${port}`;
   }
 
   if (protocol !== 'http:' && protocol !== 'https:') {
     return;
   }
-  // 根据当前协议构建WebSocket URL，并包括端口号（如果有）
+  // æ ¹æ®å½“å‰åè®®æž„å»ºWebSocket URLï¼Œå¹¶åŒ…æ‹¬ç«¯å£å·ï¼ˆå¦‚æžœæœ‰ï¼‰
   let wsUrl = `ws://${loc}${defaultPort}/api/webgalsync`;
   if (protocol === 'https:') {
     wsUrl = `wss://${loc}${defaultPort}/api/webgalsync`;
   }
-  logger.info('正在启动socket连接位于：' + wsUrl);
+  logger.info('æ­£åœ¨å¯åŠ¨socketè¿žæŽ¥ä½äºŽï¼? + wsUrl);
   const socket = new WebSocket(wsUrl);
   socket.onopen = () => {
-    logger.info('socket已连接');
+    logger.info('socketå·²è¿žæŽ?);
     function sendStageSyncMessage() {
       const message: IDebugMessage = {
         event: 'message',
@@ -48,13 +49,13 @@ export const webSocketFunc = () => {
         },
       };
       socket.send(JSON.stringify(message));
-      // logger.debug('传送信息', message);
+      // logger.debug('ä¼ é€ä¿¡æ?, message);
       setTimeout(sendStageSyncMessage, 1000);
     }
     sendStageSyncMessage();
   };
   socket.onmessage = (e) => {
-    // logger.info('收到信息', e.data);
+    // logger.info('æ”¶åˆ°ä¿¡æ¯', e.data);
     const str: string = e.data;
     const data: IDebugMessage = JSON.parse(str);
     const message = data.data;
@@ -69,16 +70,16 @@ export const webSocketFunc = () => {
       });
     }
     if (message.command === DebugCommand.REFETCH_TEMPLATE_FILES) {
-      const title = document.getElementById('Title_enter_page');
+      const title =
+        document.getElementById('Title_enter_page') ??
+        (document.querySelector('.html-body__title-enter') as HTMLElement | null);
       if (title) {
         title.style.display = 'none';
       }
       WebGAL.events.styleUpdate.emit();
     }
     if (message.command === DebugCommand.SET_COMPONENT_VISIBILITY) {
-      // handle SET_COMPONENT_VISIBILITY message
       const command = message.message;
-
       const commandData = JSON.parse(command) as IComponentVisibilityCommand[];
       commandData.forEach((item) => {
         if (item) {
@@ -101,8 +102,31 @@ export const webSocketFunc = () => {
       const command = message.message;
       webgalStore.dispatch(setFontOptimization(command === 'true'));
     }
+    if (message.command === DebugCommand.SET_EFFECT) {
+      try {
+        const effect = JSON.parse(message.message) as IEffect;
+        const targetEffect = webgalStore.getState().stage.effects.find((e) => e.target === effect.target);
+        const targetTransform = targetEffect?.transform ? targetEffect.transform : baseTransform;
+        const newTransform = {
+          ...targetTransform,
+          ...(effect.transform ?? {}),
+          position: {
+            ...targetTransform.position,
+            ...(effect.transform?.position ?? {}),
+          },
+          scale: {
+            ...targetTransform.scale,
+            ...(effect.transform?.scale ?? {}),
+          },
+        };
+        webgalStore.dispatch(stageActions.updateEffect({ target: effect.target, transform: newTransform }));
+      } catch (e) {
+        logger.error(`æ— æ³•è®¾ç½®æ•ˆæžœ ${message.message}, ${e}`);
+        return;
+      }
+    }
   };
-  socket.onerror = (e) => {
-    logger.info('当前没有连接到 Terre 编辑器');
+  socket.onerror = () => {
+    logger.info('å½“å‰æ²¡æœ‰è¿žæŽ¥åˆ?Terre ç¼–è¾‘å™?);
   };
 };

@@ -3,24 +3,24 @@ import { WebGAL } from '@/Core/WebGAL';
 export function generateUniversalSoftInAnimationObj(targetKey: string, duration: number) {
   const target = WebGAL.gameplay.pixiStage!.getStageObjByKey(targetKey);
 
-  // 先设置一个通用的初态
+  let elapsedTime = 0;
+  let startAlpha = 0;
 
-  // TODO：通用初态设置
   /**
-   * 在此书写为动画设置初态的操作
+   * 在此书写为动画设置初始的操作
    */
   function setStartState() {
-    if (target) {
-      target.pixiContainer.alpha = 0;
+    elapsedTime = 0;
+    if (target?.pixiContainer) {
+      startAlpha = target.pixiContainer.alpha;
     }
   }
 
-  // TODO：通用终态设置
   /**
    * 在此书写为动画设置终态的操作
    */
   function setEndState() {
-    if (target) {
+    if (target?.pixiContainer) {
       target.pixiContainer.alpha = 1;
     }
   }
@@ -33,12 +33,12 @@ export function generateUniversalSoftInAnimationObj(targetKey: string, duration:
     if (target) {
       const sprite = target.pixiContainer;
       const baseDuration = WebGAL.gameplay.pixiStage!.frameDuration;
-      const currentAddOplityDelta = (duration / baseDuration) * delta;
-      const increasement = 1 / currentAddOplityDelta;
-      // const decreasement = 5 / currentAddOplityDelta;
-      if (sprite.alpha < 1) {
-        sprite.alpha += increasement;
-      }
+
+      elapsedTime += baseDuration;
+      const realElapsedTime = Math.min(elapsedTime, duration);
+      const progress = realElapsedTime / duration;
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      if (sprite) sprite.alpha = startAlpha + (1 - startAlpha) * easedProgress;
     }
   }
 

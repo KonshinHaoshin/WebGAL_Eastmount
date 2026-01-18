@@ -3,7 +3,7 @@ import { IPerform } from '@/Core/Modules/perform/performInterface';
 import { webgalStore } from '@/store/store';
 import cloneDeep from 'lodash/cloneDeep';
 import { getStringArgByKey } from '@/Core/util/getSentenceArg';
-import { setStage } from '@/store/stageReducer';
+import { setStage, stageActions } from '@/store/stageReducer';
 import { WebGAL } from '@/Core/WebGAL';
 
 /**
@@ -17,9 +17,15 @@ export const setTransition = (sentence: ISentence): IPerform => {
   const exitAnimation = getStringArgByKey(sentence, 'exit');
   if (enterAnimation) {
     WebGAL.animationManager.nextEnterAnimationName.set(key, enterAnimation);
+    webgalStore.dispatch(
+      stageActions.updateAnimationSettings({ target: key, key: 'enterAnimationName', value: enterAnimation }),
+    );
   }
   if (exitAnimation) {
     WebGAL.animationManager.nextExitAnimationName.set(key + '-off', exitAnimation);
+    webgalStore.dispatch(
+      stageActions.updateAnimationSettings({ target: key, key: 'exitAnimationName', value: exitAnimation }),
+    );
   }
   return {
     performName: 'none',

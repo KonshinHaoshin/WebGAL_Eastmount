@@ -1,4 +1,4 @@
-import { startFast, stopAll, stopFast } from '@/Core/controller/gamePlay/fastSkip';
+import { setFastButton, startFast, stopAll, stopFast } from '@/Core/controller/gamePlay/fastSkip';
 import { nextSentence } from '@/Core/controller/gamePlay/nextSentence';
 import { fastSaveGame } from '@/Core/controller/storage/fastSaveLoad';
 import { setStorage } from '@/Core/controller/storage/storageController';
@@ -151,10 +151,13 @@ export function useMouseWheel(stageStore?: { current: any }) {
       } else if (isGameActive() && direction === 'down' && !ctrlKey) {
         if (stageStore?.current.judgment !== '') return; // 审判期间禁止滚轮下翻
         clearTimeout(wheelTimeout);
+        if (WebGAL.gameplay.isFast) stopFast();
         WebGAL.gameplay.isFast = true;
+        setFastButton(true);
         // 滚轮视作快进
         setTimeout(() => {
           WebGAL.gameplay.isFast = false;
+          setFastButton(false);
         }, 150);
         next();
       }

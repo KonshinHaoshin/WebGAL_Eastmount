@@ -51,6 +51,7 @@ export enum commandType {
   judgment, // 审问
   testimony, // 证言
   clearTestimony // 清空证言
+  callSteam, // 调用Steam功能
 }
 
 /**
