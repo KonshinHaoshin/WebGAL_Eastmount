@@ -1120,7 +1120,7 @@ export default class PixiStage {
       }
 
       player.pivot.set(player.width / 2, player.height / 2);
-      player.position.set(0, stageHeight / 2); // 或者仍然 0,0 但容器 baseY 用中心线
+      player.position.set(0, stageHeight / 2);
 
       container.setBaseY(stageHeight / 2);
       container.pivot.set(0, stageHeight / 2);
@@ -1137,18 +1137,28 @@ export default class PixiStage {
       if (pos === 'left') container.setBaseX(targetWidth / 2);
       if (pos === 'right') container.setBaseX(stageWidth - targetWidth / 2);
 
-      container.addChild(player);
-
       /** ---------------------------
-       * 6. 应用当前状态 pose
+       * 6. 应用当前状态 pose（先应用再显示）
        * --------------------------- */
       const state = webgalStore.getState().stage;
-
       const motion = state.live2dMotion.find((m) => m.target === key)?.motion;
-      if (motion) player.setPose(motion);
-
       const expression = state.live2dExpression.find((e) => e.target === key)?.expression;
-      if (expression) player.setPose(expression);
+      if (motion) {
+        motion
+          .split(',')
+          .map((pose) => pose.trim())
+          .filter(Boolean)
+          .forEach((pose) => player.setPose(pose));
+      }
+      if (expression) {
+        expression
+          .split(',')
+          .map((pose) => pose.trim())
+          .filter(Boolean)
+          .forEach((pose) => player.setPose(pose));
+      }
+
+      container.addChild(player);
     } catch (err) {
       console.error('[WebGAL Mano] load error:', err);
       this.removeStageObjectByKey(key);
