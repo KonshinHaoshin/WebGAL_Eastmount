@@ -1119,10 +1119,11 @@ export default class PixiStage {
         });
       }
 
-      // pivot：底部中心
-      player.pivot.set(player.width / 2, player.height);
-      // 以容器原点放置，交给容器定位
-      player.position.set(0, 0);
+      player.pivot.set(player.width / 2, player.height / 2);
+      player.position.set(0, stageHeight / 2); // 或者仍然 0,0 但容器 baseY 用中心线
+
+      container.setBaseY(stageHeight / 2);
+      container.pivot.set(0, stageHeight / 2);
 
       // 缩放适配舞台
       const scaleX = stageWidth / player.width;
@@ -1132,8 +1133,6 @@ export default class PixiStage {
 
       const targetWidth = player.width * scale;
 
-      // 容器定位
-      container.setBaseY(stageHeight);
       if (pos === 'center') container.setBaseX(stageWidth / 2);
       if (pos === 'left') container.setBaseX(targetWidth / 2);
       if (pos === 'right') container.setBaseX(stageWidth - targetWidth / 2);
