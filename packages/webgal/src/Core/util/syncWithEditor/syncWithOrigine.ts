@@ -35,6 +35,9 @@ export const syncWithOrigine = (sceneName: string, sentenceId: number, experment
     const recId = findLastAvailableBacklog(lastRecoverySentenceId, sceneName);
     const isCanRec = recId >= 0 && expermental;
     resetStage(!isCanRec);
+    // resetStage 可能触发重渲染，再次确保标题界面隐藏
+    dispatch(setVisibility({ component: 'showTitle', visibility: false }));
+    dispatch(setVisibility({ component: 'showMenuPanel', visibility: false }));
     WebGAL.sceneManager.sceneData.currentScene = sceneParser(rawScene, sceneName, sceneUrl);
     // 开始快进到指定语句
     const currentSceneName = WebGAL.sceneManager.sceneData.currentScene.sceneName;
