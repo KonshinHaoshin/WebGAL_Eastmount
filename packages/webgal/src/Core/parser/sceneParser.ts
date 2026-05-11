@@ -49,6 +49,7 @@ import { showItem } from '@/Core/gameScripts/showItem';
 import { pediaUpdate } from '@/Core/gameScripts/pediaUpdate';
 import { presentTheEvidence } from '@/Core/gameScripts/presentTheEvidence';
 import { thinking } from '@/Core/gameScripts/thinking';
+import { callSteam } from '@/Core/gameScripts/callSteam';
 
 export const SCRIPT_TAG_MAP = defineScripts({
   say: ScriptConfig(commandType.say, say),
@@ -97,6 +98,7 @@ export const SCRIPT_TAG_MAP = defineScripts({
   pediaUpdate: ScriptConfig(commandType.pediaUpdate, pediaUpdate, { next: true }),
   presentTheEvidence: ScriptConfig(commandType.presentTheEvidence, presentTheEvidence),
   thinking: ScriptConfig(commandType.thinking, thinking),
+  callSteam: ScriptConfig(commandType.callSteam, callSteam, { next: true }),
 });
 
 export const SCRIPT_CONFIG: IConfigInterface[] = Object.values(SCRIPT_TAG_MAP);

@@ -50,7 +50,8 @@ export enum commandType {
   refute, // 反驳
   judgment, // 审问
   testimony, // 证言
-  clearTestimony // 清空证言
+  clearTestimony, // 清空证言
+  callSteam, // Steam成就解锁
 }
 
 /**
