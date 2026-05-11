@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import { INSTALLED } from 'pixi.js';
 import { v4 as uuid } from 'uuid';
 import { webgalStore } from '@/store/store';
 import { setStage, stageActions } from '@/store/stageReducer';
@@ -19,17 +20,33 @@ import { calculateStates, CharacterPlayer } from 'webgal_mano';
 import { SCREEN_CONSTANTS } from '@/Core/util/constants';
 import { addSpineBgImpl, addSpineFigureImpl } from '@/Core/controller/stage/pixi/spine';
 import { AnimatedGIF } from '@pixi/gif';
+import { GifResource } from '@/Core/controller/stage/pixi/GifResource';
 import { setFreeFigure } from '@/store/stageReducer';
 import { baseBlinkParam, baseFocusParam, BlinkParam, FocusParam } from '@/Core/live2DCore';
 import { isEqual } from 'lodash';
 // import { figureCash } from '@/Core/gameScripts/vocal/conentsCash'; // 如果要使用 Live2D，取消这里的注释
 // import { Live2DModel, SoundManager } from 'pixi-live2d-display-webgal'; // 如果要使用 Live2D，取消这里的注释
 
+INSTALLED.push(GifResource);
+
 export interface IAnimationObject {
   setStartState: Function;
   setEndState: Function;
   tickerFunc: PIXI.TickerCallback<number>;
   getEndStateEffect?: Function;
+  forceStopWithoutSetEndState?: Function;
+}
+
+interface SetContainerInitialPositionOptions {
+  container: WebGALPixiContainer;
+  childContainer: any;
+  originalWidth: number;
+  originalHeight: number;
+  position: 'center' | 'left' | 'right' | 'bg';
+  isLive2DFigure: boolean;
+  overrideBounds?: [number, number, number, number];
+  transform?: { xOffset?: number; yOffset?: number; xScale?: number; yScale?: number };
+  isJsonlFigure?: boolean;
 }
 
 interface IStageAnimationObject {
@@ -75,7 +92,7 @@ export interface ILive2DRecord {
 window.PIXI = PIXI;
 
 export default class PixiStage {
-  public static assignTransform<T extends ITransform>(target: T, source?: ITransform) {
+  public static assignTransform<T extends ITransform>(target: T, source?: ITransform, convertAlpha = true) {
     if (!source) return;
     const targetScale = target.scale;
     const targetPosition = target.position;
@@ -84,6 +101,13 @@ export default class PixiStage {
     Object.assign(target, source);
     target.scale = targetScale;
     target.position = targetPosition;
+    if (convertAlpha) {
+      const sourceAlpha = source.alpha;
+      if (sourceAlpha !== undefined) {
+        target.alpha = 1;
+        (target as any).alphaFilterVal = sourceAlpha;
+      }
+    }
   }
 
   /**
@@ -119,6 +143,8 @@ export default class PixiStage {
   private stageAnimations: Array<IStageAnimationObject> = [];
   private loadQueue: { url: string; callback: () => void; name?: string }[] = [];
   private live2dFigureRecorder: Array<ILive2DRecord> = [];
+  // 存储当前口型值，用于在motion更新后重新应用
+  private currentMouthValues: Map<string, number> = new Map();
   // 锁定变换对象（对象可能正在执行动画，不能应用变换）
   private lockTransformTarget: Array<string> = [];
 
@@ -331,6 +357,25 @@ export default class PixiStage {
     this.removeAnimationByIndex(index);
   }
 
+  public removeAnimationByTargetKey(targetKey: string) {
+    let index = this.stageAnimations.findIndex((e) => e.targetKey === targetKey);
+    while (index !== -1) {
+      this.removeAnimationByIndex(index);
+      index = this.stageAnimations.findIndex((e) => e.targetKey === targetKey);
+    }
+  }
+
+  public removeAnimationWithoutSetEndState(key: string) {
+    const index = this.stageAnimations.findIndex((e) => e.key === key);
+    if (index >= 0) {
+      const thisTickerFunc = this.stageAnimations[index];
+      this.currentApp?.ticker.remove(thisTickerFunc.animationObject.tickerFunc);
+      thisTickerFunc.animationObject.forceStopWithoutSetEndState?.();
+      this.unlockStageObject(thisTickerFunc.targetKey ?? 'default');
+      this.stageAnimations.splice(index, 1);
+    }
+  }
+
   public removeAnimationWithSetEffects(key: string) {
     const index = this.stageAnimations.findIndex((e) => e.key === key);
     if (index >= 0) {
@@ -452,25 +497,15 @@ export default class PixiStage {
       setTimeout(() => {
         const texture = loader.resources?.[url]?.texture;
         if (texture && this.getStageObjByUuid(bgUuid)) {
-          /**
-           * 重设大小
-           */
-          const originalWidth = texture.width;
-          const originalHeight = texture.height;
-          const scaleX = this.stageWidth / originalWidth;
-          const scaleY = this.stageHeight / originalHeight;
-          const targetScale = Math.max(scaleX, scaleY);
           const bgSprite = new PIXI.Sprite(texture);
-          bgSprite.scale.x = targetScale;
-          bgSprite.scale.y = targetScale;
-          bgSprite.anchor.set(0.5);
-          bgSprite.position.y = this.stageHeight / 2;
-          thisBgContainer.setBaseX(this.stageWidth / 2);
-          thisBgContainer.setBaseY(this.stageHeight / 2);
-          thisBgContainer.pivot.set(0, this.stageHeight / 2);
-
-          // 挂载
-          thisBgContainer.addChild(bgSprite);
+          this.setContainerInitialPosition({
+            container: thisBgContainer,
+            childContainer: bgSprite,
+            originalWidth: texture.width,
+            originalHeight: texture.height,
+            position: 'bg',
+            isLive2DFigure: false,
+          });
         }
       }, 0);
     };
@@ -540,20 +575,15 @@ export default class PixiStage {
            * 重设大小
            */
           texture.baseTexture.resource.load().then(() => {
-            const originalWidth = videoResource.source.videoWidth;
-            const originalHeight = videoResource.source.videoHeight;
-            const scaleX = this.stageWidth / originalWidth;
-            const scaleY = this.stageHeight / originalHeight;
-            const targetScale = Math.max(scaleX, scaleY);
             const bgSprite = new PIXI.Sprite(texture);
-            bgSprite.scale.x = targetScale;
-            bgSprite.scale.y = targetScale;
-            bgSprite.anchor.set(0.5);
-            bgSprite.position.y = this.stageHeight / 2;
-            thisBgContainer.setBaseX(this.stageWidth / 2);
-            thisBgContainer.setBaseY(this.stageHeight / 2);
-            thisBgContainer.pivot.set(0, this.stageHeight / 2);
-            thisBgContainer.addChild(bgSprite);
+            this.setContainerInitialPosition({
+              container: thisBgContainer,
+              childContainer: bgSprite,
+              originalWidth: videoResource.source.videoWidth,
+              originalHeight: videoResource.source.videoHeight,
+              position: 'bg',
+              isLive2DFigure: false,
+            });
           });
         }
       }, 0);
@@ -591,12 +621,7 @@ export default class PixiStage {
       this.removeStageObjectByKey(key);
     }
 
-    const metadata = this.getFigureMetadataByKey(key);
-    if (metadata) {
-      if (metadata.zIndex) {
-        thisFigureContainer.zIndex = metadata.zIndex;
-      }
-    }
+    this.applyFigureMetadata(thisFigureContainer, key);
     // 挂载
     this.figureContainer.addChild(thisFigureContainer);
     const figureUuid = uuid();
@@ -615,36 +640,15 @@ export default class PixiStage {
       setTimeout(() => {
         const texture = loader.resources?.[url]?.texture;
         if (texture && this.getStageObjByUuid(figureUuid)) {
-          /**
-           * 重设大小
-           */
-          const originalWidth = texture.width;
-          const originalHeight = texture.height;
-          const scaleX = this.stageWidth / originalWidth;
-          const scaleY = this.stageHeight / originalHeight;
-          const targetScale = Math.min(scaleX, scaleY);
           const figureSprite = new PIXI.Sprite(texture);
-          figureSprite.scale.x = targetScale;
-          figureSprite.scale.y = targetScale;
-          figureSprite.anchor.set(0.5);
-          figureSprite.position.y = this.stageHeight / 2;
-          const targetWidth = originalWidth * targetScale;
-          const targetHeight = originalHeight * targetScale;
-          thisFigureContainer.setBaseY(this.stageHeight / 2);
-          if (targetHeight < this.stageHeight) {
-            thisFigureContainer.setBaseY(this.stageHeight / 2 + (this.stageHeight - targetHeight) / 2);
-          }
-          if (presetPosition === 'center') {
-            thisFigureContainer.setBaseX(this.stageWidth / 2);
-          }
-          if (presetPosition === 'left') {
-            thisFigureContainer.setBaseX(targetWidth / 2);
-          }
-          if (presetPosition === 'right') {
-            thisFigureContainer.setBaseX(this.stageWidth - targetWidth / 2);
-          }
-          thisFigureContainer.pivot.set(0, this.stageHeight / 2);
-          thisFigureContainer.addChild(figureSprite);
+          this.setContainerInitialPosition({
+            container: thisFigureContainer,
+            childContainer: figureSprite,
+            originalWidth: texture.width,
+            originalHeight: texture.height,
+            position: presetPosition,
+            isLive2DFigure: false,
+          });
         }
       }, 0);
     };
@@ -671,13 +675,10 @@ export default class PixiStage {
       this.removeStageObjectByKey(key);
     }
 
-    // 设置 zIndex（如果 metadata 有）
-    const metadata = this.getFigureMetadataByKey(key);
-    if (metadata?.zIndex !== undefined) {
-      thisFigureContainer.zIndex = metadata.zIndex;
-    }
+    this.applyFigureMetadata(thisFigureContainer, key);
 
     // 获取 loopMode（默认 true）
+    const metadata = this.getFigureMetadataByKey(key);
     const loopMode: 'true' | 'false' | 'disappear' = metadata?.loop ?? 'true';
 
     // 添加容器到舞台
@@ -701,53 +702,30 @@ export default class PixiStage {
       // 解码 GIF
       const gif = await AnimatedGIF.fromBuffer(buffer);
 
-      const originalWidth = gif.width;
-      const originalHeight = gif.height;
-      const scaleX = this.stageWidth / originalWidth;
-      const scaleY = this.stageHeight / originalHeight;
-      const targetScale = Math.min(scaleX, scaleY);
-
-      // 设置缩放、锚点、位置
-      gif.scale.set(targetScale);
-      gif.anchor.set(0.5);
-      gif.position.y = this.stageHeight / 2;
-
-      const targetWidth = originalWidth * targetScale;
-      const targetHeight = originalHeight * targetScale;
-
-      thisFigureContainer.setBaseY(this.stageHeight / 2);
-      if (targetHeight < this.stageHeight) {
-        thisFigureContainer.setBaseY(this.stageHeight / 2 + (this.stageHeight - targetHeight) / 2);
-      }
-
-      if (presetPosition === 'center') {
-        thisFigureContainer.setBaseX(this.stageWidth / 2);
-      } else if (presetPosition === 'left') {
-        thisFigureContainer.setBaseX(targetWidth / 2);
-      } else if (presetPosition === 'right') {
-        thisFigureContainer.setBaseX(this.stageWidth - targetWidth / 2);
-      }
-
-      thisFigureContainer.pivot.set(0, this.stageHeight / 2);
-
-      // === 🔑 loop 控制 ===
+      // === loop 控制 ===
       if (loopMode === 'true') {
         gif.loop = true;
       } else {
         gif.loop = false;
         gif.onComplete = () => {
           if (loopMode === 'false') {
-            // 停在最后一帧
             gif.stop();
           } else if (loopMode === 'disappear') {
-            // 播完消失
             this.removeStageObjectByKey(key);
           }
         };
       }
 
+      this.setContainerInitialPosition({
+        container: thisFigureContainer,
+        childContainer: gif,
+        originalWidth: gif.width,
+        originalHeight: gif.height,
+        position: presetPosition,
+        isLive2DFigure: false,
+      });
+
       gif.play();
-      thisFigureContainer.addChild(gif);
     } catch (e) {
       console.error('GIF 加载失败', e);
     }
@@ -772,8 +750,7 @@ export default class PixiStage {
 
     // 新建容器并设置 zIndex
     const container = new WebGALPixiContainer();
-    const metadata = this.getFigureMetadataByKey(key);
-    if (metadata?.zIndex !== undefined) container.zIndex = metadata.zIndex;
+    this.applyFigureMetadata(container, key);
 
     // 挂载并登记
     this.figureContainer.addChild(container);
@@ -893,38 +870,17 @@ export default class PixiStage {
         // 先隐藏，等统一设置完再显示
         model.visible = false;
 
-        // 计算缩放（与图片/视频一致，尽量填满高度同时不超宽）
-        const scaleX = stageWidth / model.width;
-        const scaleY = stageHeight / model.height;
-        const targetScale = Math.min(scaleX, scaleY);
-
-        const targetWidth = model.width * targetScale;
-        const targetHeight = model.height * targetScale;
-
-        const finalScaleX = targetScale * (xscale ?? 1);
-        const finalScaleY = targetScale * (yscale ?? 1);
-
-        model.scale.set(finalScaleX, finalScaleY);
-        model.anchor.set(0.5);
-        model.position.set(x ?? 0, stageHeight / 2 + (y ?? 0));
-
-        // 容器基准位（上下居中，必要时向下补齐）
-        container.setBaseY(stageHeight / 2);
-        if (targetHeight < stageHeight) {
-          container.setBaseY(stageHeight / 2 + (stageHeight - targetHeight) / 2);
-        }
-
-        // 左中右预设位
-        if (presetPosition === 'center') {
-          container.setBaseX(stageWidth / 2);
-        } else if (presetPosition === 'left') {
-          container.setBaseX(targetWidth / 2);
-        } else if (presetPosition === 'right') {
-          container.setBaseX(stageWidth - targetWidth / 2);
-        }
-
-        container.pivot.set(0, stageHeight / 2);
-        container.addChild(model);
+        this.setContainerInitialPosition({
+          container: container,
+          childContainer: model,
+          originalWidth: model.width,
+          originalHeight: model.height,
+          position: presetPosition,
+          isLive2DFigure: true,
+          overrideBounds: bounds ?? [0, 0, 0, 0],
+          transform: { xOffset: x, yOffset: y, xScale: xscale, yScale: yscale },
+          isJsonlFigure: true,
+        });
         models.push(model);
 
         // ✨ 细节：禁用角度自动控制，避免抖头
@@ -1170,12 +1126,9 @@ export default class PixiStage {
    * @param jsonPath
    */
   // eslint-disable-next-line max-params
-  public addLive2dFigure(key: string, jsonPath: string, pos: string) {
+  public addLive2dFigure(key: string, jsonPath: string, pos: 'left' | 'center' | 'right') {
     if (!Live2D.isAvailable) return;
     try {
-      let stageWidth = this.stageWidth;
-      let stageHeight = this.stageHeight;
-
       this.figureCash.push(jsonPath);
 
       const loader = this.assetLoader;
@@ -1191,12 +1144,7 @@ export default class PixiStage {
         this.removeStageObjectByKey(key);
       }
 
-      const metadata = this.getFigureMetadataByKey(key);
-      if (metadata) {
-        if (metadata.zIndex) {
-          thisFigureContainer.zIndex = metadata.zIndex;
-        }
-      }
+      this.applyFigureMetadata(thisFigureContainer, key);
       // 挂载
       this.figureContainer.addChild(thisFigureContainer);
       const figureUuid = uuid();
@@ -1233,33 +1181,15 @@ export default class PixiStage {
             ]);
 
             models.forEach((model) => {
-              const scaleX = stageWidth / model.width;
-              const scaleY = stageHeight / model.height;
-              const targetScale = Math.min(scaleX, scaleY);
-              const targetWidth = model.width * targetScale;
-              const targetHeight = model.height * targetScale;
-              model.scale.x = targetScale;
-              model.scale.y = targetScale;
-              model.anchor.set(0.5);
-              model.pivot.x += (overrideBounds[0] + overrideBounds[2]) * 0.5;
-              model.pivot.y += (overrideBounds[1] + overrideBounds[3]) * 0.5;
-              model.position.x = 0;
-              model.position.y = stageHeight / 2;
-
-              let baseY = stageHeight / 2;
-              if (targetHeight < stageHeight) {
-                baseY = stageHeight / 2 + (stageHeight - targetHeight) / 2;
-              }
-              thisFigureContainer.setBaseY(baseY);
-              if (pos === 'center') {
-                thisFigureContainer.setBaseX(stageWidth / 2);
-              } else if (pos === 'left') {
-                thisFigureContainer.setBaseX(targetWidth / 2);
-              } else if (pos === 'right') {
-                thisFigureContainer.setBaseX(stageWidth - targetWidth / 2);
-              }
-
-              thisFigureContainer.pivot.set(0, stageHeight / 2);
+              instance.setContainerInitialPosition({
+                container: thisFigureContainer,
+                childContainer: model,
+                originalWidth: model.width,
+                originalHeight: model.height,
+                position: pos,
+                isLive2DFigure: true,
+                overrideBounds: overrideBounds,
+              });
 
               let animation_index = 0;
               let priority_number = 3;
@@ -1303,7 +1233,12 @@ export default class PixiStage {
               // lip-sync is still a problem and you can not.
               Live2D.SoundManager.volume = 0; // @ts-ignore
 
-              thisFigureContainer.addChild(model);
+              // 监听模型更新事件，确保口型参数不被motion覆盖
+              // @ts-ignore
+              model.internalModel.on('beforeModelUpdate', () => {
+                const currentMouthValue = instance.getCurrentMouthValue(key);
+                if (currentMouthValue !== null) instance.setModelMouthY(key, currentMouthValue);
+              });
             });
           })();
         }
@@ -1335,13 +1270,11 @@ export default class PixiStage {
       this.removeStageObjectByKey(key);
     }
 
-    // 设置 zIndex（如果 metadata 有）
-    const metadata = this.getFigureMetadataByKey(key);
-    if (metadata?.zIndex !== undefined) {
-      thisFigureContainer.zIndex = metadata.zIndex;
-    }
+    // 设置 metadata（zIndex, blendMode）
+    this.applyFigureMetadata(thisFigureContainer, key);
 
     // 获取 loop 模式（默认 true）
+    const metadata = this.getFigureMetadataByKey(key);
     const loopMode: 'true' | 'false' | 'disappear' = metadata?.loop ?? 'true';
 
     // 添加容器到舞台
@@ -1403,34 +1336,14 @@ export default class PixiStage {
 
       // 加载后获取原始宽高
       video.onloadedmetadata = () => {
-        const originalWidth = video.videoWidth;
-        const originalHeight = video.videoHeight;
-        const scaleX = this.stageWidth / originalWidth;
-        const scaleY = this.stageHeight / originalHeight;
-        const targetScale = Math.min(scaleX, scaleY);
-
-        sprite.scale.set(targetScale);
-        sprite.anchor.set(0.5);
-        sprite.position.y = this.stageHeight / 2;
-
-        const targetWidth = originalWidth * targetScale;
-        const targetHeight = originalHeight * targetScale;
-
-        thisFigureContainer.setBaseY(this.stageHeight / 2);
-        if (targetHeight < this.stageHeight) {
-          thisFigureContainer.setBaseY(this.stageHeight / 2 + (this.stageHeight - targetHeight) / 2);
-        }
-
-        if (presetPosition === 'center') {
-          thisFigureContainer.setBaseX(this.stageWidth / 2);
-        } else if (presetPosition === 'left') {
-          thisFigureContainer.setBaseX(targetWidth / 2);
-        } else if (presetPosition === 'right') {
-          thisFigureContainer.setBaseX(this.stageWidth - targetWidth / 2);
-        }
-
-        thisFigureContainer.pivot.set(0, this.stageHeight / 2);
-        thisFigureContainer.addChild(sprite);
+        this.setContainerInitialPosition({
+          container: thisFigureContainer,
+          childContainer: sprite,
+          originalWidth: video.videoWidth,
+          originalHeight: video.videoHeight,
+          position: presetPosition,
+          isLive2DFigure: false,
+        });
       };
 
       // 错误处理
@@ -1514,6 +1427,61 @@ export default class PixiStage {
           spineObject.state.setAnimation(0, animation, false);
         }
       }
+    }
+  }
+
+  public changeSpineSkinByKey(key: string, skin: string) {
+    if (!skin) return;
+
+    const target = this.figureObjects.find((e) => e.key === key && !e.isExiting);
+    if (target?.sourceType !== 'spine') return;
+
+    const container = target.pixiContainer;
+    const sprite = container.children[0] as PIXI.Container;
+    if (sprite?.children?.[0]) {
+      const spineObject = sprite.children[0];
+      // @ts-ignore
+      const skeleton = spineObject.skeleton;
+      // @ts-ignore
+      const skeletonData = skeleton?.data ?? spineObject.spineData;
+      const skinObject =
+        // @ts-ignore
+        skeletonData?.findSkin?.(skin) ??
+        // @ts-ignore
+        skeletonData?.skins?.find((item: any) => item.name === skin);
+
+      if (!skeleton || !skinObject) {
+        logger.warn(`Spine skin not found: ${skin} on ${key}`);
+        return;
+      }
+
+      try {
+        // @ts-ignore
+        if (typeof skeleton.setSkinByName === 'function') {
+          // @ts-ignore
+          skeleton.setSkinByName(skin);
+        } else {
+          // @ts-ignore
+          skeleton.setSkin(skinObject);
+        }
+      } catch (error) {
+        // @ts-ignore
+        skeleton.setSkin?.(skinObject);
+      }
+
+      // @ts-ignore
+      if (typeof skeleton.setSlotsToSetupPose === 'function') {
+        // @ts-ignore
+        skeleton.setSlotsToSetupPose();
+      } else {
+        // @ts-ignore
+        skeleton.setupPoseSlots?.();
+      }
+
+      // @ts-ignore
+      spineObject.state?.apply?.(skeleton);
+      // @ts-ignore
+      skeleton.updateWorldTransform?.();
     }
   }
 
@@ -1603,6 +1571,11 @@ export default class PixiStage {
         }
       }
     }
+    this.currentMouthValues.set(key, y);
+  }
+
+  public getCurrentMouthValue(key: string): number | null {
+    return this.currentMouthValues.get(key) ?? null;
   }
 
   /**
@@ -1866,6 +1839,136 @@ export default class PixiStage {
       this.live2dFigureRecorder[figureTargetIndex].focus = focus;
     } else {
       this.live2dFigureRecorder.push({ target, motion: '', expression: '', blink: baseBlinkParam, focus });
+    }
+  }
+
+  public applyFigureMetadata(container: WebGALPixiContainer, key: string) {
+    const metadata = this.getFigureMetadataByKey(key);
+    if (metadata === undefined) return;
+    if (metadata?.zIndex !== undefined) container.zIndex = metadata.zIndex;
+  }
+
+  public setContainerInitialPosition(options: SetContainerInitialPositionOptions) {
+    const {
+      container,
+      childContainer,
+      originalWidth,
+      originalHeight,
+      position,
+      isLive2DFigure,
+      overrideBounds = [0, 0, 0, 0],
+      transform: { xOffset = 0, yOffset = 0, xScale = 1, yScale = 1 } = {},
+      isJsonlFigure,
+    } = options;
+
+    try {
+      let positioningType = Live2D.positioningType;
+      if (!isLive2DFigure) {
+        positioningType = 'M_2_4';
+      }
+      if (isJsonlFigure && positioningType === 'M_3_0_0') {
+        positioningType = 'M_2_4';
+      }
+
+      const scaleX = this.stageWidth / originalWidth;
+      const scaleY = this.stageHeight / originalHeight;
+      let targetScale = 1.0;
+      if (position === 'bg') {
+        targetScale = Math.max(scaleX, scaleY);
+      } else {
+        targetScale = Math.min(scaleX, scaleY);
+        switch (positioningType) {
+          case 'M_2_3':
+            targetScale *= 1.5;
+            break;
+          case 'M_3_0_0':
+          case 'M_3_1_0':
+            targetScale *= 1.25;
+            break;
+        }
+      }
+
+      childContainer.scale.set(targetScale * xScale, targetScale * yScale);
+      childContainer.anchor.set(0.5);
+      childContainer.pivot.x += (overrideBounds[0] + overrideBounds[2]) * 0.5;
+      childContainer.pivot.y += (overrideBounds[1] + overrideBounds[3]) * 0.5;
+
+      switch (positioningType) {
+        case 'M_2_3':
+          childContainer.position.x = this.stageWidth / 2 + xOffset;
+          childContainer.position.y = this.stageHeight / 1.2 + yOffset;
+          break;
+        case 'M_3_0_0':
+        case 'M_3_1_0':
+          childContainer.position.x = xOffset;
+          childContainer.position.y = this.stageHeight / 1.8 + yOffset;
+          break;
+        default:
+          childContainer.position.x = xOffset;
+          childContainer.position.y = this.stageHeight / 2 + yOffset;
+          break;
+      }
+
+      if (position === 'bg') {
+        container.setBaseX(this.stageWidth / 2);
+        container.setBaseY(this.stageHeight / 2);
+      } else {
+        const targetWidth = originalWidth * targetScale;
+        const targetHeight = originalHeight * targetScale;
+        switch (positioningType) {
+          case 'M_2_3':
+            break;
+          default:
+            if (targetHeight < this.stageHeight) {
+              container.setBaseY(this.stageHeight / 2 + (this.stageHeight - targetHeight) / 2);
+            } else {
+              container.setBaseY(this.stageHeight / 2);
+            }
+            break;
+        }
+        if (position === 'center') {
+          switch (positioningType) {
+            case 'M_2_3':
+              break;
+            default:
+              container.setBaseX(this.stageWidth / 2);
+              break;
+          }
+        }
+        if (position === 'left') {
+          switch (positioningType) {
+            case 'M_3_0_0':
+            case 'M_3_1_0':
+              container.setBaseX(this.stageWidth / 2 - 430);
+              break;
+            default:
+              container.setBaseX(targetWidth / 2);
+              break;
+          }
+        }
+        if (position === 'right') {
+          switch (positioningType) {
+            case 'M_3_0_0':
+            case 'M_3_1_0':
+              container.setBaseX(this.stageWidth / 2 + 430);
+              break;
+            default:
+              container.setBaseX(this.stageWidth - targetWidth / 2);
+              break;
+          }
+        }
+      }
+
+      switch (positioningType) {
+        case 'M_2_3':
+          break;
+        default:
+          container.pivot.set(0, this.stageHeight / 2);
+          break;
+      }
+      container.addChild(childContainer);
+    } catch (error) {
+      console.error('设置容器初始位置失败:', error);
     }
   }
 

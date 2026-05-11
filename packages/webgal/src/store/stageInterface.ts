@@ -169,6 +169,7 @@ export interface ILive2DFocus {
 
 export interface IFigureMetadata {
 	zIndex?: number;
+	blendMode?: string;
 	loop?: 'true' | 'false' | 'disappear'; // 视频立绘播放模式
 	lut?: string; // 立绘的 LUT 文件路径
 }

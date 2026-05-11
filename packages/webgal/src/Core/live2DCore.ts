@@ -29,12 +29,16 @@ export const baseFocusParam: FocusParam = {
   instant: false,
 };
 
+type PositioningType = 'M_2_3' | 'M_2_4' | 'M_3_0_0' | 'M_3_1_0';
+
 export class Live2DCore {
   public isAvailable = false;
 
   public Live2DModel: any;
   public SoundManager: any;
   public Config: any;
+
+  public positioningType: PositioningType = 'M_2_4';
 
   public constructor() {
     this.initLive2D();
