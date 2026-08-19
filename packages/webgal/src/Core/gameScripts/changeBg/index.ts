@@ -37,6 +37,9 @@ export const changeBg = (sentence: ISentence): IPerform => {
   const exitDuration = getNumberArgByKey(sentence, 'exitDuration') ?? DEFAULT_BG_OUT_DURATION;
   const ease = getStringArgByKey(sentence, 'ease') ?? '';
   const ignoreDefault = getBooleanArgByKey(sentence, 'ignoreDefault') ?? false;
+  // Dragonspring compatibility: older scripts selected the custom blinds
+  // transition with -type=blinds before it became the blindsIn animation.
+  const legacyTransitionType = getStringArgByKey(sentence, 'type') ?? '';
   const lutArg = getStringArgByKey(sentence, 'lut');
   if (lutArg !== null) stageStateManager.setStage('bgLut', lutArg ? assetSetter(lutArg, fileType.lut) : '');
 
@@ -94,8 +97,8 @@ export const changeBg = (sentence: ISentence): IPerform => {
   });
 
   // 应用动画的优先级更高一点
-  const enterAnimation = getStringArgByKey(sentence, 'enter');
-  const exitAnimation = getStringArgByKey(sentence, 'exit');
+  const enterAnimation = getStringArgByKey(sentence, 'enter') ?? (legacyTransitionType === 'blinds' ? 'blindsIn' : null);
+  const exitAnimation = getStringArgByKey(sentence, 'exit') ?? (legacyTransitionType === 'blinds' ? 'universalSoftOff' : null);
   if (enterAnimation) {
     stageStateManager.updateAnimationSettings({ target: 'bg-main', key: 'enterAnimationName', value: enterAnimation });
     duration = getAnimateDuration(enterAnimation);
@@ -156,7 +159,7 @@ export const changeBg = (sentence: ISentence): IPerform => {
     stopFunction: () => {
       WebGAL.gameplay.pixiStage?.removeAnimation(enterAnimationKey);
     },
-    blockingNext: () => false,
+    blockingNext: () => legacyTransitionType === 'blinds',
     blockingAuto: () => true,
   };
 };

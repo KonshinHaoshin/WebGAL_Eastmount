@@ -33,4 +33,19 @@ describe('Dragonspring custom command compatibility', () => {
     expect(result[1].args.find(({ key }) => key === 'refutes')?.value).toBe('{"word":"target"}');
     expect(result[1].args.find(({ key }) => key === 'colors')?.value).toBe('{"word":"#fff"}');
   });
+
+  test('preserves legacy Mano, LUT and blinds parameters', () => {
+    const result = parser.parse(
+      'changeFigure:character.json?type=webgal_mano -pose={ArmL1,Cry} -lut=warm.png;\n' +
+        'changeBg:court.png -type=blinds -lut=cold.png;',
+      'custom',
+      '/custom.txt',
+    ).sentenceList;
+
+    expect(result[0].content).toBe('character.json?type=webgal_mano');
+    expect(result[0].args.find(({ key }) => key === 'pose')?.value).toBe('{ArmL1,Cry}');
+    expect(result[0].args.find(({ key }) => key === 'lut')?.value).toBe('warm.png');
+    expect(result[1].args.find(({ key }) => key === 'type')?.value).toBe('blinds');
+    expect(result[1].args.find(({ key }) => key === 'lut')?.value).toBe('cold.png');
+  });
 });
