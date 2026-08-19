@@ -18,6 +18,7 @@ import localforage from 'localforage';
 import { stageStateManager } from '@/Core/Modules/stage/stageStateManager';
 import { parseTransformFrame } from '../parseTransformFrame';
 import { assetSetter, fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
+import { generateBlindsInAnimationObj } from '@/Core/controller/stage/pixi/animations/blindsIn';
 
 /**
  * 进行背景图片的切换
@@ -144,6 +145,10 @@ export const changeBg = (sentence: ISentence): IPerform => {
     duration,
     isHoldOn: false,
     startFunction: () => {
+      if (enterAnimationName === 'blindsIn' && !WebGAL.gameplay.skipAnimation) {
+        WebGAL.gameplay.pixiStage?.registerAnimation(generateBlindsInAnimationObj('bg-main', enterDuration), enterAnimationKey, 'bg-main');
+        return;
+      }
       if (!enterAnimationTimeline || WebGAL.gameplay.skipAnimation) return;
       const animationObject = generateTimelineObj(enterAnimationTimeline, 'bg-main', enterAnimationDuration);
       WebGAL.gameplay.pixiStage?.registerAnimation(animationObject, enterAnimationKey, 'bg-main');

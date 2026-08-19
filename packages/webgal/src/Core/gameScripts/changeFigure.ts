@@ -20,6 +20,7 @@ import { baseBlinkParam, baseFocusParam, BlinkParam, FocusParam } from '@/Core/l
 import { DEFAULT_FIG_IN_DURATION, DEFAULT_FIG_OUT_DURATION, WEBGAL_NONE } from '../constants';
 import { stageStateManager } from '@/Core/Modules/stage/stageStateManager';
 import { parseTransformFrame } from './parseTransformFrame';
+import { generateBlindsInAnimationObj } from '@/Core/controller/stage/pixi/animations/blindsIn';
 /**
  * 更改立绘
  * @param sentence 语句
@@ -293,6 +294,10 @@ export function changeFigure(sentence: ISentence): IPerform {
     duration,
     isHoldOn: false,
     startFunction: () => {
+      if (enterAnimationName === 'blindsIn' && !WebGAL.gameplay.skipAnimation) {
+        WebGAL.gameplay.pixiStage?.registerAnimation(generateBlindsInAnimationObj(key, enterDuration), enterAnimationKey, key);
+        return;
+      }
       if (!enterAnimationTimeline || WebGAL.gameplay.skipAnimation) return;
       const animationObject = generateTimelineObj(enterAnimationTimeline, key, enterAnimationDuration);
       WebGAL.gameplay.pixiStage?.registerAnimation(animationObject, enterAnimationKey, key);

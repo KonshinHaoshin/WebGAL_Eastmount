@@ -86,6 +86,7 @@ export function getAnimationTimeline(
 }
 
 export function getAnimateDuration(animationName: string) {
+  if (animationName === 'blindsIn') return 1000;
   const effect = WebGAL.animationManager.getAnimations().find((ani) => ani.name === animationName);
   if (effect) {
     let duration = 0;
