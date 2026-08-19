@@ -39,10 +39,24 @@ export const contentParser = (
       return assetSetter(contentRaw, fileType.bgm);
     case commandType.unlockCg:
       return assetSetter(contentRaw, fileType.background);
+    case commandType.presentTheEvidence:
+      return getPresentTheEvidenceContent(contentRaw, assetSetter);
     default:
       return contentRaw;
   }
 };
+
+function getPresentTheEvidenceContent(contentRaw: string, assetSetter: any): string {
+  const parts = contentRaw.split(/(?<!\\)@/);
+  const scenesPart = parts[0] ?? '';
+  const tagPart = parts.length > 1 ? `@${parts[1]}` : '';
+  const scenes = scenesPart.split(/(?<!\\)\|/);
+  const parsedScenes = scenes.map((scene) => {
+    const trimmed = scene.trim();
+    return trimmed.includes('.') ? assetSetter(trimmed, fileType.scene) : trimmed;
+  });
+  return parsedScenes.join('|') + (tagPart ? ` ${tagPart}` : '');
+}
 
 function getChooseContent(contentRaw: string, assetSetter: any): string {
   const chooseList = contentRaw.split(/(?<!\\)\|/);
