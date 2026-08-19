@@ -19,10 +19,10 @@ interface IShowGlobalDialogProps {
 }
 
 export function showGlogalDialog(props: IShowGlobalDialogProps) {
-  const { playSeClick, playSeEnter } = useSEByWebgalStore();
+  const { playSeClick, playSeEnter, playSeCancel } = useSEByWebgalStore();
   webgalStore.dispatch(setVisibility({ component: 'showGlobalDialog', visibility: true }));
   const handleLeft = () => {
-    playSeClick();
+    playSeCancel();
     props.leftFunc?.();
     hideGlobalDialog();
   };
@@ -39,12 +39,12 @@ export function showGlogalDialog(props: IShowGlobalDialogProps) {
           <div className={styles.button_list}>
             {props.leftText && (
               <div className={styles.button} onClick={handleLeft} onMouseEnter={playSeEnter}>
-                {props.leftText}
+                <span>{props.leftText}</span>
               </div>
             )}
             {props.rightText && (
               <div className={styles.button} onClick={handleRight} onMouseEnter={playSeEnter}>
-                {props.rightText}
+                <span dangerouslySetInnerHTML={{ __html: props.rightText }} />
               </div>
             )}
           </div>

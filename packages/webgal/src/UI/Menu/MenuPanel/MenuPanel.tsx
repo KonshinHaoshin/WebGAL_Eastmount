@@ -17,7 +17,7 @@ export const MenuPanel = () => {
   // 国际化
   const t = useTrans('menu.');
 
-  const { playSeClick, playSeDialogOpen, playSePageChange } = useSoundEffect();
+  const { playSeDialogOpen, playSePageChange, playSeCancel } = useSoundEffect();
   const GUIState = useSelector((state: RootState) => state.GUI);
   const enableFlowchart = useSelector((state: RootState) => state.userData.globalGameVar.Enable_flowchart === true);
   const dispatch = useDispatch();
@@ -90,14 +90,14 @@ export const MenuPanel = () => {
         clickFunc={() => {
           playSeDialogOpen();
           showGlogalDialog({
-            title: t('$gaming.buttons.titleTips'),
-            leftText: t('$common.yes'),
-            rightText: t('$common.no'),
-            leftFunc: () => {
+            title: '即将返回标题界面。',
+            leftText: '取消',
+            rightText: '<span style="color: red">前</span>往标题界面',
+            leftFunc: () => {},
+            rightFunc: () => {
               backToTitle();
               dispatch(setVisibility({ component: 'showMenuPanel', visibility: false }));
             },
-            rightFunc: () => {},
           });
         }}
         tagName={t('title.title')}
@@ -122,7 +122,7 @@ export const MenuPanel = () => {
         iconColor="rgba(123,144,169,1)"
         tagColor="rgba(123,144,169,1)"
         clickFunc={() => {
-          playSeClick();
+          playSeCancel();
           dispatch(setVisibility({ component: 'showMenuPanel', visibility: false }));
         }}
         tagName={t('exit.title')}

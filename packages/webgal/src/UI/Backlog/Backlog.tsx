@@ -1,21 +1,115 @@
 import styles from './backlog.module.scss';
-import { CloseSmall, Return, VolumeNotice } from '@icon-park/react';
+import { CloseSmall, VolumeNotice } from '@icon-park/react';
 import { jumpFromBacklog } from '@/Core/controller/storage/jumpFromBacklog';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, webgalStore } from '@/store/store';
 import { setVisibility } from '@/store/GUIReducer';
 import { logger } from '@/Core/util/logger';
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import useTrans from '@/hooks/useTrans';
-import { compileSentence, EnhancedNode } from '@/Stage/TextBox/TextBox';
+import { compileSentence } from '@/Stage/TextBox/TextBox';
 import useSoundEffect from '@/hooks/useSoundEffect';
 import { WebGAL } from '@/Core/WebGAL';
+import backlogBg from '@/assets/dragonspring/backlog.png';
+import backlog_item_button from '@/assets/dragonspring/backlog_item_left.png';
+import backlog_item_nameContainer from '@/assets/dragonspring/namebox.png';
+import useLoadJson from '@/hooks/useLoadJson';
+import defaultCharacters from '@/assets/dragonspring/characters.json';
 import { stopAuto } from '@/Core/controller/gamePlay/autoPlay';
+
+/* ====== 工具函数：把 ReactNode 转为纯文本 ====== */
+function toPlainText(node: React.ReactNode): string {
+  if (typeof node === 'string') return node;
+  if (typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(toPlainText).join('');
+  // eslint-disable-next-line no-eq-null,eqeqeq
+  if (node == null) return '';
+  // @ts-ignore
+  if (typeof node?.props?.children !== 'undefined') {
+    // @ts-ignore
+    return toPlainText(node.props.children);
+  }
+  return String(node as any);
+}
+
+/** 仅英文字母首字母大写（中文不变） */
+function upperFirstLatin(ch: string) {
+  return /^[a-z]/.test(ch) ? ch.toUpperCase() : ch;
+}
+
+/** 强化空白归一 */
+function normalizeSpaces(s: string) {
+  return s
+    .replace(/[\u00A0\u1680\u180E\u2000-\u200B\u202F\u205F\u2060\u3000\uFEFF]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+function compact(s: string) {
+  return normalizeSpaces(s).replace(/\s+/g, '');
+}
+
+/** 把输入名映射到 characters.json 的规范键（含空格），并返回颜色 */
+function resolveCanonicalNameAndColor(
+  inputName: string,
+  characters: Record<string, string>,
+): { canonicalKey: string; color?: string } {
+  const dict = characters;
+
+  const rawNorm = normalizeSpaces(inputName);
+  const rawComp = compact(inputName);
+
+  // a) 紧凑匹配（“千早爱音”≈“千早 爱音”）
+  for (const k of Object.keys(dict)) {
+    if (compact(k) === rawComp) {
+      const ck = normalizeSpaces(k);
+      const color = dict[k];
+      return color ? { canonicalKey: ck, color } : { canonicalKey: ck };
+    }
+  }
+
+  // b) 直接匹配（用户本就输入了空格）
+  if (dict[rawNorm]) {
+    return { canonicalKey: rawNorm, color: dict[rawNorm] };
+  }
+
+  // c) 兜底：返回规范化文本
+  return { canonicalKey: rawNorm };
+}
+
+/* ====== 不同下标的字符使用不同尺寸/样式 ====== */
+interface CharStyle {
+  fontSize: string;
+  color?: string;
+  useLayer?: boolean; // 是否使用 outer/inner 叠层描边
+  outlineOnly?: boolean;
+}
+
+interface StyleOpts {
+  isSurnameFirst: boolean;
+  isGivenFirst: boolean;
+  hasSurname: boolean; // 是否有“姓 名”结构
+  surnameColor?: string; // 姓首字颜色
+}
+
+function styleForIndex(i: number, opt: StyleOpts): CharStyle {
+  const { isSurnameFirst, isGivenFirst, hasSurname, surnameColor } = opt;
+
+  // 姓首字 250%，名首字 200%，其余 150%（统一）
+  const size = isSurnameFirst ? '250%' : isGivenFirst ? '200%' : '150%';
+
+  if (isSurnameFirst) {
+    if (surnameColor) return { fontSize: size, color: surnameColor, useLayer: false };
+    return { fontSize: size, color: '#fff', useLayer: true };
+  }
+  if (isGivenFirst) {
+    return { fontSize: size, color: '#fff', useLayer: true };
+  }
+  return { fontSize: size, color: '#fff', useLayer: true };
+}
 
 export const Backlog = () => {
   const t = useTrans('gaming.');
-  // logger.info('Backlog render');
-  const { playSeEnter, playSeClick } = useSoundEffect();
+  const { playSeEnter, playSeClick, playSeCancel } = useSoundEffect();
   const GUIStore = useSelector((state: RootState) => state.GUI);
   const isBacklogOpen = GUIStore.showBacklog;
   const dispatch = useDispatch();
@@ -23,93 +117,130 @@ export const Backlog = () => {
   const [indexHide, setIndexHide] = useState(false);
   const [isDisableScroll, setIsDisableScroll] = useState(false);
   const [limit, setLimit] = useState(20);
-  useEffect(() => {
-    if (!isBacklogOpen) {
-      return;
-    }
-    let options = {
-      root: null,
-      rootMargin: '0px',
-      threshold: [1.0],
-    };
+  const characters = useLoadJson<Record<string, string>>(
+    'Stage/TextBox/characters.json',
+    defaultCharacters as Record<string, string>,
+  );
 
-    let observer = new IntersectionObserver((entries) => {
+  useEffect(() => {
+    if (!isBacklogOpen) return;
+    const options = { root: null, rootMargin: '0px', threshold: [1.0] };
+    const observer = new IntersectionObserver((entries) => {
       if ((entries?.[0]?.intersectionRatio ?? 0) <= 0) return;
-      setLimit(limit + 20);
+      setLimit((prev) => prev + 20);
     }, options);
 
     const observeTarget = document.querySelector(`#backlog_item_${limit - 5}`);
-    if (observeTarget) {
-      observer.observe(observeTarget);
-    }
-
-    return () => {
-      observer.disconnect();
-    };
+    if (observeTarget) observer.observe(observeTarget);
+    return () => observer.disconnect();
   }, [limit, isBacklogOpen]);
 
   useEffect(() => {
-    if (!isBacklogOpen) {
-      setLimit(20);
-    }
+    if (!isBacklogOpen) setLimit(20);
   }, [isBacklogOpen]);
 
-  let timeRef = useRef<ReturnType<typeof setTimeout>>();
-  // 缓存一下vdom
-  const backlogList = useMemo<any>(() => {
-    let backlogs = [];
+  const timeRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // === 渲染列表 ===
+  // eslint-disable-next-line no-undef
+  const backlogList = useMemo<JSX.Element[]>(() => {
+    // eslint-disable-next-line no-undef
+    const backlogs: JSX.Element[] = [];
     const current_backlog_len = WebGAL.backlogManager.getBacklog().length;
-    // logger.info('backlogList render');
+
     for (let i = 0; i < Math.min(current_backlog_len, limit); i++) {
       const indexOfBacklog = current_backlog_len - i - 1;
       const backlogItem = WebGAL.backlogManager.getBacklog()[indexOfBacklog];
+
+      // ===== 正文 =====
       const showTextArray = compileSentence(backlogItem.currentStageState.showText, 3, true, false);
-      const showTextArray2 = showTextArray.map((line) => {
-        return line.map((c) => {
-          return c.reactNode;
-        });
-      });
+      const showTextArray2 = showTextArray.map((line) => line.map((c) => c.reactNode));
       const showTextArrayReduced = mergeStringsAndKeepObjects(showTextArray2);
-      const showTextElementList = showTextArrayReduced.map((line, index) => {
-        return (
-          <div key={`backlog-line-${index}`}>
-            {line.map((e, index) => {
-              if (e === '<br />') {
-                return <br key={`br${index}`} />;
-              } else {
-                return e;
-              }
-            })}
-          </div>
-        );
-      });
-      const showNameArray = compileSentence(backlogItem.currentStageState.showName, 3, true);
-      const showNameArray2 = showNameArray.map((line) => {
-        return line.map((c) => {
-          return c.reactNode;
+      const showTextElementList = showTextArrayReduced.map((line, idx) => (
+        <div key={`backlog-line-${idx}`}>{line.map((e, i2) => (e === '<br />' ? <br key={`br${i2}`} /> : e))}</div>
+      ));
+
+      const nameRaw = compileSentence(backlogItem.currentStageState.showName, 3, true);
+      const fullNameInput = nameRaw.map((line) => line.map((c) => toPlainText(c.reactNode)).join('')).join('\n');
+
+      const { canonicalKey, color: surnameColor } = resolveCanonicalNameAndColor(fullNameInput, characters);
+
+      // 检查是否有名字内容（去除空白字符后）
+      const hasName = canonicalKey.trim() !== '';
+
+      // 拆分"姓 名"（若没有空格，则将整个名字视为"姓"，名为空）
+      const tokens = canonicalKey.split(' ');
+      const hasSurnameGiven = tokens.length >= 2;
+      const surname = hasSurnameGiven ? tokens[0] : canonicalKey; // 有空格时取第一部分作为姓，无空格时整个名字作为"姓"
+      const given = hasSurnameGiven ? tokens.slice(1).join('') : ''; // 有空格时取剩余部分作为名，无空格时名为空
+
+      // 显示文本（如果有名，显示姓+名；如果无名，只显示姓）
+      const display = hasSurnameGiven && given.length > 0 ? surname + given : surname;
+      const chars = Array.from(display);
+      const givenStartIndex = hasSurnameGiven && given.length > 0 ? surname.length : -1; // 有名时从姓氏后开始，无名时为-1
+
+      const nameCharSpans = chars.map((origCh, idx) => {
+        const isSurnameFirst = idx === 0; // 第一个字符总是姓首字
+        const isGivenFirst = hasSurnameGiven && given.length > 0 && idx === givenStartIndex; // 有名且是名首字位置
+
+        const ch = isSurnameFirst || isGivenFirst ? upperFirstLatin(origCh) : origCh;
+
+        const s = styleForIndex(idx, {
+          isSurnameFirst,
+          isGivenFirst,
+          hasSurname: hasSurnameGiven,
+          surnameColor,
         });
-      });
-      const showNameArrayReduced = mergeStringsAndKeepObjects(showNameArray2);
-      const nameElementList = showNameArrayReduced.map((line, index) => {
+
+        const baseStyle: React.CSSProperties = {
+          fontSize: s.fontSize,
+          color: s.color ?? '#fff',
+          lineHeight: 1,
+          marginRight: 0,
+        };
+
+        // 姓首字有颜色：纯色实心（这种情况不会发生，因为姓是空的）
+        if (isSurnameFirst && surnameColor) {
+          return (
+            <span key={`${ch}-${idx}`} className={styles.name_char} style={baseStyle}>
+              {ch}
+            </span>
+          );
+        }
+
+        if (s.useLayer) {
+          return (
+            <span key={`${ch}-${idx}`} className={styles.name_char} style={baseStyle}>
+              <span className={styles.name_zhanwei}>
+                {ch}
+                <span className={styles.name_outer}>{ch}</span>
+                <span className={styles.name_inner}>{ch}</span>
+              </span>
+            </span>
+          );
+        }
+
         return (
-          <div key={`backlog-line-${index}`}>
-            {line.map((e, index) => {
-              if (e === '<br />') {
-                return <br key={`br${index}`} />;
-              } else {
-                return e;
-              }
-            })}
-          </div>
+          <span key={`${ch}-${idx}`} className={styles.name_char} style={baseStyle}>
+            {ch}
+          </span>
         );
       });
-      const singleBacklogView = (
+
+      const nameElement = (
+        <div className={styles.name_line} key={`name-line-${i}`}>
+          {nameCharSpans}
+        </div>
+      );
+
+      backlogs.push(
         <div
           className={styles.backlog_item}
           id={`backlog_item_${i}`}
           style={{ animationDelay: `${20 * ((i - 1) % 20)}ms` }}
           key={'backlogItem' + backlogItem.currentStageState.showText + backlogItem.saveScene.currentSentenceId}
         >
+          {/* 左：按钮 | 名字底板+文字 */}
           <div className={styles.backlog_func_area}>
             <div className={styles.backlog_item_button_list}>
               <div
@@ -122,53 +253,29 @@ export const Backlog = () => {
                 onMouseEnter={playSeEnter}
                 className={styles.backlog_item_button_element}
               >
-                <Return theme="outline" size={iconSize} fill="#ffffff" strokeWidth={3} />
+                <img src={backlog_item_button} alt="return" className={styles.backlog_item_button_img} />
               </div>
-              {backlogItem.currentStageState.vocal ? (
-                <div
-                  onClick={() => {
-                    playSeClick();
-                    // 暂停所有 backlog 语音（包括当前；后续会重置并播放当前）
-                    document.querySelectorAll('[id^="backlog_audio_play_element_"]').forEach((audio: any) => {
-                      audio.pause();
-                      audio.currentTime = 0;
-                    });
-                    // 暂停游戏内正在播放的语音，避免与 backlog 语音混合
-                    const currentVocal = document.getElementById('currentVocal') as HTMLAudioElement | null;
-                    if (currentVocal) {
-                      currentVocal.pause();
-                      currentVocal.currentTime = 0;
-                    }
-                    // 卸载 vocal-play perform，避免其 blockingAuto 阻塞自动播放
-                    WebGAL.gameplay.performController.unmountPerform('vocal-play', true);
-                    // 获取到播放 backlog 语音的元素
-                    const backlog_audio_element: any = document.getElementById(
-                      'backlog_audio_play_element_' + indexOfBacklog,
-                    );
-                    if (backlog_audio_element) {
-                      backlog_audio_element.currentTime = 0;
-                      const userDataStore = webgalStore.getState().userData;
-                      const mainVol = userDataStore.optionData.volumeMain;
-                      backlog_audio_element.volume = mainVol * 0.01 * userDataStore.optionData.vocalVolume * 0.01;
-                      backlog_audio_element?.play();
-                    }
-                  }}
-                  onMouseEnter={playSeEnter}
-                  className={styles.backlog_item_button_element}
-                >
-                  <VolumeNotice theme="outline" size={iconSize} fill="#ffffff" strokeWidth={3} />
-                </div>
-              ) : null}
+
+              {/* 语音播放按钮已屏蔽 */}
             </div>
-            <div className={styles.backlog_item_content_name}>{nameElementList}</div>
+
+            {hasName && (
+              <div className={styles.backlog_item_content_name}>
+                <img src={backlog_item_nameContainer} alt="namebox" className={styles.name_container_bg} />
+                <div className={styles.name_container_text}>{nameElement}</div>
+              </div>
+            )}
           </div>
+
+          {/* 右：正文 */}
           <div className={styles.backlog_item_content}>
             <span className={styles.backlog_item_content_text}>{showTextElementList}</span>
           </div>
-          <audio id={'backlog_audio_play_element_' + indexOfBacklog} src={backlogItem.currentStageState.vocal} />
-        </div>
+
+          {/* 语音元素（如有） */}
+          <audio id={'backlog_audio_play_element_' + indexOfBacklog} src={backlogItem.currentStageState.vocal ?? ''} />
+        </div>,
       );
-      backlogs.push(singleBacklogView);
     }
     return backlogs;
   }, [
@@ -176,103 +283,85 @@ export const Backlog = () => {
       0,
     limit,
   ]);
+
+  // 显隐切换时的滚动/层级管理
   useEffect(() => {
-    /* 切换为展示历史记录时触发 */
     if (GUIStore.showBacklog) {
       stopAuto();
-      // logger.info('展示backlog');
-      // 立即清除 防止来回滚动时可能导致的错乱
-      if (timeRef.current) {
-        clearTimeout(timeRef.current);
-      }
-      // setIsDisableScroll(false);
-      // 重新把index调回正数
+      if (timeRef.current) clearTimeout(timeRef.current);
       setIndexHide(false);
-      // 向上滑动触发回想时会带着backlog一起滑一下 我也不知道为什么，可能是我的鼠标问题 所以先ban掉滚动
       setIsDisableScroll(true);
-      // nextTick开启滚动
-      setTimeout(() => {
-        setIsDisableScroll(false);
-      }, 0);
+      setTimeout(() => setIsDisableScroll(false), 0);
     } else {
-      /* 隐藏历史记录触发 */
-      // 这里是为了让backlog的z-index降低
       timeRef.current = setTimeout(() => {
         setIndexHide(true);
-        // setIsDisableScroll(false);
-        // setIsDisableScroll(true);
         timeRef.current = undefined;
-        // 700是和动画一样的延时 保险起见多个80ms
-        // 不加也没啥 问题不大
       }, 700 + 80);
     }
   }, [GUIStore.showBacklog]);
+
   return (
-    <>
-      {
-        // ${indexHide ? styles.Backlog_main_out_IndexHide : ''}
-        <div
-          className={`
+    <div
+      className={`
           ${GUIStore.showBacklog ? styles.Backlog_main : styles.Backlog_main_out}
           ${indexHide ? styles.Backlog_main_out_IndexHide : ''}
-          `}
+        `}
+      style={{ ['--backlog-bg' as any]: `url(${backlogBg})` }}
+    >
+      <div className={styles.backlog_top}>
+        <CloseSmall
+          className={styles.backlog_top_icon}
+          onClick={() => {
+            playSeCancel();
+            dispatch(setVisibility({ component: 'showBacklog', visibility: false }));
+            dispatch(setVisibility({ component: 'showTextBox', visibility: true }));
+          }}
+          onMouseEnter={playSeEnter}
+          theme="outline"
+          size="4em"
+          fill="#ffffff"
+          strokeWidth={3}
+        />
+        <div
+          className={styles.backlog_title}
+          onClick={() => {
+            logger.info('Rua! Testing');
+          }}
         >
-          <div className={styles.backlog_top}>
-            <CloseSmall
-              className={styles.backlog_top_icon}
-              onClick={() => {
-                playSeClick();
-                dispatch(setVisibility({ component: 'showBacklog', visibility: false }));
-                dispatch(setVisibility({ component: 'showTextBox', visibility: true }));
-              }}
-              onMouseEnter={playSeEnter}
-              theme="outline"
-              size="4em"
-              fill="#ffffff"
-              strokeWidth={3}
-            />
-            <div
-              className={styles.backlog_title}
-              onClick={() => {
-                logger.info('Rua! Testing');
-              }}
-            >
-              {t('buttons.backlog')}
-            </div>
-          </div>
-          {GUIStore.showBacklog && (
-            <div className={`${styles.backlog_content} ${isDisableScroll ? styles.Backlog_main_DisableScroll : ''}`}>
-              {backlogList}
-            </div>
-          )}
+          {t('buttons.backlog')}
         </div>
-      }
-    </>
+      </div>
+
+      {GUIStore.showBacklog && (
+        <div className={`${styles.backlog_content} ${isDisableScroll ? styles.Backlog_main_DisableScroll : ''}`}>
+          {backlogList}
+        </div>
+      )}
+    </div>
   );
 };
 
-export function mergeStringsAndKeepObjects(arr: ReactNode[]): ReactNode[][] {
-  let result = [];
-  let currentString = '';
-
-  // eslint-disable-next-line @typescript-eslint/prefer-for-of
-  for (let i = 0; i < arr.length; i++) {
-    const currentItem = arr[i];
-
-    if (typeof currentItem === 'string') {
-      currentString += currentItem;
-    } else {
-      if (currentString !== '') {
-        result.push(currentString);
-        currentString = '';
+/**
+ * 把连续的字符串合并，但保留 React 节点（如 <span/>、<br/> 等）
+ * 输入：ReactNode[][]（每行的节点数组）
+ * 输出：ReactNode[][]（同结构，字符串已合并）
+ */
+export function mergeStringsAndKeepObjects(arr: ReactNode[][]): ReactNode[][] {
+  return arr.map((line) => {
+    const result: ReactNode[] = [];
+    let current = '';
+    for (const item of line) {
+      if (typeof item === 'string') {
+        current += item;
+      } else {
+        if (current) {
+          result.push(current);
+          current = '';
+        }
+        result.push(item);
       }
-      result.push(currentItem);
     }
-  }
-
-  if (currentString !== '') {
-    result.push(currentString);
-  }
-
-  return result as ReactNode[][];
+    if (current) result.push(current);
+    return result;
+  });
 }

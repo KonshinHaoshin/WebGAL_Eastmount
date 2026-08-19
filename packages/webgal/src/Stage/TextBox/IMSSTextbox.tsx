@@ -1,10 +1,19 @@
 import styles from './textbox.module.scss';
-import { useEffect } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { WebGAL } from '@/Core/WebGAL';
 import { ITextboxProps } from './types';
 import useApplyStyle from '@/hooks/useApplyStyle';
 import { css } from '@emotion/css';
 import { textSize } from '@/store/userDataInterface';
+import textboxBg from '@/assets/dragonspring/textbox.png';
+import nameBoxBg from '@/assets/dragonspring/namebox.png';
+import useLoadJson from '@/hooks/useLoadJson';
+import button_on from '@/assets/dragonspring/button_on.png';
+import button_off from '@/assets/dragonspring/button_off.png';
+import { switchAuto } from '@/Core/controller/gamePlay/autoPlay';
+import useSoundEffect from '@/hooks/useSoundEffect';
+import cursor from '@/assets/dragonspring/cursor.png';
+import defaultCharacters from '@/assets/dragonspring/characters.json';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 
@@ -17,7 +26,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
     isRead,
     isText,
     isSafari,
-    isFirefox: boolean,
+    isFirefox,
     fontSize,
     miniAvatar,
     isHasName,
@@ -28,93 +37,314 @@ export default function IMSSTextbox(props: ITextboxProps) {
     textboxOpacity,
     textSizeState,
   } = props;
-
+  const [isClicked, setIsClicked] = useState(false);
+  const [showCursor, setShowCursor] = useState(false);
   const applyStyle = useApplyStyle('textbox');
   const readTextClassName = isRead ? ` ${applyStyle('readText', styles.readText)}` : '';
   const readTextInnerClassName = isRead ? ` ${applyStyle('readTextInner', styles.readTextInner)}` : '';
+  const { playSeClick } = useSoundEffect();
+  const characters = useLoadJson<Record<string, string>>(
+    'Stage/TextBox/characters.json',
+    defaultCharacters as Record<string, string>,
+  );
+
+  // 直接监听 WebGAL.gameplay.isAuto 的变化，确保无论从哪里调用 stopAuto() 都能立即更新
+  useEffect(() => {
+    const checkAutoMode = () => {
+      const currentAutoState = WebGAL.gameplay.isAuto;
+      setIsClicked((prevState) => {
+        // 只有当状态真正改变时才更新，避免不必要的重渲染
+        if (currentAutoState !== prevState) {
+          return currentAutoState;
+        }
+        return prevState;
+      });
+    };
+
+    // 立即检查一次
+    checkAutoMode();
+
+    // 定期检查auto模式状态（与 TextBox.tsx 使用相同的检查间隔）
+    const interval = setInterval(checkAutoMode, 100);
+
+    return () => clearInterval(interval);
+  }, []); // 空依赖数组，只在组件挂载时运行一次
+
+  // 处理auto按钮点击
+  const handleAutoClick = () => {
+    switchAuto();
+    playSeClick();
+    // 立即更新按钮状态（乐观更新），确保按钮立即响应
+    // 直接读取 WebGAL.gameplay.isAuto 的当前值，因为 switchAuto() 已经改变了它
+    // useEffect 会在 isAuto prop 更新后再次同步，确保最终一致性
+    setIsClicked(WebGAL.gameplay.isAuto);
+  };
 
   useEffect(() => {
     function settleText() {
       const textElements = document.querySelectorAll('.Textelement_start');
-      const textArray = [...textElements];
+      const textArray = [...(textElements as unknown as HTMLElement[])];
       textArray.forEach((e) => {
         e.className = applyStyle('TextBox_textElement_Settled', styles.TextBox_textElement_Settled);
       });
+      // 点击后立即显示全部文字时，也立即显示 cursor
+      setShowCursor(true);
     }
 
     WebGAL.events.textSettle.on(settleText);
     return () => {
       WebGAL.events.textSettle.off(settleText);
     };
-  }, []);
+  }, [applyStyle]);
+
+  // 当对话键变化时，隐藏 cursor
+  useEffect(() => {
+    setShowCursor(false);
+  }, [currentDialogKey]);
+
+  // 计算文本动画完成时间并自动显示 cursor（与 say.ts 使用相同的逻辑）
+  useEffect(() => {
+    if (!isText || textArray.length === 0) {
+      setShowCursor(false);
+      return;
+    }
+
+    // 计算文本总字符数（与 say.ts 中的逻辑一致）
+    let totalChars = 0;
+    textArray.forEach((line) => {
+      line.forEach(() => {
+        totalChars++;
+      });
+    });
+
+    // 计算文本播放结束时间（与 say.ts 中的计算逻辑完全一致）
+    // say.ts 中的计算：
+    // - sentenceDelay = textDelay * len (所有字符数 * textDelay)
+    // - endDelay = useTextAnimationDuration(textSpeed) / 2 (textDuration / 2)
+    // - duration = sentenceDelay + endDelay
+    const sentenceDelay = totalChars * textDelay; // 所有字符延迟的总和
+    const endDelay = textDuration / 2; // 动画持续时间的一半
+    const totalAnimationTime = sentenceDelay + endDelay;
+
+    // 在动画完成后自动显示 cursor（不依赖点击，与 say.ts 的 stopFunction 时机一致）
+    const timer = setTimeout(() => {
+      setShowCursor(true);
+    }, totalAnimationTime);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [textArray, textDelay, textDuration, isText, currentDialogKey]);
+
   let allTextIndex = 0;
-  const nameElementList = showName.map((line, index) => {
-    const textline = line.map((en, index) => {
-      const e = en.reactNode;
-      let style = '';
-      let tips = '';
-      let style_alltext = '';
-      let isEnhanced = false;
-      if (en.enhancedValue) {
-        isEnhanced = true;
-        const data = en.enhancedValue;
-        for (const dataElem of data) {
-          const { key, value } = dataElem;
-          switch (key) {
-            case 'style':
-              style = value;
-              break;
-            case 'tips':
-              tips = value;
-              break;
-            case 'style-alltext':
-              style_alltext = value;
-              break;
-          }
+
+  // 两个工具
+  function toPlainText(node: React.ReactNode): string {
+    if (typeof node === 'string') return node;
+    if (typeof node === 'number') return String(node);
+    if (Array.isArray(node)) return node.map(toPlainText).join('');
+    // eslint-disable-next-line no-eq-null,eqeqeq
+    if (node == null) return '';
+    // @ts-ignore
+    if (typeof node.props?.children !== 'undefined') {
+      // @ts-ignore
+      return toPlainText(node.props.children);
+    }
+    return String(node as any);
+  }
+
+  function upperFirstLatin(ch: string) {
+    // 仅对英文字母有效；汉字等不改变
+    if (/^[a-z]/.test(ch)) return ch.toUpperCase();
+    return ch;
+  }
+
+  function normalizeSpaces(s: string) {
+    // 统一空白：去首尾、将全角空格转半角、压缩中间多空格为一个
+    return s
+      .replace(/\u3000/g, ' ')
+      .trim()
+      .replace(/\s+/g, ' ');
+  }
+  function compact(s: string) {
+    // 去除所有空白，用于“千早爱音” ≈ “千早 爱音”的匹配
+    return normalizeSpaces(s).replace(/\s+/g, '');
+  }
+
+  /** 返回：{ canonicalKey, color }
+   * canonicalKey 是在 characters.json 中存在的"规范键"（含空格，如"千早 爱音"）
+   * 若找不到，canonicalKey 为 normalize 后的原文，color 为 undefined
+   */
+  function resolveCanonicalNameAndColor(
+    inputName: string,
+    characters: Record<string, string>,
+  ): { canonicalKey: string; color?: string } {
+    const raw = normalizeSpaces(inputName);
+    const compactInput = compact(raw);
+
+    // 1) 先尝试字典"紧凑匹配"：去空格后相等则认为是该键
+    const dict = characters;
+    for (const k of Object.keys(dict)) {
+      if (compact(k) === compactInput) {
+        const color = dict[k];
+        if (color && color.length > 0) {
+          return { canonicalKey: normalizeSpaces(k), color };
         }
+        return { canonicalKey: normalizeSpaces(k) };
       }
-      const styleClassName = ' ' + css(style, { label: 'showname' });
-      const styleAllText = ' ' + css(style_alltext, { label: 'showname' });
-      if (isEnhanced) {
+    }
+
+    // 2) 再尝试直接键匹配（用户本就输入了空格）
+    const directKey = normalizeSpaces(raw);
+    if (dict[directKey]) {
+      return { canonicalKey: directKey, color: dict[directKey] };
+    }
+
+    // 3) 找不到就返回 normalize 后文本，颜色为空
+    return { canonicalKey: directKey };
+  }
+
+  interface CharStyle {
+    fontSize: string;
+    color?: string;
+    useLayer?: boolean; // 使用 outerName/innerName 叠层（渐变+描边）
+    outlineOnly?: boolean; // 只描边（透明填充）
+    strokeWidthEm?: number; // 描边宽度（em）
+  }
+
+  interface StyleOpts {
+    isSurnameFirst: boolean; // 姓氏首字
+    isGivenFirst: boolean; // 名字首字
+    hasSurname: boolean; // 是否有“姓 名”结构
+    surnameColor?: string; // 姓首字颜色
+  }
+
+  function styleForIndex(i: number, opt: StyleOpts): CharStyle {
+    const { isSurnameFirst, isGivenFirst, hasSurname, surnameColor } = opt;
+
+    const size = isSurnameFirst ? '250%' : isGivenFirst ? '200%' : '150%';
+
+    // 1) 姓首字：有颜色→纯色实心；无颜色→叠层白描边
+    if (isSurnameFirst) {
+      if (surnameColor) return { fontSize: size, color: surnameColor, useLayer: false };
+      return { fontSize: size, color: '#fff', useLayer: true };
+    }
+
+    // 2) 名首字：仅强调（加大字号），颜色不变，走叠层
+    if (isGivenFirst) {
+      return { fontSize: size, color: '#fff', useLayer: true };
+    }
+
+    // 3) 普通字：统一 150%，叠层
+    return { fontSize: size, color: '#fff', useLayer: true };
+  }
+
+  // 名字逐字渲染
+  // 名字逐字渲染（带“姓/名”逻辑 + 自动匹配字典键）
+  const nameElementList = showName.map((line, index) => {
+    const fullText = line.map((en) => toPlainText(en.reactNode)).join('');
+
+    // 拿到规范键（含空格）与颜色
+    const { canonicalKey, color: surnameColor } = resolveCanonicalNameAndColor(fullText, characters);
+
+    // 拆分"姓 名"（若没有空格，则将整个名字视为"姓"，名为空）
+    const tokens = canonicalKey.split(' ');
+    const hasSurnameGiven = tokens.length >= 2;
+    const surname = hasSurnameGiven ? tokens[0] : canonicalKey; // 有空格时取第一部分作为姓，无空格时整个名字作为"姓"
+    const given = hasSurnameGiven ? tokens.slice(1).join('') : ''; // 有空格时取剩余部分作为名，无空格时名为空
+
+    // 组合成最终要显示的字符数组（如果有名，显示姓+名；如果无名，只显示姓）
+    const display = hasSurnameGiven && given.length > 0 ? surname + given : surname;
+    const chars = Array.from(display);
+
+    // 计算"名"的起始下标（如果名是空的，则不会有名首字）
+    const givenStartIndex = hasSurnameGiven && given.length > 0 ? surname.length : -1; // 有名时从姓氏后开始，无名时为-1
+
+    // 渲染函数：保持你原有的大小/描边叠层策略，但根据首字位置调整颜色/大写
+    const charSpans = chars.map((origCh, i) => {
+      // 按规则处理大写：姓首字 & 名首字（仅 ASCII 有效）
+      const isSurnameFirst = i === 0; // 第一个字符总是姓首字
+      const isGivenFirst = hasSurnameGiven && given.length > 0 && i === givenStartIndex; // 有名且是名首字位置
+
+      const ch = isSurnameFirst || isGivenFirst ? upperFirstLatin(origCh) : origCh;
+
+      const s = styleForIndex(i, {
+        isSurnameFirst,
+        isGivenFirst,
+        hasSurname: hasSurnameGiven,
+        surnameColor,
+      });
+
+      const base: React.CSSProperties = {
+        position: 'relative',
+        display: 'inline-block',
+        lineHeight: 1,
+        marginRight: 0,
+      };
+
+      // 规则补充：
+      // 1) 姓首字：若有颜色映射 → 纯色实心（不走叠层）+ 大写
+      if (isSurnameFirst && surnameColor) {
         return (
-          <span key={index} style={{ position: 'relative' }}>
-            <span className={styles.zhanwei + styleAllText}>
-              {e}
-              <span className={applyStyle('outerName', styles.outerName) + styleClassName + styleAllText}>{e}</span>
-              {isUseStroke && <span className={applyStyle('innerName', styles.innerName) + styleAllText}>{e}</span>}
+          <span key={`${ch}-${i}`} style={{ ...base, fontSize: s.fontSize, color: surnameColor, left: '20px' }}>
+            {ch}
+          </span>
+        );
+      }
+
+      // 2) 名首字：仅大写，不改颜色；走原有叠层（白 + 描边）
+      // 3) 无姓氏之分时：仅首字大写，改颜色；走原有叠层
+      //    => 这两种都沿用“useLayer”的路径
+      if (s.useLayer) {
+        return (
+          <span key={`${ch}-${i}`} style={{ ...base, fontSize: s.fontSize }}>
+            <span className={styles.zhanwei}>
+              {ch}
+              <span className={applyStyle('outerName', styles.outerName)}>{ch}</span>
+              {isUseStroke && <span className={applyStyle('innerName', styles.innerName)}>{ch}</span>}
             </span>
           </span>
         );
       }
-      return (
-        <span key={index} style={{ position: 'relative' }}>
-          <span className={styles.zhanwei + styleAllText}>
-            {e}
-            <span className={applyStyle('outerName', styles.outerName) + styleClassName + styleAllText}>{e}</span>
-            {isUseStroke && <span className={applyStyle('innerName', styles.innerName) + styleAllText}>{e}</span>}
+
+      // 其它情况（很少触发）：按你原逻辑
+      if (s.outlineOnly) {
+        return (
+          <span key={`${ch}-${i}`} style={{ ...base, fontSize: s.fontSize, color: 'transparent' }}>
+            {ch}
           </span>
+        );
+      }
+      return (
+        <span key={`${ch}-${i}`} style={{ ...base, fontSize: s.fontSize, color: s.color ?? '#fff' }}>
+          {ch}
         </span>
       );
     });
+
     return (
       <div
         style={{
+          display: 'flex',
+          alignItems: 'baseline',
           wordBreak: isSafari || props.isFirefox ? 'break-all' : undefined,
-          display: isSafari ? 'flex' : undefined,
           flexWrap: isSafari ? 'wrap' : undefined,
         }}
-        key={`text-line-${index}`}
+        key={`name-line-${index}`}
       >
-        {textline}
+        {charSpans}
       </div>
     );
   });
+
+  // ==== 对话正文渲染（保持你原逻辑）====
   const textElementList = textArray.map((line, index) => {
-    const textLine = line.map((en, index) => {
-      const e = en.reactNode;
+    const textLine = line.map((en, idx) => {
+      const e = en.reactNode as ReactNode;
       let style = '';
       let tips = '';
       let style_alltext = '';
+
       if (en.enhancedValue) {
         const data = en.enhancedValue;
         for (const dataElem of data) {
@@ -132,33 +362,36 @@ export default function IMSSTextbox(props: ITextboxProps) {
           }
         }
       }
-      // if (e === '<br />') {
-      //   return <br key={`br${index}`} />;
-      // }
-      const outerClassName = applyStyle('outer', styles.outer);
-      const readTextOuterClassName = isRead ? ` ${applyStyle('readTextOuter', styles.readTextOuter)}` : '';
+
       let delay = allTextIndex * textDelay;
       allTextIndex++;
-      let prevLength = currentConcatDialogPrev.length;
+      const prevLength = currentConcatDialogPrev.length;
+
       if (currentConcatDialogPrev !== '' && allTextIndex >= prevLength) {
         delay = delay - prevLength * textDelay;
       }
+
       const styleClassName = ' ' + css(style);
       const styleAllText = ' ' + css(style_alltext);
+      const readTextOuterClassName = isRead ? ` ${applyStyle('readTextOuter', styles.readTextOuter)}` : '';
+
       if (allTextIndex < prevLength) {
         return (
           <span
-            // data-text={e}
             id={`${delay}`}
             className={
               applyStyle('TextBox_textElement_Settled', styles.TextBox_textElement_Settled) + readTextClassName
             }
-            key={currentDialogKey + index}
+            key={currentDialogKey + idx}
             style={{ animationDelay: `${delay}ms`, animationDuration: `${textDuration}ms` }}
           >
             <span className={styles.zhanwei + styleAllText}>
               {e}
-              <span className={outerClassName + readTextOuterClassName + styleClassName + styleAllText}>{e}</span>
+              <span
+                className={applyStyle('outer', styles.outer) + readTextOuterClassName + styleClassName + styleAllText}
+              >
+                {e}
+              </span>
               {isUseStroke && (
                 <span className={applyStyle('inner', styles.inner) + readTextInnerClassName + styleAllText}>{e}</span>
               )}
@@ -166,20 +399,24 @@ export default function IMSSTextbox(props: ITextboxProps) {
           </span>
         );
       }
+
       return (
         <span
-          // data-text={e}
           id={`${delay}`}
           className={`${applyStyle(
             'TextBox_textElement_start',
             styles.TextBox_textElement_start,
           )}${readTextClassName} Textelement_start`}
-          key={currentDialogKey + index}
+          key={currentDialogKey + idx}
           style={{ animationDelay: `${delay}ms`, position: 'relative' }}
         >
           <span className={styles.zhanwei + styleAllText}>
             {e}
-            <span className={outerClassName + readTextOuterClassName + styleClassName + styleAllText}>{e}</span>
+            <span
+              className={applyStyle('outer', styles.outer) + readTextOuterClassName + styleClassName + styleAllText}
+            >
+              {e}
+            </span>
             {isUseStroke && (
               <span className={applyStyle('inner', styles.inner) + readTextInnerClassName + styleAllText}>{e}</span>
             )}
@@ -187,6 +424,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
         </span>
       );
     });
+
     return (
       <div
         style={{
@@ -202,30 +440,35 @@ export default function IMSSTextbox(props: ITextboxProps) {
   });
 
   const userDataState = useSelector((state: RootState) => state.userData);
-  const lineHeightValue = textSizeState === textSize.medium ? 2.2 : 2;
-  const textLineHeight = userDataState.globalGameVar.Line_height;
-  const finalTextLineHeight = textLineHeight ? Number(textLineHeight) : lineHeightValue;
-  const lineHeightCssStr = `line-height: ${finalTextLineHeight}em`;
+  const defaultLineHeight = textSizeState === textSize.medium ? 2.2 : 2;
+  const configuredLineHeight = Number(userDataState.globalGameVar.Line_height);
+  const finalLineHeight = Number.isFinite(configuredLineHeight) && configuredLineHeight > 0
+    ? configuredLineHeight
+    : defaultLineHeight;
+  const lineHeightCssStr = `line-height: ${finalLineHeight}em`;
   const lhCss = css(lineHeightCssStr);
 
   return (
     <>
       {isText && (
         <div className={styles.TextBox_Container}>
+          {/* 全屏 PNG 背景 */}
           <div
-            className={
-              applyStyle('TextBox_main', styles.TextBox_main) +
-              ' ' +
-              applyStyle('TextBox_Background', styles.TextBox_Background) +
-              ' ' +
-              (miniAvatar === ''
-                ? applyStyle('TextBox_main_miniavatarOff', styles.TextBox_main_miniavatarOff)
-                : undefined)
-            }
+            aria-hidden
             style={{
-              opacity: `${textboxOpacity / 100}`,
+              position: 'fixed',
+              inset: 0,
+              zIndex: 2,
+              pointerEvents: 'none',
+              backgroundImage: `url(${textboxBg})`,
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+              backgroundSize: 'cover',
+              opacity: textboxOpacity / 100,
             }}
           />
+
+          {/* 文字层：透明，仅用于定位/排版 */}
           <div
             id="textBoxMain"
             className={
@@ -237,6 +480,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
             }
             style={{
               fontFamily: font,
+              background: 'transparent',
             }}
           >
             <div id="miniAvatar" className={applyStyle('miniAvatarContainer', styles.miniAvatarContainer)}>
@@ -244,31 +488,69 @@ export default function IMSSTextbox(props: ITextboxProps) {
                 <img className={applyStyle('miniAvatarImg', styles.miniAvatarImg)} alt="miniAvatar" src={miniAvatar} />
               )}
             </div>
+
             {isHasName && (
               <>
+                {/* namebox 背景图，直接铺满全屏 */}
                 <div
-                  className={
-                    applyStyle('TextBox_showName', styles.TextBox_showName) +
-                    ' ' +
-                    applyStyle('TextBox_ShowName_Background', styles.TextBox_ShowName_Background)
-                  }
+                  aria-hidden
                   style={{
-                    opacity: `${textboxOpacity / 100}`,
-                    fontSize: '200%',
+                    position: 'fixed',
+                    inset: 0,
+                    zIndex: 3,
+                    pointerEvents: 'none',
+                    backgroundImage: `url(${nameBoxBg})`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                    backgroundSize: 'cover',
+                    opacity: textboxOpacity / 100,
                   }}
-                >
-                  <span style={{ opacity: 0 }}>{nameElementList}</span>
-                </div>
+                />
+
+                {/* 名字：按屏幕坐标固定位置 */}
                 <div
                   className={applyStyle('TextBox_showName', styles.TextBox_showName)}
                   style={{
-                    fontSize: '200%',
+                    position: 'absolute',
+                    left: -165,
+                    top: -190,
+                    fontSize: '200%', // 作为整体基准，不影响逐字 fontSize 的相对大小
+                    background: 'transparent',
+                    border: 0,
+                    zIndex: 4,
                   }}
                 >
                   {nameElementList}
                 </div>
               </>
             )}
+
+            {/* Auto按钮 */}
+            <div
+              style={{
+                position: 'fixed',
+                left: 40,
+                top: 1260,
+                zIndex: 99999,
+                cursor: 'pointer',
+                display: 'flex',
+                justifyContent: 'center',
+                pointerEvents: 'auto',
+              }}
+              onClick={handleAutoClick}
+            >
+              <img
+                src={isClicked ? button_on : button_off}
+                alt="auto_button"
+                style={{
+                  width: 'auto',
+                  height: 'auto',
+                }}
+                draggable={false}
+              />
+            </div>
+
+            {/* 对话正文 */}
             <div
               className={`${lhCss} ${applyStyle('text', styles.text)}`}
               style={{
@@ -276,11 +558,13 @@ export default function IMSSTextbox(props: ITextboxProps) {
                 flexFlow: 'column',
                 overflow: 'hidden',
                 paddingLeft: '0.1em',
-                // lineHeight: textSizeState === textSize.medium ? '2.2em' : '2em', // 不加的话上半拼音可能会被截断，同时保持排版整齐
               }}
             >
               {textElementList}
             </div>
+
+            {/* Cursor - 文本播放完成后显示并闪烁 */}
+            {showCursor && !isClicked && <img src={cursor} alt="cursor" className={styles.textBoxCursor} />}
           </div>
         </div>
       )}

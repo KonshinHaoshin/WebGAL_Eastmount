@@ -70,7 +70,8 @@
   position: relative;
 }
 
-.singleButton:hover, .singleButton_active {
+.singleButton:hover,
+.singleButton_active {
   background-color: rgba(255, 255, 255, 0.3);
 }
 
@@ -100,6 +101,7 @@
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }

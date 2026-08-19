@@ -113,14 +113,14 @@
 
 .bgmName {
   color: rgba(255, 255, 255, 0.8);
-  font-family: "资源圆体", serif;
+  font-family: "思源宋体", serif;
   font-size: 155%;
   margin: 5px 5px 0 15px;
   overflow: hidden;
 }
 
 .bgmElement {
-  font-family: "资源圆体", serif;
+  font-family: "思源宋体", serif;
   padding: 0.5em 1em 0.5em 1em;
   overflow: hidden;
   background-color: rgba(0, 0, 0, 0.1);
@@ -189,37 +189,6 @@
   cursor: pointer;
 }
 
-.cgElementStack {
-  background-color: transparent;
-  box-shadow: none;
-}
-
-.cgStackItem {
-  position: absolute;
-  inset: 0.6em;
-  box-sizing: border-box;
-  padding: 0.75em;
-  background-color: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 0 15px 5px rgba(0, 0, 0, 0.28);
-  transform-origin: center 70%;
-  opacity: 0;
-  animation: cgStackItemIn 1.5s ease-out both;
-}
-
-@keyframes cgStackItemIn {
-  0% {
-    opacity: 0;
-    transform: var(--cg-stack-start-transform);
-  }
-  20% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 1;
-    transform: var(--cg-stack-end-transform);
-  }
-}
-
 .cgShowDiv {
   height: 8%;
   width: 100%;
@@ -232,17 +201,11 @@
 .cgShowDivWarpper {
   display: flex;
   flex-flow: row;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: flex-end;
   //background: rgba(255, 255, 255, 0.35);
   border-radius: 7px;
   padding: 12px 15px;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  flex-wrap: nowrap;
-  -webkit-overflow-scrolling: touch;
 }
 
 .cgNav {
@@ -256,7 +219,6 @@
   cursor: pointer;
   transition: background-color 0.5s, color 0.5s, font-weight 0.5s;
   border-radius: 7px;
-  flex-shrink: 0;
 }
 
 .cgNav:first-child {

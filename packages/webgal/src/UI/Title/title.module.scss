@@ -1,67 +1,96 @@
-.Title_main {
-  width: 100%;
-  height: 100%;
+.Title_backup_background {
   position: absolute;
-  z-index: 13;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1;
 }
 
+.Title_main {
+  position: absolute;
+  inset: 0;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: auto;
+  z-index: 2;
+}
+
+
+.Title_buttonContainer {
+  position: absolute;
+  left: 6%;
+  right: auto;
+  bottom: 6%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+
+/* ✅ 改成横向排列 */
 .Title_buttonList {
   display: flex;
-  position: absolute;
-  left: 0;
-  min-width: 25%;
-  height: 100%;
-  justify-content: center;
-  align-items: flex-start;
-  flex-flow: column;
-  transition: background 0.75s;
-  padding-left: 120px;
+  flex-direction: row;
+  align-items: flex-end;         /* 底边对齐 */
+  gap: 2.5%;
+  pointer-events: auto;
+  flex-wrap: nowrap;             /* 不换行（需要换行就改 wrap） */
 }
 
-.Title_button {
-  font-weight: bold;
-  text-align: center;
-  flex: 0 1 auto;
+/* 图片按钮：无默认按钮样式，居中响应 */
+.Title_imgButton {
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
   cursor: pointer;
-  padding: 1em 2em 1em 2em;
-  margin: 20px 0;
-  transition: all 0.33s;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(5px);
-  border-radius: 4px;
-  transform: skewX(-10deg);
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+  line-height: 0;
+  outline: none;
+
+  img {
+    display: block;
+    width: 260px; /* 横排时可以缩小些 */
+    height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
+    image-rendering: auto;
+    filter: drop-shadow(0 0.42vh 0.63vw rgba(0,0,0,0.35));
+    transition: transform 0.1s ease;
+  }
+
+  &:hover:not(:disabled) img,
+  &:focus-visible:not(:disabled) img {
+    transform: translateY(-4px) scale(1.02); /* 悬停时微微上浮 */
+  }
+
+  &:active:not(:disabled) img {
+    transform: translateY(0) scale(0.98);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    filter: grayscale(30%);
+  }
 }
 
-.Title_button:hover {
-  text-shadow: 0 0 10px rgba(255, 255, 255, 1);
-  padding: 1em 6em 1em 3em;
+/* 屏幕阅读器可见、视觉上隐藏 */
+.srOnly {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 1px, 1px);
+  white-space: nowrap; border: 0;
 }
 
-.Title_button_text {
-  font-size: 165%;
-  color: #fbfbfb;
-  padding: 0 0.5em 0 0.5em;
-  letter-spacing: 0.2em;
+
+.Title_buttonWrapper {
+  display: flex;
+  align-items: flex-end;
 }
 
-.Title_button_text_outer {
-  display: none;
-}
-
-.Title_button_text_inner {
-  display: none;
-}
-
-.Title_backup_background {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  z-index: 13;
-  background: linear-gradient(135deg, #fdfbfb 0%, #dcddde 100%);
-}
-
-.Title_button_disabled {
-  cursor: not-allowed !important;
-  opacity: 0.5;
-}
+.pos1 { transform: translateY(10px) scale(1.3); }
+.pos2 { transform: translateY(-20px) scale(1.5); }
+.pos3 { transform: translateY(30px) scale(1.25); }
+.pos4 { transform: translateX(-40px) translateY(-6px)  scale(1); }
+.pos5 { transform: translateX(-110px) translateY(20px) scale(1); }

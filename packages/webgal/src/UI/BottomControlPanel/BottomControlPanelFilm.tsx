@@ -23,7 +23,7 @@ export const BottomControlPanelFilm = () => {
   };
   return (
     <>
-      {stageState.enableFilm !== '' && (
+      {stageState.enableFilm !== '' && stageState.judgment === '' && (
         <>
           <div
             className={styles.tag}

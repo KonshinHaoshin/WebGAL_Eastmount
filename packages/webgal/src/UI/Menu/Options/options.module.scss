@@ -117,6 +117,8 @@
   animation: Elements_in ease-out 0.7s forwards;
 }
 
+// 4.6.4 uses these classes for the language/font-style dropdowns. Keep the
+// current component contract while retaining Dragonspring's green palette.
 .Option_select {
   position: relative;
   max-width: 100%;

@@ -1,4 +1,4 @@
-import { switchAuto } from '@/Core/controller/gamePlay/autoPlay';
+// import { switchAuto } from '@/Core/controller/gamePlay/autoPlay'; DS引擎使用textbox处的一个按钮来控制auto，为了防止出问题注释掉相关内容
 import { backToTitle } from '@/Core/controller/gamePlay/backToTitle';
 import { switchFast } from '@/Core/controller/gamePlay/fastSkip';
 import { loadGame } from '@/Core/controller/storage/loadGame';
@@ -84,7 +84,7 @@ export const BottomControlPanel = () => {
   return (
     // <div className={styles.ToCenter}>
     <>
-      {GUIStore.showTextBox && stageState.enableFilm === '' && (
+      {GUIStore.showTextBox && stageState.enableFilm === '' && !GUIStore.showTitle && (
         <div className={styles.main} style={{ visibility: GUIStore.controlsVisibility ? 'visible' : 'hidden' }}>
           {GUIStore.showTextBox && (
             <span
@@ -189,7 +189,7 @@ export const BottomControlPanel = () => {
             />
             <span className={styles.button_text}>{t('buttons.replay')}</span>
           </span>
-          <span
+          {/* <span
             id="Button_ControlPanel_auto"
             className={styles.singleButton}
             style={{ fontSize }}
@@ -201,7 +201,7 @@ export const BottomControlPanel = () => {
           >
             <PlayOne className={styles.button} theme="outline" size={size} fill="#f5f5f7" strokeWidth={strokeWidth} />
             <span className={styles.button_text}>{t('buttons.auto')}</span>
-          </span>
+          </span> */}
           <span
             id="Button_ControlPanel_fast"
             className={styles.singleButton}
@@ -310,13 +310,13 @@ export const BottomControlPanel = () => {
             onClick={() => {
               playSeDialogOpen();
               showGlogalDialog({
-                title: t('buttons.titleTips'),
-                leftText: t('$common.yes'),
-                rightText: t('$common.no'),
-                leftFunc: () => {
+                title: '即将返回标题界面。',
+                leftText: '取消',
+                rightText: '<span style="color: red">前</span>往标题界面',
+                leftFunc: () => { },
+                rightFunc: () => {
                   backToTitle();
                 },
-                rightFunc: () => {},
               });
             }}
             onMouseEnter={playSeEnter}
