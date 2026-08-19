@@ -38,6 +38,18 @@ import { showVars } from '../gameScripts/showVars';
 import { defineScripts, IConfigInterface, ScriptConfig, ScriptFunction, scriptRegistry } from './utils';
 import { applyStyle } from '@/Core/gameScripts/applyStyle';
 import { wait } from '@/Core/gameScripts/wait';
+import { manopedia } from '@/Core/gameScripts/manopedia';
+import { addItem } from '@/Core/gameScripts/addItem';
+import { Item } from '@/Core/gameScripts/Item';
+import { clearItem } from '@/Core/gameScripts/clearItem';
+import { showItem } from '@/Core/gameScripts/showItem';
+import { pediaUpdate } from '@/Core/gameScripts/pediaUpdate';
+import { presentTheEvidence } from '@/Core/gameScripts/presentTheEvidence';
+import { thinking } from '@/Core/gameScripts/thinking';
+import { judgment } from '@/Core/gameScripts/judgment';
+import { testimony } from '@/Core/gameScripts/testimony';
+import { clearTestimony } from '@/Core/gameScripts/clearTestimony';
+import { refute } from '@/Core/gameScripts/refute';
 
 export const SCRIPT_TAG_MAP = defineScripts({
   say: ScriptConfig(commandType.say, say),
@@ -74,6 +86,18 @@ export const SCRIPT_TAG_MAP = defineScripts({
   getUserInput: ScriptConfig(commandType.getUserInput, getUserInput),
   applyStyle: ScriptConfig(commandType.applyStyle, applyStyle, { next: true }),
   wait: ScriptConfig(commandType.wait, wait),
+  manopedia: ScriptConfig(commandType.manopedia, manopedia),
+  addItem: ScriptConfig(commandType.addItem, addItem, { next: true }),
+  Item: ScriptConfig(commandType.Item, Item),
+  clearItem: ScriptConfig(commandType.clearItem, clearItem, { next: true }),
+  showItem: ScriptConfig(commandType.showItem, showItem, { next: true }),
+  pediaUpdate: ScriptConfig(commandType.pediaUpdate, pediaUpdate, { next: true }),
+  presentTheEvidence: ScriptConfig(commandType.presentTheEvidence, presentTheEvidence),
+  thinking: ScriptConfig(commandType.thinking, thinking),
+  judgment: ScriptConfig(commandType.judgment, judgment, { next: true }),
+  testimony: ScriptConfig(commandType.testimony, testimony),
+  clearTestimony: ScriptConfig(commandType.clearTestimony, clearTestimony, { next: true }),
+  refute: ScriptConfig(commandType.refute, refute),
   callSteam: ScriptConfig(commandType.callSteam, callSteam, { next: true }),
   return: ScriptConfig(commandType.return, returnScript),
 });

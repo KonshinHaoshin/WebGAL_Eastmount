@@ -53,10 +53,20 @@ export function syncPixiStageState(stageState: IStageState, options: IResolvedSt
     syncFigures(stageState, options.skipAnimation);
     syncLive2d(stageState);
     syncFigureMetaData(stageState);
+    syncLut(stageState);
   }
   if (options.applyPixiEffects) {
     applyStageEffects(stageState.effects);
   }
+}
+
+function syncLut(stageState: IStageState) {
+  const pixiStage = WebGAL.gameplay.pixiStage;
+  if (!pixiStage) return;
+  void pixiStage.setLutByKey('bg-main', stageState.bgLut ?? '');
+  Object.entries(stageState.figureMetaData).forEach(([key, metadata]) => {
+    if (metadata.lut !== undefined) void pixiStage.setLutByKey(key, metadata.lut);
+  });
 }
 
 export function applyStageEffects(effects: IEffect[]) {
@@ -279,8 +289,10 @@ function addFigure(key: string, url: string, position: IFigurePosition) {
   if (!pixiStage) return;
   const baseUrl = window.location.origin;
   const urlObject = new URL(url, baseUrl);
-  const figureType = urlObject.searchParams.get('type') as 'image' | 'live2D' | 'spine' | null;
-  if (url.endsWith('.json')) {
+  const figureType = urlObject.searchParams.get('type') as 'image' | 'live2D' | 'spine' | 'webgal_mano' | null;
+  if (figureType === 'webgal_mano') {
+    pixiStage.addManoFigure(key, url, position);
+  } else if (url.endsWith('.json')) {
     pixiStage.addLive2dFigure(key, url, position);
   } else if (url.endsWith('.skel') || figureType === 'spine') {
     pixiStage.addSpineFigure(key, url, position);

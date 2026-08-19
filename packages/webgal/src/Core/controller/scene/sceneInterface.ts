@@ -40,6 +40,18 @@ export enum commandType {
   getUserInput,
   applyStyle,
   wait,
+  manopedia,
+  addItem, // 添加道具（无需交互）
+  Item, // 添加道具（需交互）
+  clearItem, // 清除道具
+  showItem, // 显示物品提示
+  pediaUpdate, // 显示魔女图鉴更新提示
+  presentTheEvidence, // 出示证物
+  thinking, // 思考选择
+  judgment, // 审问
+  refute, // 反驳
+  testimony, // 证言
+  clearTestimony, // 清空证言
   callSteam, // 调用Steam功能
   return, // 从被调用的场景返回
 }

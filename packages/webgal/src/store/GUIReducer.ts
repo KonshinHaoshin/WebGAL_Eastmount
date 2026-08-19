@@ -34,6 +34,11 @@ const initState: IGuiState = {
   isShowLogo: true,
   enableAppreciationMode: false, // Paf87
   fontOptimization: false,
+  showPhone: false,
+  showManopediaUpdate: false,
+  manopediaUpdateItem: null,
+  showItem: false,
+  showItemInfo: null,
 };
 
 /**
@@ -50,8 +55,10 @@ const GUISlice = createSlice({
      */
     setVisibility: (state, action: PayloadAction<setVisibilityPayload>) => {
       getStorage();
-      const { component, visibility } = action.payload;
+      const { component, visibility, itemInfo } = action.payload;
       state[component] = visibility;
+      if (component === 'showManopediaUpdate') state.manopediaUpdateItem = visibility ? itemInfo ?? null : null;
+      if (component === 'showItem') state.showItemInfo = visibility ? itemInfo ?? null : null;
     },
     /**
      * 设置MenuPanel的当前选中项

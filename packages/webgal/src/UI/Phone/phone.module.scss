@@ -1,0 +1,123 @@
+.phoneContainer {
+    position: fixed;
+    top: 0;
+    left: 800px;
+    width: 100%;
+    height: 100%;
+    scale: 1.6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 15; // 高于 FullScreenClick 的 z-index (12)
+    pointer-events: none; // 允许点击穿透到背景，但阻止点击 FullScreenClick
+}
+
+.phone {
+    position: relative;
+    width: 600px; // 根据实际图片大小调整
+    height: 800px; // 根据实际图片大小调整
+    transform: rotate(-5deg); // 稍微向左倾斜
+    pointer-events: auto; // 恢复 phone 内部的点击事件
+}
+
+.phoneImage {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.wifiIcon {
+    position: absolute;
+    top: -140px;
+    left: -100px;
+    scale: 0.35;
+    transform: rotate(-5deg);
+    pointer-events: none;
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+}
+
+.closeButton {
+    position: absolute;
+    top: -170px;
+    right: -120px;
+    scale: 0.35;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+    &:hover {
+        transform: scale(1.1);
+    }
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+}
+
+// 按钮基础样式
+.phoneButton {
+    position: absolute;
+    cursor: pointer;
+    width: 60px; // 根据实际图标大小调整
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+    pointer-events: auto;
+    // &:hover {
+    //     transform: scale(1.1);
+    // }
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+}
+
+// Save 按钮
+.saveButton {
+    width: 150px;
+    height: 150px;
+    top: 120px;
+    left: 140px;
+}
+
+// Load 按钮
+.loadButton {
+    width: 150px;
+    height: 150px;
+    top: 120px;
+    right: 140px;
+}
+
+// History 按钮
+.historyButton {
+    width: 150px;
+    height: 150px;
+    top: 260px;
+    left: 140px;
+}
+
+// Setting 按钮
+.settingButton {
+    width: 150px;
+    height: 150px;
+    top: 260px;
+    right: 140px;
+}
+
+// Back to Title 按钮
+.backtotitleButton {
+    width: 150px;
+    height: 150px;
+    top: 400px;
+    left: 140px;
+}

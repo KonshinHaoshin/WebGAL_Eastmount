@@ -25,6 +25,18 @@ export function getStringArgByKey(sentence: ISentence, argKey: string): string |
   return toSafeString(argValue);
 }
 
+export function getObjectArgByKey(sentence: ISentence, argKey: string): Record<string, unknown> | null {
+  const value = getSentenceArgByKey(sentence, argKey) as unknown;
+  if (value && typeof value === 'object' && !Array.isArray(value)) return value as Record<string, unknown>;
+  if (typeof value !== 'string') return null;
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * 从参数中获取立绘的预设位置，没有指定位置时返回空字符串
  */

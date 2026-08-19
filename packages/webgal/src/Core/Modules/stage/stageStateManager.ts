@@ -85,6 +85,21 @@ export const initState: IStageState = {
   isDisableTextbox: false,
   replacedUIlable: {},
   figureMetaData: {},
+  bgLut: '',
+  judgment: '',
+  judgmentTimer: 0,
+  judgmentTimeout: '',
+  isJudgmentFastForward: false,
+  enableManopedia: false,
+  inventory: { items: {} },
+  viewingItemId: null,
+  viewingItemCount: 1,
+  isEvidenceMode: false,
+  evidenceTarget: '',
+  evidenceJumpScenes: [],
+  showManopedia: false,
+  testimonyData: [],
+  inlineThinking: null,
 };
 
 /**
@@ -126,7 +141,14 @@ export class StageStateManager {
   }
 
   public replaceCalculationStageState(stageState: IStageState) {
-    this.calculationStageState = cloneDeep(stageState);
+    // Old official saves do not contain Dragonspring fields, while older
+    // Dragonspring saves do not contain every 4.6.4 field. Merge both onto
+    // the current schema instead of dropping either side's defaults.
+    this.calculationStageState = cloneDeep({
+      ...initState,
+      ...stageState,
+      inventory: stageState.inventory ?? initState.inventory,
+    });
   }
 
   public replaceAllStageState(stageState: IStageState, options?: IStageCommitOptions) {
@@ -151,7 +173,7 @@ export class StageStateManager {
       ...FIGURE_KEYS,
       ...state.freeFigure.map((figure) => figure.key),
     ];
-    if (!activeTargets.includes(target)) return;
+    if (!activeTargets.includes(target) && !target.startsWith('item-')) return;
 
     const effectIndex = state.effects.findIndex((e) => e.target === target);
     if (effectIndex >= 0) {
@@ -349,6 +371,23 @@ export class StageStateManager {
       }
       this.calculationStageState.figureMetaData[payload[0]][payload[1]] = payload[2];
     }
+  }
+
+  public addInventoryItem(payload: import('./stageInterface').IModifyInventoryItemPayload) {
+    const { itemId, count, name } = payload;
+    const items = this.calculationStageState.inventory.items;
+    if (!items[itemId]) {
+      if (!name) return;
+      items[itemId] = { id: itemId, name, count: 0 };
+    }
+    items[itemId].count = Math.max(0, items[itemId].count + count);
+    if (items[itemId].count === 0) delete items[itemId];
+  }
+
+  public clearAllItems() {
+    this.calculationStageState.inventory.items = {};
+    this.calculationStageState.viewingItemId = null;
+    this.calculationStageState.viewingItemCount = 1;
   }
 
   public clearUncommittedNonHoldPerforms() {

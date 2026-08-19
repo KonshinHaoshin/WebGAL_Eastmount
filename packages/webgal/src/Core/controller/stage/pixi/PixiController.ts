@@ -20,6 +20,7 @@ import { GifResource } from './GifResource';
 import { stageStateManager } from '@/Core/Modules/stage/stageStateManager';
 import { queryStageObjectReferenceBox, type QueryTargetReferenceBoxResult } from './referenceBox';
 import { assignPixiTransform } from './stageEffectTransform';
+import { CharacterPlayer } from 'webgal_mano';
 
 export interface IAnimationObject {
   setStartState: Function;
@@ -45,7 +46,7 @@ export interface IStageObject {
   // 相关的源 url
   sourceUrl: string;
   sourceExt: string;
-  sourceType: 'img' | 'live2d' | 'spine' | 'gif' | 'video' | 'stage';
+  sourceType: 'img' | 'live2d' | 'spine' | 'gif' | 'video' | 'stage' | 'webgal_mano';
   spineAnimation?: string;
   /** 创建这个立绘时用的身份，见 syncPixiStageState 的 getFigureIdentity */
   figureIdentity?: string;
@@ -86,6 +87,8 @@ export default class PixiStage {
   public readonly backgroundEffectsContainer: PIXI.Container;
   public readonly figureContainer: PIXI.Container;
   public figureObjects = this.createReactiveList<IStageObject>([]);
+  public readonly itemContainer: PIXI.Container;
+  public itemObjects = this.createReactiveList<IStageObject>([]);
   public stageWidth = SCREEN_CONSTANTS.width;
   public stageHeight = SCREEN_CONSTANTS.height;
   public assetLoader = new PIXI.Loader();
@@ -111,6 +114,8 @@ export default class PixiStage {
   // 更新 ticker 状态的防抖标记
   private isTickerUpdatePending = false;
   private referenceBoxWaiters = new Map<string, Set<() => void>>();
+  private lutRequestVersions = new Map<string, number>();
+  private lutAppliedSignatures = new Map<string, string>();
 
   /**
    * 暂时没用上，以后可能用
@@ -174,6 +179,9 @@ export default class PixiStage {
     this.figureContainer = new PIXI.Container();
     this.figureContainer.sortableChildren = true; // 允许立绘启用 z-index
     this.figureContainer.zIndex = 2;
+    this.itemContainer = new PIXI.Container();
+    this.itemContainer.sortableChildren = true;
+    this.itemContainer.zIndex = 2.5;
     this.backgroundEffectsContainer = new PIXI.Container(); // 背景特效
     this.backgroundEffectsContainer.zIndex = 1;
     this.backgroundContainer = new PIXI.Container();
@@ -181,6 +189,7 @@ export default class PixiStage {
     this.mainStageContainer.addChild(
       this.foregroundEffectsContainer,
       this.figureContainer,
+      this.itemContainer,
       this.backgroundEffectsContainer,
       this.backgroundContainer,
     );
@@ -770,6 +779,9 @@ export default class PixiStage {
     } else if (target?.sourceType === 'spine') {
       // 处理 Spine 动画切换
       this.changeSpineAnimationByKey(key, motion);
+    } else if (target?.sourceType === 'webgal_mano') {
+      const player = target.pixiContainer?.children[0] as CharacterPlayer | undefined;
+      motion.split(',').map((pose) => pose.trim()).filter(Boolean).forEach((pose) => player?.setPose(pose));
     }
   }
 
@@ -857,6 +869,11 @@ export default class PixiStage {
   public changeModelExpressionByKey(key: string, expression: string) {
     // logger.debug(`Applying expression ${expression} to ${key}`);
     const target = this.figureObjects.find((e) => e.key === key && !e.isExiting);
+    if (target?.sourceType === 'webgal_mano') {
+      const player = target.pixiContainer?.children[0] as CharacterPlayer | undefined;
+      expression.split(',').map((pose) => pose.trim()).filter(Boolean).forEach((pose) => player?.setPose(pose));
+      return;
+    }
     if (target?.sourceType !== 'live2d') return;
     const figureRecordTarget = this.live2dFigureRecorder.find((e) => e.target === key);
     if (target && figureRecordTarget?.expression !== expression) {
@@ -945,7 +962,11 @@ export default class PixiStage {
    * @param key
    */
   public getStageObjByKey(key: string) {
-    return [...this.figureObjects, ...this.backgroundObjects, this.mainStageObject].find((e) => e.key === key);
+    return [...this.itemObjects, ...this.figureObjects, ...this.backgroundObjects, this.mainStageObject].find((e) => e.key === key);
+  }
+
+  public getItemObjByKey(key: string) {
+    return this.itemObjects.find((item) => item.key === key);
   }
 
   public queryTargetReferenceBox(target: string): QueryTargetReferenceBoxResult {
@@ -983,7 +1004,7 @@ export default class PixiStage {
   }
 
   public getAllStageObj() {
-    return [...this.figureObjects, ...this.backgroundObjects, this.mainStageObject];
+    return [...this.figureObjects, ...this.backgroundObjects, ...this.itemObjects, this.mainStageObject];
   }
 
   /**
@@ -1031,6 +1052,132 @@ export default class PixiStage {
     //   newEffects.splice(index, 1);
     // }
     // updateCurrentEffects(newEffects);
+  }
+
+  public removeItemObjectByKey(key: string) {
+    const index = this.itemObjects.findIndex((item) => item.key === key);
+    if (index < 0) return;
+    const item = this.itemObjects[index];
+    if (item.pixiContainer) {
+      item.pixiContainer.destroy({ children: true });
+      this.itemContainer.removeChild(item.pixiContainer);
+      item.pixiContainer = null;
+    }
+    this.itemObjects.splice(index, 1);
+    this.notifyTargetReferenceBoxChanged(key);
+    this.requestRender();
+  }
+
+  public addItem(key: string, url: string, presetPosition: 'left' | 'center' | 'right' = 'center') {
+    this.removeItemObjectByKey(key);
+    const container = new WebGALPixiContainer();
+    container.zIndex = this.getFigureMetadataByKey(key)?.zIndex ?? 0;
+    this.itemContainer.addChild(container);
+    this.itemObjects.push({
+      uuid: uuid(), key, pixiContainer: container, sourceUrl: url,
+      sourceType: 'img', sourceExt: this.getExtName(url),
+    });
+    const setup = () => {
+      const texture = this.assetLoader.resources[url]?.texture;
+      if (!texture || !this.getItemObjByKey(key)) return;
+      const scale = Math.min(this.stageWidth / texture.width, this.stageHeight / texture.height);
+      const sprite = new PIXI.Sprite(texture);
+      sprite.anchor.set(0.5);
+      sprite.scale.set(scale);
+      sprite.interactive = true;
+      sprite.buttonMode = true;
+      const width = texture.width * scale;
+      const x = presetPosition === 'left' ? width / 2 : presetPosition === 'right' ? this.stageWidth - width / 2 : this.stageWidth / 2;
+      container.setBaseX(x);
+      container.setBaseY(this.stageHeight / 2);
+      container.addChild(sprite);
+      this.notifyTargetReferenceBoxChanged(key);
+      this.requestRender();
+    };
+    this.loadQueue.push({ url, callback: setup });
+    this.callLoader();
+  }
+
+  public async addManoFigure(key: string, jsonPath: string, pos: IFigurePosition = 'center') {
+    this.removeStageObjectByKey(key);
+    const container = new WebGALPixiContainer();
+    this.figureContainer.addChild(container);
+    const figureUuid = uuid();
+    this.figureObjects.push({
+      uuid: figureUuid, key, pixiContainer: container, sourceUrl: jsonPath,
+      sourceType: 'webgal_mano', sourceExt: 'json',
+    });
+    try {
+      const response = await fetch(jsonPath);
+      if (!response.ok) throw new Error(`Failed to fetch Mano model: ${response.status}`);
+      const modelData = await response.json();
+      const cleanJsonUrl = jsonPath.split('?')[0];
+      const baseDir = cleanJsonUrl.slice(0, cleanJsonUrl.lastIndexOf('/') + 1);
+      const configuredBase = modelData.settings?.basePath;
+      const basePath = new URL(configuredBase && configuredBase !== './' ? configuredBase : baseDir, window.location.href).href;
+      modelData.settings = { ...modelData.settings, basePath };
+      const textures: Record<string, PIXI.Texture> = {};
+      await Promise.all((modelData.assets?.layers ?? []).map(async (layer: { id: string; path: string }) => {
+        const url = new URL(String(layer.path), basePath).href;
+        const texture = await PIXI.Texture.fromURL(url);
+        textures[String(layer.id)] = texture;
+        textures[url] = texture;
+      }));
+      if (!this.getStageObjByUuid(figureUuid)) return;
+      const player = new CharacterPlayer(modelData, textures as any);
+      player.resetToDefault();
+      const scale = Math.min(this.stageWidth / player.width, this.stageHeight / player.height) * 0.9;
+      player.pivot.set(player.width / 2, player.height / 2);
+      player.position.set(0, this.stageHeight / 2);
+      player.scale.set(scale);
+      container.setBaseY(this.stageHeight / 2);
+      container.pivot.set(0, this.stageHeight / 2);
+      const targetWidth = player.width * scale;
+      const horizontalPos = pos.startsWith('left') ? 'left' : pos.startsWith('right') ? 'right' : 'center';
+      container.setBaseX(horizontalPos === 'left' ? targetWidth / 2 : horizontalPos === 'right' ? this.stageWidth - targetWidth / 2 : this.stageWidth / 2);
+      const state = stageStateManager.getViewStageState();
+      const poses = [
+        state.live2dMotion.find((item) => item.target === key)?.motion,
+        state.live2dExpression.find((item) => item.target === key)?.expression,
+      ].filter(Boolean).join(',');
+      poses.split(',').map((pose) => pose.trim()).filter(Boolean).forEach((pose) => player.setPose(pose));
+      container.addChild(player);
+      this.notifyTargetReferenceBoxChanged(key);
+      this.requestRender();
+    } catch (error) {
+      logger.error('[webgal_mano] failed to load figure', error);
+      this.removeStageObjectByKey(key);
+    }
+  }
+
+  public async setLutByKey(key: string, url: string) {
+    const target = this.getStageObjByKey(key);
+    const signature = `${target?.uuid ?? 'missing'}:${url}`;
+    if (this.lutAppliedSignatures.get(key) === signature) return;
+    this.lutAppliedSignatures.set(key, signature);
+    const version = (this.lutRequestVersions.get(key) ?? 0) + 1;
+    this.lutRequestVersions.set(key, version);
+    const container = target?.pixiContainer;
+    if (!container) return;
+    if (!url) {
+      container.setColorMapTexture(null);
+      this.requestRender();
+      return;
+    }
+    try {
+      const texture = await PIXI.Texture.fromURL(url);
+      if (this.lutRequestVersions.get(key) !== version) {
+        texture.destroy();
+        return;
+      }
+      const currentContainer = this.getStageObjByKey(key)?.pixiContainer;
+      if (!currentContainer) return;
+      currentContainer.setColorMapTexture(texture);
+      currentContainer.colorMapIntensity = 1;
+      this.requestRender();
+    } catch (error) {
+      logger.error(`[LUT] failed to load ${url}`, error);
+    }
   }
 
   public cacheGC() {

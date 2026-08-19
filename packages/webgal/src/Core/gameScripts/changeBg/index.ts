@@ -17,6 +17,7 @@ import { DEFAULT_BG_OUT_DURATION } from '@/Core/constants';
 import localforage from 'localforage';
 import { stageStateManager } from '@/Core/Modules/stage/stageStateManager';
 import { parseTransformFrame } from '../parseTransformFrame';
+import { assetSetter, fileType } from '@/Core/util/gameAssetsAccess/assetSetter';
 
 /**
  * 进行背景图片的切换
@@ -35,6 +36,8 @@ export const changeBg = (sentence: ISentence): IPerform => {
   const exitDuration = getNumberArgByKey(sentence, 'exitDuration') ?? DEFAULT_BG_OUT_DURATION;
   const ease = getStringArgByKey(sentence, 'ease') ?? '';
   const ignoreDefault = getBooleanArgByKey(sentence, 'ignoreDefault') ?? false;
+  const lutArg = getStringArgByKey(sentence, 'lut');
+  if (lutArg !== null) stageStateManager.setStage('bgLut', lutArg ? assetSetter(lutArg, fileType.lut) : '');
 
   const dispatch = webgalStore.dispatch;
   if (unlockName !== '') {

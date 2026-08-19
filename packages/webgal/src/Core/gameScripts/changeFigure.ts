@@ -47,6 +47,16 @@ export function changeFigure(sentence: ISentence): IPerform {
   let motion = getStringArgByKey(sentence, 'motion') ?? '';
   const skin = getStringArgByKey(sentence, 'skin') ?? '';
   let expression = getStringArgByKey(sentence, 'expression') ?? '';
+  const isWebgalMano = content.includes('type=webgal_mano');
+  if (isWebgalMano) {
+    const poseArg = getStringArgByKey(sentence, 'pose') ?? '';
+    const namedPoses = poseArg.replace(/^\{|\}$/g, '').split(',').map((pose) => pose.trim()).filter(Boolean);
+    const flagPoses = sentence.args
+      .filter((arg) => arg.value === true && !['left', 'right', 'next', 'clear', 'center', 'id', 'pose'].includes(arg.key))
+      .map((arg) => arg.key);
+    motion = [...namedPoses, ...flagPoses].join(',');
+    expression = '';
+  }
   const boundsFromArgs = getStringArgByKey(sentence, 'bounds') ?? '';
   let bounds = getOverrideBoundsArr(boundsFromArgs);
 
@@ -86,6 +96,8 @@ export function changeFigure(sentence: ISentence): IPerform {
   const exitAnimation = getStringArgByKey(sentence, 'exit');
   let zIndex = getNumberArgByKey(sentence, 'zIndex') ?? -1;
   let blendMode = getStringArgByKey(sentence, 'blendMode');
+  const lutArg = getStringArgByKey(sentence, 'lut');
+  if (lutArg !== null) stageStateManager.setFigureMetaData([id, 'lut', lutArg ? assetSetter(lutArg, fileType.lut) : '', false]);
   const enterDuration = getNumberArgByKey(sentence, 'enterDuration') ?? duration;
   duration = enterDuration;
   const exitDuration = getNumberArgByKey(sentence, 'exitDuration') ?? DEFAULT_FIG_OUT_DURATION;

@@ -1,0 +1,88 @@
+.container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; // 恢复居中，不再写死在顶部
+  padding: 60px;
+}
+
+.testimonyList {
+  display: flex;
+  flex-direction: column;
+  gap: 60px; // 增加间距，使排版更清晰
+  width: 100%;
+}
+
+.testimonyItem {
+  display: flex;
+  width: 100%;
+  pointer-events: none;
+
+  &.left {
+    justify-content: flex-start;
+    text-align: left;
+    // 使用旋转代替倾斜
+    transform: rotate(2deg);
+    padding-left: 100px;
+  }
+  &.right {
+    justify-content: flex-start;
+    // 使用旋转，方向与 left 相反
+    transform: rotate(-2deg) translateX(1000px);
+    padding-right: 100px;
+
+    .text {
+      text-align: left;
+    }
+  }
+  &.center {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+.textWrapper {
+  max-width: 85%;
+  // 移除背景和边框，直接显示文字
+  background: transparent;
+  padding: 10px 20px;
+  pointer-events: auto;
+}
+
+.text {
+  color: #fff;
+  font-family: "SweiB2Sugar", serif;
+  // 字体进一步放大
+  font-size: 96px;
+  // 移除阴影
+  word-break: break-all;
+  // 黑边变细
+  -webkit-text-stroke: 3px #000;
+}
+
+.keyword {
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+  padding: 0 5px;
+  // 有颜色的字进一步放大
+  font-size: 1.15em;
+  // 移除 hover 缩放和发光
+  transition: none;
+
+  &:hover {
+    transform: none;
+    text-shadow: none;
+  }
+
+  // 移除下划线
+  &::after {
+    display: none;
+  }
+}

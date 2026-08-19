@@ -1,0 +1,56 @@
+.timerContainer {
+  position: absolute;
+  top: 40px;
+  right: 100px; // Offset from gear button
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 100;
+  pointer-events: auto;
+  height: auto;
+  width: auto;
+}
+
+.fastForwardBtn {
+  cursor: pointer;
+  width: 211px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+}
+
+.timerDisplay {
+  width: 466px;
+  height: 192px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 60px; // Offset for the clock icon in the background image
+}
+
+.timerValue {
+  color: #fff;
+  font-family: 'cantebriggia', serif;
+  font-size: 48px;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+}
+
+.digit {
+  width: 32px; // Adjusted for 48px font size
+  text-align: center;
+  display: inline-block;
+}
+
+.separator {
+  width: 18px;
+  text-align: center;
+  display: inline-block;
+}

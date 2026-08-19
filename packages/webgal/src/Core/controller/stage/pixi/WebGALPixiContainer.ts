@@ -10,6 +10,7 @@ import * as PIXI from 'pixi.js';
 import { BlurFilter } from '@pixi/filter-blur';
 import { INIT_RAD, RadiusAlphaFilter } from '@/Core/controller/stage/pixi/shaders/RadiusAlphaFilter';
 import { logger } from '@/Core/util/logger';
+import { ColorMapFilter } from '@pixi/filter-color-map';
 
 /**
  * Filter configuration for creation and default state detection.
@@ -46,6 +47,7 @@ const enum FilterPriority {
   GodrayFilm,
   Bevel,
   Adjustment,
+  ColorMap,
 }
 
 const FILTER_CONFIGS: Record<string, FilterConfig> = {
@@ -165,9 +167,20 @@ const FILTER_CONFIGS: Record<string, FilterConfig> = {
       return ab.bloomScale === 0 && ab.brightness === 1 && ab.blur === 0 && ab.threshold === 0;
     },
   },
+  colorMap: {
+    priority: FilterPriority.ColorMap,
+    create: () => new ColorMapFilter(null, false),
+    isDefault: (filter) => !(filter as ColorMapFilter).colorMap,
+  },
 };
 
 const PROPERTY_CONFIGS: Record<string, PropertyConfig> = {
+  colorMapIntensity: {
+    filterName: 'colorMap',
+    defaultValue: 1,
+    overrideSet: (value, filter) => { (filter as ColorMapFilter).mix = value; },
+    overrideGet: (filter, defaultValue) => filter ? (filter as ColorMapFilter).mix : defaultValue,
+  },
   blur: {
     filterName: 'blur',
     filterProperty: 'blur',
@@ -662,6 +675,22 @@ export class WebGALPixiContainer extends PIXI.Container {
   }
   public set bloomThreshold(v: number) {
     this._setPropertyValue('bloomThreshold', v);
+  }
+
+  public setColorMapTexture(texture: PIXI.Texture | null) {
+    if (!texture) {
+      this.removeFilterByName('colorMap');
+      return;
+    }
+    this.ensureFilterByName<ColorMapFilter>('colorMap').colorMap = texture;
+  }
+
+  public get colorMapIntensity(): number {
+    return this._getPropertyValue('colorMapIntensity');
+  }
+
+  public set colorMapIntensity(value: number) {
+    this._setPropertyValue('colorMapIntensity', value);
   }
 
   private removeIfDefault(filterName: string) {

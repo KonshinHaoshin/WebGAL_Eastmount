@@ -206,9 +206,25 @@ export interface ILive2DFocus {
 export interface IFigureMetadata {
   zIndex?: number;
   blendMode?: string;
+  lut?: string;
 }
 
 type figureMetaData = Record<string, IFigureMetadata>;
+
+export interface IInventoryItem { id: string; name: string; count: number }
+export interface IInventory { items: Record<string, IInventoryItem> }
+export interface IModifyInventoryItemPayload { itemId: string; count: number; name?: string }
+export interface IInlineThinking {
+  avatar: string;
+  options: { label: string; target: string; icon?: string }[];
+}
+export interface ITestimonyData {
+  content: string;
+  refutes: Record<string, string>;
+  colors: Record<string, string>;
+  pos?: 'left' | 'right' | 'center';
+  y?: number;
+}
 
 /**
  * @interface IStageState 游戏舞台数据接口
@@ -262,6 +278,21 @@ export interface IStageState {
   isDisableTextbox: boolean;
   replacedUIlable: Record<string, string>;
   figureMetaData: figureMetaData;
+  bgLut: string;
+  judgment: string;
+  judgmentTimer: number;
+  judgmentTimeout: string;
+  isJudgmentFastForward: boolean;
+  enableManopedia: boolean;
+  inventory: IInventory;
+  viewingItemId: string | null;
+  viewingItemCount: number;
+  isEvidenceMode: boolean;
+  evidenceTarget: string;
+  evidenceJumpScenes: string[];
+  showManopedia: boolean;
+  testimonyData: ITestimonyData[];
+  inlineThinking: IInlineThinking | null;
 }
 
 /**

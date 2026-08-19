@@ -22,7 +22,7 @@ interface ReferenceBoxContainer {
 
 export interface ReferenceBoxStageObject {
   pixiContainer: ReferenceBoxContainer | null;
-  sourceType: 'img' | 'live2d' | 'spine' | 'gif' | 'video' | 'stage';
+  sourceType: 'img' | 'live2d' | 'spine' | 'gif' | 'video' | 'stage' | 'webgal_mano';
 }
 
 export type QueryTargetReferenceBoxResult = ReferenceBoxQueryResultPayload;

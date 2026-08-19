@@ -18,6 +18,12 @@ export enum textSize {
   large,
 }
 
+export enum textFont {
+  song,
+  hei,
+  lxgw,
+}
+
 export enum voiceOption {
   yes,
   no,

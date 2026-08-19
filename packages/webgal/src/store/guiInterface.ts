@@ -32,11 +32,25 @@ export interface IGuiState {
   isShowLogo: boolean;
   enableAppreciationMode: boolean; // Pc102
   fontOptimization: boolean; // 字体优化
+  showPhone: boolean;
+  showManopediaUpdate: boolean;
+  manopediaUpdateItem: ItemNoticeInfo | null;
+  showItem: boolean;
+  showItemInfo: ItemNoticeInfo | null;
+}
+
+export interface ItemNoticeInfo {
+  itemId: string;
+  itemName: string;
+  itemImage: string;
 }
 
 export type componentsVisibility = Pick<
   IGuiState,
-  Exclude<keyof IGuiState, 'currentMenuTag' | 'titleBg' | 'titleBgm' | 'logoImage' | 'theme' | 'fontOptions'>
+  Exclude<
+    keyof IGuiState,
+    'currentMenuTag' | 'titleBg' | 'titleBgm' | 'logoImage' | 'theme' | 'fontOptions' | 'manopediaUpdateItem' | 'showItemInfo'
+  >
 >;
 // 标题资源
 export type GuiAsset = Pick<IGuiState, 'titleBgm' | 'titleBg'>;
@@ -51,6 +65,7 @@ export interface IGuiStore {
 export interface setVisibilityPayload {
   component: keyof componentsVisibility;
   visibility: boolean;
+  itemInfo?: ItemNoticeInfo;
 }
 
 export interface setAssetPayload {

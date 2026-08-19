@@ -1,54 +1,37 @@
-import page_flip_1 from '@/assets/se/page-flip-1.mp3';
-import switch_1 from '@/assets/se/switch-1.mp3';
-import mouse_enter from '@/assets/se/mouse-enter.mp3';
-import dialog_se from '@/assets/se/dialog.mp3';
-import click_se from '@/assets/se/click.mp3';
+import pageFlip from '@/assets/se/page-flip-1.mp3';
+import switchSound from '@/assets/se/switch-1.mp3';
+import mouseEnter from '@/assets/se/mouse-enter.mp3';
+import dialog from '@/assets/se/dialog.mp3';
+import click from '@/assets/se/click.mp3';
+import openMedia from '@/assets/dragonspring/ogg/open_media.ogg';
+import openGear from '@/assets/dragonspring/ogg/open_gearbutton.ogg';
+import closePedia from '@/assets/dragonspring/ogg/close_pedia.ogg';
+import closeGear from '@/assets/dragonspring/ogg/close_gearbutton.ogg';
+import choose from '@/assets/dragonspring/ogg/choose.ogg';
+import pediaChoose from '@/assets/dragonspring/ogg/pedia_choose.ogg';
+import cancel from '@/assets/dragonspring/ogg/right_click.ogg';
 import { stageStateManager } from '@/Core/Modules/stage/stageStateManager';
 
-/**
- * 调用音效
- */
-const useSoundEffect = () => {
-  const playSeEnter = () => {
-    stageStateManager.setStageAndCommit('uiSe', mouse_enter);
-  };
-  const playSeClick = () => {
-    stageStateManager.setStageAndCommit('uiSe', click_se);
-  };
-  const playSeSwitch = () => {
-    stageStateManager.setStageAndCommit('uiSe', switch_1);
-  };
-  const playSePageChange = () => {
-    stageStateManager.setStageAndCommit('uiSe', page_flip_1);
-  };
+const play = (source: string) => stageStateManager.setStageAndCommit('uiSe', source);
 
-  const playSeDialogOpen = () => {
-    stageStateManager.setStageAndCommit('uiSe', dialog_se);
-  };
+const useSoundEffect = () => ({
+  playSeEnter: () => play(mouseEnter),
+  playSeClick: () => play(choose || click),
+  playSeCancel: () => play(cancel),
+  playSeManopedia: () => play(openMedia),
+  playSeGear: () => play(openGear),
+  playSeCloseGear: () => play(closeGear),
+  playSeCloseManopedia: () => play(closePedia),
+  playSePediaChoose: () => play(pediaChoose),
+  playSeSwitch: () => play(switchSound),
+  playSePageChange: () => play(pageFlip),
+  playSeDialogOpen: () => play(dialog),
+});
 
-  return {
-    playSeEnter,
-    playSeClick,
-    playSePageChange,
-    playSeDialogOpen,
-    playSeSwitch,
-  };
-};
-
-/**
- * 调用音效（只供 choose.tsx 使用）
- */
-export const useSEByWebgalStore = () => {
-  const playSeEnter = () => {
-    stageStateManager.setStageAndCommit('uiSe', mouse_enter);
-  };
-  const playSeClick = () => {
-    stageStateManager.setStageAndCommit('uiSe', click_se);
-  };
-  return {
-    playSeEnter, // 鼠标进入
-    playSeClick, // 鼠标点击
-  };
-};
+export const useSEByWebgalStore = () => ({
+  playSeEnter: () => play(mouseEnter),
+  playSeClick: () => play(choose || click),
+  playSeCancel: () => play(cancel),
+});
 
 export default useSoundEffect;
