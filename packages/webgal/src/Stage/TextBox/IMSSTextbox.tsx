@@ -490,15 +490,20 @@ export default function IMSSTextbox(props: ITextboxProps) {
             </div>
 
             {isHasName && (
-              <>
-                {/* namebox 背景图，直接铺满全屏 */}
+              <div
+                style={{
+                  position: 'fixed',
+                  inset: 0,
+                  zIndex: 3,
+                  pointerEvents: 'none',
+                }}
+              >
+                {/* 姓名框贴图与姓名文字共享 2560×1440 设计坐标系 */}
                 <div
                   aria-hidden
                   style={{
-                    position: 'fixed',
+                    position: 'absolute',
                     inset: 0,
-                    zIndex: 3,
-                    pointerEvents: 'none',
                     backgroundImage: `url(${nameBoxBg})`,
                     backgroundRepeat: 'no-repeat',
                     backgroundPosition: 'center',
@@ -507,13 +512,11 @@ export default function IMSSTextbox(props: ITextboxProps) {
                   }}
                 />
 
-                {/* 名字：按屏幕坐标固定位置 */}
                 <div
                   className={applyStyle('TextBox_showName', styles.TextBox_showName)}
                   style={{
-                    position: 'absolute',
-                    left: -165,
-                    top: -190,
+                    left: 289,
+                    top: 900,
                     fontSize: '200%', // 作为整体基准，不影响逐字 fontSize 的相对大小
                     background: 'transparent',
                     border: 0,
@@ -522,7 +525,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
                 >
                   {nameElementList}
                 </div>
-              </>
+              </div>
             )}
 
             {/* Auto按钮 */}
