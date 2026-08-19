@@ -39,7 +39,9 @@ export default function IMSSTextbox(props: ITextboxProps) {
   } = props;
   const [isClicked, setIsClicked] = useState(false);
   const [showCursor, setShowCursor] = useState(false);
-  const applyStyle = useApplyStyle('textbox');
+  // Dragonspring's textbox template is an override layer rather than a full
+  // replacement. Its name glyph layout relies on both class sets.
+  const applyStyle = useApplyStyle('textbox', true);
   const readTextClassName = isRead ? ` ${applyStyle('readText', styles.readText)}` : '';
   const readTextInnerClassName = isRead ? ` ${applyStyle('readTextInner', styles.readTextInner)}` : '';
   const { playSeClick } = useSoundEffect();
@@ -490,20 +492,15 @@ export default function IMSSTextbox(props: ITextboxProps) {
             </div>
 
             {isHasName && (
-              <div
-                style={{
-                  position: 'fixed',
-                  inset: 0,
-                  zIndex: 3,
-                  pointerEvents: 'none',
-                }}
-              >
-                {/* 姓名框贴图与姓名文字共享 2560×1440 设计坐标系 */}
+              <>
+                {/* namebox 背景图，直接铺满全屏 */}
                 <div
                   aria-hidden
                   style={{
-                    position: 'absolute',
+                    position: 'fixed',
                     inset: 0,
+                    zIndex: 3,
+                    pointerEvents: 'none',
                     backgroundImage: `url(${nameBoxBg})`,
                     backgroundRepeat: 'no-repeat',
                     backgroundPosition: 'center',
@@ -515,8 +512,9 @@ export default function IMSSTextbox(props: ITextboxProps) {
                 <div
                   className={applyStyle('TextBox_showName', styles.TextBox_showName)}
                   style={{
-                    left: 289,
-                    top: 900,
+                    position: 'absolute',
+                    left: -165,
+                    top: -190,
                     fontSize: '200%', // 作为整体基准，不影响逐字 fontSize 的相对大小
                     background: 'transparent',
                     border: 0,
@@ -525,7 +523,7 @@ export default function IMSSTextbox(props: ITextboxProps) {
                 >
                   {nameElementList}
                 </div>
-              </div>
+              </>
             )}
 
             {/* Auto按钮 */}

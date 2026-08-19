@@ -8,7 +8,7 @@ import { IWebGALStyleObj } from 'webgal-parser/build/types/styleParser';
 import { logger } from '@/Core/util/logger';
 import { useStageState } from '@/hooks/useStageState';
 
-export default function useApplyStyle(ui: string) {
+export default function useApplyStyle(ui: string, preserveFallbackClass = false) {
   const styleObject = useValue<IWebGALStyleObj>(WebGAL.styleObjects.get(ui) ?? { classNameStyles: {}, others: '' });
   const replaced = useStageState().replacedUIlable;
 
@@ -17,7 +17,11 @@ export default function useApplyStyle(ui: string) {
     const className = replaced?.[classNameLable] ?? classNameLable;
     if (Object.keys(styleObject.value.classNameStyles).includes(className)) {
       const cijClassName = css(styleObject.value.classNameStyles?.[className] ?? '');
-      return cijClassName;
+      // Legacy Dragonspring templates were authored as an override layer on
+      // top of the component's CSS module. Keep the 4.6.4 replacement
+      // behaviour by default, while allowing that legacy composition model
+      // for components which explicitly opt in.
+      return preserveFallbackClass ? `${fallbackClassName} ${cijClassName}` : cijClassName;
     }
     return fallbackClassName;
   };
